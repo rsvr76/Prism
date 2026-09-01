@@ -1,8 +1,8 @@
-# Unfold
+# Prism
 
-> Turn code into understanding.
+> See your code from every angle.
 
-Unfold takes a student's own Python implementation of a data structure or algorithm, runs it for real, and unfolds the execution step by step — variables, pointers, and structures changing in sync with the code — with an AI tutor that explains what happened, grounded in the actual execution trace.
+Prism takes a student's own Python implementation of a data structure or algorithm, runs it for real, and unfolds the execution step by step — variables, pointers, and structures changing in sync with the code — with an AI tutor that explains what happened, grounded in the actual execution trace.
 
 Built for the [SPEED August AI Challenge](https://august-ai-challenge-31059.devpost.com/) (Devpost) 
 
@@ -11,7 +11,7 @@ Built for the [SPEED August AI Challenge](https://august-ai-challenge-31059.devp
 
 Students can read DSA code line by line without ever building the mental model of what's actually happening to the data underneath it — how pointers move, how memory changes, how a structure reshapes itself. Most existing tools either animate a textbook algorithm the student didn't write, or let you step through arbitrary code with no real explanation of *why* something happened.
 
-## What Unfold does
+## What Prism does
 
 - **Paste your own code** — not a preset example.
 - **Real execution, not a canned animation** — a Python tracer captures the actual runtime state at every step.
@@ -19,7 +19,7 @@ Students can read DSA code line by line without ever building the mental model o
 - **Step controls** — step forward/back, play/pause, jump to any step.
 - **AI explanations grounded in the trace** — after each step, the AI explains the change using the real before/after state, not a generic description of the algorithm.
 
-**Note on scope:** Unfold currently supports Python only, and structure visualization (linked lists, trees) requires using the provided `Node`/`TreeNode` classes rather than arbitrary custom class shapes. We're not claiming to be the first tool that visualizes arbitrary code execution — that already exists (Python Tutor, others). What's ours is the AI-grounded explanation layer built on top of a real trace.
+**Note on scope:** Prism currently supports Python only, and structure visualization (linked lists, trees) requires using the provided `Node`/`TreeNode` classes rather than arbitrary custom class shapes. We're not claiming to be the first tool that visualizes arbitrary code execution — that already exists (Python Tutor, others). What's ours is the AI-grounded explanation layer built on top of a real trace.
 
 ## How it works
 
