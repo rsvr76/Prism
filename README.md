@@ -1,82 +1,132 @@
+
 # Prism
 
-> See your code from every angle.
+> **See your code from every angle.**
 
-Prism takes a student's own Python implementation of a data structure or algorithm, runs it for real, and unfolds the execution step by step — variables, pointers, and structures changing in sync with the code — with an AI tutor that explains what happened, grounded in the actual execution trace.
+Prism is an AI-powered visual learning tool for **Data Structures and Algorithms (DSA)**.
 
-Built for the [SPEED August AI Challenge](https://august-ai-challenge-31059.devpost.com/) (Devpost) 
+Paste your own Python implementation, run it for real, and watch the execution unfold step by step. Prism synchronizes the source code with visual changes to variables, pointers, and data structures, while an AI tutor explains what happened using the actual execution trace.
+
+
+
+## Table of Contents
+
+- [The Problem](#the-problem)
+- [What Prism Does](#what-prism-does)
+- [How It Works](#how-it-works)
+- [Tech Stack](#tech-stack)
+- [Current Scope](#current-scope)
+- [Limitations](#limitations)
+- [Future Roadmap](#future-roadmap)
+- [Built For](#built-for)
+
 
 
 ## The Problem
 
-Students can read DSA code line by line without ever building the mental model of what's actually happening to the data underneath it — how pointers move, how memory changes, how a structure reshapes itself. Most existing tools either animate a textbook algorithm the student didn't write, or let you step through arbitrary code with no real explanation of *why* something happened.
+Students can read DSA code line by line without building a clear mental model of what is happening underneath:
 
-## What Prism does
+- How **pointers** move
+- How **variables** change
+- How **data structures** evolve
+- **Why** a particular line executes
+- **What changes** after each operation
 
-- **Paste your own code** — not a preset example.
-- **Real execution, not a canned animation** — a Python tracer captures the actual runtime state at every step.
-- **Synced visualization** — a structural diagram (pointers, nodes, array cells) updates in lockstep with the highlighted line of code.
-- **Step controls** — step forward/back, play/pause, jump to any step.
-- **AI explanations grounded in the trace** — after each step, the AI explains the change using the real before/after state, not a generic description of the algorithm.
+Existing tools often provide predefined visualizations or execution debugging **without** contextual learning support.
 
-**Note on scope:** Prism currently supports Python only, and structure visualization (linked lists, trees) requires using the provided `Node`/`TreeNode` classes rather than arbitrary custom class shapes. We're not claiming to be the first tool that visualizes arbitrary code execution — that already exists (Python Tutor, others). What's ours is the AI-grounded explanation layer built on top of a real trace.
 
-## How it works
+
+## What Prism Does
+
+| Feature | Description |
+|---|---|
+| **Use Your Own Code** | Paste your own implementation instead of preset examples |
+| **Real Execution** | Execute code for real and capture the runtime state |
+| **Visualize Execution** | See structures, variables, pointers, and arrays come alive |
+| **Code-Visual Sync** | Synchronize code and visuals at every execution step |
+| **Step Controls** | Play, pause, next, previous, and timeline navigation |
+| **AI Tutor** | Ask *why* something happened at any step |
+| **Trace-Grounded AI** | Explanations are grounded in the real execution trace — no guessing |
+
+
+
+## How It Works
 
 ```
-Your code
-   │
-   ▼
-Sandboxed execution (sys.settrace)
-   │
-   ▼
-Canonical execution state (per step: line, variables, objects)
-   │
-   ├──▶ Structural renderer  ──▶ synced diagram + code highlight
-   │
-   └──▶ AI explanation layer ──▶ grounded step-by-step commentary
+Your Python Code
+       ↓
+Sandboxed Execution
+       ↓
+Execution Trace
+       ↓
+ ┌─────┴─────┐
+ ↓           ↓
+Visual      AI Tutor
+Model       Explanation
+ ↓           ↓
+ └─────┬─────┘
+       ↓
+Student Understanding
 ```
 
-The AI never invents what happened — it explains the state the tracer actually captured.
 
-## Tech stack
 
-- **Tracer:** Python `sys.settrace` / `bdb`, sandboxed via restricted `exec()`
-- **Frontend:** React + a code editor component, synced to the execution timeline
-- **AI:** LLM call per step, prompted with the state diff (not the raw code alone)
+## Tech Stack
 
-## Getting started
+| Layer | Technology |
+|---|---|
+| **Backend** | Python |
+| **Tracing** | `sys.settrace` / `bdb` |
+| **Frontend** | React |
+| **Visualization** | Interactive data-structure rendering |
+| **AI** | LLM API with execution-trace context |
 
-```bash
-# clone
-git clone <repo-url>
-cd unfold
 
-# backend
-cd backend && pip install -r requirements.txt
 
-# frontend
-cd frontend && npm install && npm run dev
-```
+## Current Scope
 
-*(Setup instructions will be finalized as the build progresses — this is a hackathon-in-progress repo.)*
+**Language:**
+- Python only
 
-## Demo
+**Data Structures:**
+- Arrays
+- Linked Lists
+- Stacks
+- Queues
+- Binary Trees
 
-📹 *Demo video link — added at submission.*
+**Algorithms:**
+- Basic searching
+- Sorting
+- Traversal
+- Recursion
+
+
 
 ## Limitations
 
-- Python only for this hackathon build.
-- Structure detection relies on provided boilerplate classes (`Node`, `TreeNode`), not open-ended inference over arbitrary class shapes.
-- One visualization view per structure type — no switchable "views" in this version.
+- Structure visualization currently relies on supported `Node` / `TreeNode` classes rather than arbitrary custom class shapes.
+- This is a **hackathon prototype** and not a production-grade arbitrary-code execution environment.
 
-## What's next
 
-- Multi-language support beyond Python
-- Student-defined visualization templates
-- "What if I changed this line?" — branching execution to compare a modified run against the original
 
-## License
+## Future Roadmap
 
-MIT
+- [ ] Multiple visualization perspectives
+- [ ] Student-defined visualization templates
+- [ ] Prediction and quiz modes
+- [ ] Code experimentation sandbox
+- [ ] Branching execution and comparison
+- [ ] More data structures and algorithms
+- [ ] Multi-language support
+
+
+
+## Built For
+
+**SPEED August AI Challenge**
+
+
+> *Don't just read your code. **See it happen.***
+
+**Prism** — *See your code from every angle.*
