@@ -3,11 +3,18 @@ node_modules/
 
 # Next.js
 .next/
+out/
 
-# Local files
-LOGS.md
-MEMORY.md
+# Environment Variables
+.env
+.env*.local
+.env.local
+
+# Research & reference files
 New Research/
 research/
 references/
-tests/
+LOGS.md
+MEMORY.md
+
+

@@ -159,26 +159,29 @@ function generateMockTutorResponse(
 }
 
 /**
- * Mock generator for Phase 6B Complexity analysis.
+ * Mock generator for Phase 6C Grounded Complexity analysis.
  */
 function generateMockComplexityAnalysis(
   request: ComplexityRequest
 ): ComplexityResponseOutput {
-  const { metrics, detectedStructures } = request;
+  const { metrics } = request;
   const timeClass = metrics.observedTimeHeuristic;
   const spaceClass = metrics.observedSpaceHeuristic;
 
-  const evidence: string[] = [
-    `Total trace operations recorded: ${metrics.totalOperations} across ${metrics.totalSteps} steps.`,
-    `Max loop nesting level: ${metrics.maxLoopNesting} (inner line repeated ${metrics.maxLineExecutionCount} times).`,
-  ];
-
-  if (metrics.isRecursive) {
-    evidence.push(`Recursive execution observed with max call stack depth ${metrics.maxCallStackDepth} and recursion depth ${metrics.recursionDepth}.`);
-  }
-
-  if (metrics.peakHeapObjects > 0) {
-    evidence.push(`Peak heap objects observed: ${metrics.peakHeapObjects} (${detectedStructures.join(", ") || "custom objects"}).`);
+  const evidenceExplanation: string[] = [];
+  if (metrics.evidenceItems && metrics.evidenceItems.length > 0) {
+    for (const item of metrics.evidenceItems) {
+      evidenceExplanation.push(item.description);
+    }
+  } else {
+    evidenceExplanation.push(
+      `Recorded ${metrics.totalOperations} operations across ${metrics.totalSteps} execution steps.`
+    );
+    if (metrics.maxLoopNesting > 0) {
+      evidenceExplanation.push(
+        `Observed loop nesting level ${metrics.maxLoopNesting} with max line repetition ${metrics.maxLineExecutionCount}.`
+      );
+    }
   }
 
   let whyExplanation = `The observed execution exhibits ${timeClass} time scaling based on loop nesting and repetition factors. `;
@@ -192,11 +195,26 @@ function generateMockComplexityAnalysis(
     whyExplanation += "Triple nested loops exhibit cubic scaling relative to the input bounds.";
   } else if (timeClass === "O(log n)") {
     whyExplanation += "The execution step count scales logarithmically with problem size (e.g. repeated halving).";
+  } else if (timeClass === "exponential") {
+    whyExplanation += "Branching recursive calls generate a tree of subproblems doubling with recursion depth.";
   } else {
-    whyExplanation += "The trace exhibits complex execution patterns across branches.";
+    whyExplanation += "The trace exhibits complex or unclassified execution patterns.";
   }
 
-  const caveats: string[] = [
+  let educationalTakeaway = "Understanding the relationship between loop nesting and step counts provides an empirical model of algorithmic growth.";
+  if (timeClass === "O(1)") {
+    educationalTakeaway = "Constant time operations execute in bounded steps regardless of how large surrounding data is.";
+  } else if (timeClass === "O(n)") {
+    educationalTakeaway = "Linear algorithms scan input once; doubling input size roughly doubles total execution operations.";
+  } else if (timeClass === "O(n²)") {
+    educationalTakeaway = "Nested loops multiply iteration counts; doubling input size quadruples total execution operations.";
+  } else if (timeClass === "O(log n)") {
+    educationalTakeaway = "Halving the search space each step allows logarithmic algorithms to process huge inputs in few iterations.";
+  } else if (timeClass === "exponential") {
+    educationalTakeaway = "Tree recursion without memoization recomputes overlapping subproblems exponentially.";
+  }
+
+  const limitations: string[] = [
     "This complexity classification is inferred empirically from the observed trace on this specific input.",
     "Dynamic execution trace measurement demonstrates empirical behavior and does not constitute a universal mathematical asymptotic proof for all inputs.",
   ];
@@ -207,51 +225,78 @@ function generateMockComplexityAnalysis(
     confidence: metrics.totalSteps > 3 ? "high" : "medium",
     summary: `Observed execution is consistent with ${timeClass} time and ${spaceClass} auxiliary space complexity.`,
     why: whyExplanation,
-    evidence,
-    caveats,
+    evidenceExplanation: evidenceExplanation.slice(0, 6),
+    educationalTakeaway,
+    limitations,
   };
 }
 
 /**
  * Direct HTTP call to Gemini API using generateContent with JSON mode.
+ * Includes timeout protection, model fallback, and API key sanitization.
  */
 async function callGemini(
   systemInstruction: string,
   userPrompt: string,
-  modelName: string = "gemini-2.5-flash",
+  modelName: string = "gemini-flash-lite-latest",
   apiKey: string
 ): Promise<string> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+  const modelsToTry = [
+    modelName,
+    "gemini-flash-lite-latest",
+    "gemini-3.5-flash",
+  ].filter((m, i, arr) => arr.indexOf(m) === i);
 
-  const body = {
-    contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-    systemInstruction: { parts: [{ text: systemInstruction }] },
-    generationConfig: {
-      responseMimeType: "application/json",
-      temperature: 0.1,
-      maxOutputTokens: 1500,
-    },
-  };
+  let lastError: Error | null = null;
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  for (const model of modelsToTry) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gemini API Error (${response.status}): ${errorText}`);
+    const body = {
+      contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+      systemInstruction: { parts: [{ text: systemInstruction }] },
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.1,
+        maxOutputTokens: 2000,
+      },
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(15000),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          return text;
+        }
+      }
+
+      // If response is not ok (e.g. 404 retired model, 503 high demand), record error and try next fallback
+      const errorText = await response.text().catch(() => "");
+      const sanitizedError = errorText.replace(new RegExp(apiKey, "g"), "[REDACTED]");
+      lastError = new Error(`Gemini API Error (${response.status} on model ${model}): ${sanitizedError.substring(0, 300)}`);
+      
+      // If 404 (model retired) or 503 (model overloaded), continue to next fallback model
+      if (response.status === 404 || response.status === 503) {
+        continue;
+      } else {
+        break;
+      }
+    } catch (err: any) {
+      const sanitizedMsg = (err?.message || "Fetch failed").replace(new RegExp(apiKey, "g"), "[REDACTED]");
+      lastError = new Error(`Gemini Network/Timeout Error (${model}): ${sanitizedMsg}`);
+      continue;
+    }
   }
 
-  const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!text) {
-    throw new Error("Gemini returned empty response candidate.");
-  }
-
-  return text;
+  throw lastError || new Error("Gemini API call failed across all candidate models.");
 }
 
 /**
@@ -316,7 +361,7 @@ export async function generateStepExplanation(
   const model =
     options.model ||
     process.env.AI_MODEL ||
-    (provider === "gemini" ? "gemini-2.5-flash" : "gpt-4o-mini");
+    (provider === "gemini" ? "gemini-flash-lite-latest" : "gpt-4o-mini");
 
   const apiKey =
     options.apiKey ||
@@ -326,7 +371,7 @@ export async function generateStepExplanation(
     process.env.AI_API_KEY ||
     "";
 
-  if (provider === "mock" || !apiKey) {
+  if (provider === "mock") {
     return generateMockExplanation(context);
   }
 
@@ -334,8 +379,14 @@ export async function generateStepExplanation(
   let rawJsonText: string;
 
   if (provider === "gemini") {
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not configured on the server.");
+    }
     rawJsonText = await callGemini(GROUNDING_SYSTEM_PROMPT, userPrompt, model, apiKey);
   } else if (provider === "openai") {
+    if (!apiKey) {
+      throw new Error("OPENAI_API_KEY is not configured on the server.");
+    }
     rawJsonText = await callOpenAI(GROUNDING_SYSTEM_PROMPT, userPrompt, model, apiKey);
   } else {
     return generateMockExplanation(context);
@@ -374,7 +425,7 @@ export async function generateTutorResponse(
   const model =
     options.model ||
     process.env.AI_MODEL ||
-    (provider === "gemini" ? "gemini-2.5-flash" : "gpt-4o-mini");
+    (provider === "gemini" ? "gemini-flash-lite-latest" : "gpt-4o-mini");
 
   const apiKey =
     options.apiKey ||
@@ -384,7 +435,7 @@ export async function generateTutorResponse(
     process.env.AI_API_KEY ||
     "";
 
-  if (provider === "mock" || !apiKey) {
+  if (provider === "mock") {
     return generateMockTutorResponse(context, question);
   }
 
@@ -392,8 +443,14 @@ export async function generateTutorResponse(
   let rawJsonText: string;
 
   if (provider === "gemini") {
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not configured on the server.");
+    }
     rawJsonText = await callGemini(TUTOR_SYSTEM_PROMPT, userPrompt, model, apiKey);
   } else if (provider === "openai") {
+    if (!apiKey) {
+      throw new Error("OPENAI_API_KEY is not configured on the server.");
+    }
     rawJsonText = await callOpenAI(TUTOR_SYSTEM_PROMPT, userPrompt, model, apiKey);
   } else {
     return generateMockTutorResponse(context, question);
@@ -417,7 +474,7 @@ export async function generateTutorResponse(
 }
 
 /**
- * Generate Phase 6B Complexity analysis grounded in execution metrics.
+ * Generate Phase 6B & 6C Complexity analysis grounded in execution metrics.
  */
 export async function generateComplexityAnalysis(
   options: ComplexityLLMRequestOptions
@@ -432,7 +489,7 @@ export async function generateComplexityAnalysis(
   const model =
     options.model ||
     process.env.AI_MODEL ||
-    (provider === "gemini" ? "gemini-2.5-flash" : "gpt-4o-mini");
+    (provider === "gemini" ? "gemini-flash-lite-latest" : "gpt-4o-mini");
 
   const apiKey =
     options.apiKey ||
@@ -442,7 +499,7 @@ export async function generateComplexityAnalysis(
     process.env.AI_API_KEY ||
     "";
 
-  if (provider === "mock" || !apiKey) {
+  if (provider === "mock") {
     return generateMockComplexityAnalysis(request);
   }
 
@@ -450,8 +507,14 @@ export async function generateComplexityAnalysis(
   let rawJsonText: string;
 
   if (provider === "gemini") {
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not configured on the server.");
+    }
     rawJsonText = await callGemini(COMPLEXITY_SYSTEM_PROMPT, userPrompt, model, apiKey);
   } else if (provider === "openai") {
+    if (!apiKey) {
+      throw new Error("OPENAI_API_KEY is not configured on the server.");
+    }
     rawJsonText = await callOpenAI(COMPLEXITY_SYSTEM_PROMPT, userPrompt, model, apiKey);
   } else {
     return generateMockComplexityAnalysis(request);
@@ -471,5 +534,12 @@ export async function generateComplexityAnalysis(
     throw new Error(`LLM Complexity output failed Zod schema validation: ${errors}`);
   }
 
-  return validationResult.data;
+  // Authoritative invariant: The deterministic analyzer has final authority over complexity class.
+  const finalResult = {
+    ...validationResult.data,
+    timeComplexity: request.metrics.observedTimeHeuristic,
+    spaceComplexity: request.metrics.observedSpaceHeuristic,
+  };
+
+  return finalResult;
 }

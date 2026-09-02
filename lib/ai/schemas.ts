@@ -115,6 +115,7 @@ export const StepExplanationSchema = z.object({
   dataStructureInsight: z
     .string()
     .max(600)
+    .nullable()
     .optional(),
   learningPoint: z
     .string()
@@ -180,6 +181,22 @@ export const ComplexityClassSchema = z.enum([
 
 export const ComplexityConfidenceSchema = z.enum(["high", "medium", "low"]);
 
+export const ComplexityEvidenceKindSchema = z.enum([
+  "loop_nesting",
+  "line_repetition",
+  "recursion",
+  "halving",
+  "heap_growth",
+  "trace_boundary",
+]);
+
+export const ComplexityEvidenceItemSchema = z.object({
+  kind: ComplexityEvidenceKindSchema,
+  description: z.string().min(1).max(500),
+  sourceLine: z.number().int().positive().optional(),
+  observedValue: z.union([z.string(), z.number()]).optional(),
+});
+
 export const DeterministicComplexityMetricsSchema = z.object({
   totalSteps: z.number().int().nonnegative(),
   totalOperations: z.number().int().nonnegative(),
@@ -193,6 +210,7 @@ export const DeterministicComplexityMetricsSchema = z.object({
   peakHeapObjects: z.number().int().nonnegative(),
   observedTimeHeuristic: ComplexityClassSchema,
   observedSpaceHeuristic: ComplexityClassSchema,
+  evidenceItems: z.array(ComplexityEvidenceItemSchema).default([]),
 });
 
 export const ComplexityRequestSchema = z.object({
@@ -215,14 +233,18 @@ export const ComplexityResponseSchema = z.object({
     .string()
     .min(5, "Why explanation must be at least 5 characters")
     .max(1500, "Why explanation must be under 1500 characters"),
-  evidence: z
+  evidenceExplanation: z
     .array(z.string().max(300))
-    .min(1, "At least 1 piece of trace evidence is required")
-    .max(10, "No more than 10 evidence points"),
-  caveats: z
+    .min(1, "At least 1 piece of evidence explanation is required")
+    .max(10, "No more than 10 evidence explanations"),
+  educationalTakeaway: z
+    .string()
+    .min(5, "Educational takeaway must be at least 5 characters")
+    .max(600, "Educational takeaway must be under 600 characters"),
+  limitations: z
     .array(z.string().max(300))
-    .min(1, "At least 1 caveat is required")
-    .max(6, "No more than 6 caveats"),
+    .min(1, "At least 1 limitation is required")
+    .max(6, "No more than 6 limitations"),
 });
 
 export type StepExplanationOutput = z.infer<typeof StepExplanationSchema>;

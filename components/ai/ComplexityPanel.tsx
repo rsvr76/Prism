@@ -13,6 +13,9 @@ import {
   HardDrive,
   Info,
   RefreshCw,
+  BookOpen,
+  Layers,
+  Terminal,
 } from "lucide-react";
 
 export default function ComplexityPanel() {
@@ -54,13 +57,30 @@ export default function ComplexityPanel() {
     }
   };
 
+  const getEvidenceKindBadge = (kind: string) => {
+    switch (kind) {
+      case "loop_nesting":
+        return "bg-amber-950/80 text-amber-300 border-amber-800/60";
+      case "line_repetition":
+        return "bg-cyan-950/80 text-cyan-300 border-cyan-800/60";
+      case "recursion":
+        return "bg-purple-950/80 text-purple-300 border-purple-800/60";
+      case "halving":
+        return "bg-emerald-950/80 text-emerald-300 border-emerald-800/60";
+      case "heap_growth":
+        return "bg-blue-950/80 text-blue-300 border-blue-800/60";
+      default:
+        return "bg-slate-900 text-slate-400 border-slate-700";
+    }
+  };
+
   return (
     <div className="h-full flex flex-col justify-between overflow-y-auto p-4 space-y-4 text-slate-200 font-mono text-xs">
       {/* ── Top Bar: Action & Status ── */}
       <div className="flex items-center justify-between pb-2 border-b border-slate-800">
         <div className="flex items-center gap-2">
           <Activity className="w-4 h-4 text-amber-400" />
-          <span className="text-xs font-bold text-slate-200">Big-O Complexity Analysis</span>
+          <span className="text-xs font-bold text-slate-200">Grounded Big-O Insights</span>
         </div>
 
         <button
@@ -104,14 +124,14 @@ export default function ComplexityPanel() {
           <div className="space-y-1 max-w-sm">
             <h4 className="text-sm font-semibold text-slate-200">Grounded Complexity Engine</h4>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              Calculates loop repetitions, recursion stack depth, and heap scaling from your actual execution trace.
+              Synthesizes loop nesting, repeated lines, recursion depth, and heap scaling from your actual execution trace.
             </p>
           </div>
           <button
             onClick={() => analyzeComplexity()}
             className="mt-2 px-4 py-1.5 rounded-md bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
           >
-            Compute Big-O Metrics
+            Compute Big-O Insights
           </button>
         </div>
       )}
@@ -120,7 +140,7 @@ export default function ComplexityPanel() {
       {isAnalyzingComplexity && (
         <div className="flex-1 flex flex-col items-center justify-center space-y-3 py-8 text-center text-slate-400">
           <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
-          <p className="text-xs">Extracting loop nesting and measuring execution scaling...</p>
+          <p className="text-xs">Extracting loop nesting and synthesizing grounded insights...</p>
         </div>
       )}
 
@@ -133,7 +153,7 @@ export default function ComplexityPanel() {
             <div className={`p-3 rounded-lg border flex flex-col items-center justify-center text-center ${getTimeColor(analysis.timeComplexity)}`}>
               <div className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider opacity-80">
                 <Clock className="w-3 h-3" />
-                <span>Time Complexity</span>
+                <span>Time (Empirical)</span>
               </div>
               <span className="text-xl font-black mt-0.5 tracking-tight">{analysis.timeComplexity}</span>
             </div>
@@ -142,7 +162,7 @@ export default function ComplexityPanel() {
             <div className="p-3 rounded-lg border bg-slate-950/80 border-slate-800 text-slate-300 flex flex-col items-center justify-center text-center">
               <div className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-slate-400">
                 <HardDrive className="w-3 h-3" />
-                <span>Space Complexity</span>
+                <span>Aux Space</span>
               </div>
               <span className="text-xl font-black text-slate-100 mt-0.5 tracking-tight">{analysis.spaceComplexity}</span>
             </div>
@@ -157,30 +177,52 @@ export default function ComplexityPanel() {
             </div>
           </div>
 
-          {/* Pedagogical Summary */}
+          {/* Pedagogical Why Explanation */}
           <div className="p-3 rounded-lg bg-slate-950/90 border border-slate-800 space-y-1.5">
             <div className="flex items-center gap-1.5 text-amber-400 font-bold text-xs">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Algorithmic Rationale</span>
+              <span>Why Prism Reached This Conclusion</span>
             </div>
             <p className="text-xs text-slate-200 leading-relaxed">{analysis.why}</p>
           </div>
 
-          {/* Measured Trace Evidence */}
-          <div className="p-3 rounded-lg bg-slate-950/80 border border-slate-800/80 space-y-2">
-            <div className="flex items-center gap-1.5 text-cyan-400 font-bold text-xs uppercase tracking-wide">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Measured Trace Facts</span>
+          {/* Educational Takeaway */}
+          {analysis.educationalTakeaway && (
+            <div className="p-3 rounded-lg bg-indigo-950/40 border border-indigo-800/50 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-indigo-300 font-bold text-xs">
+                <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Educational Takeaway</span>
+              </div>
+              <p className="text-xs text-indigo-200/90 leading-relaxed">{analysis.educationalTakeaway}</p>
             </div>
-            <ul className="space-y-1 text-[11px] text-slate-300">
-              {analysis.evidence.map((ev, idx) => (
-                <li key={idx} className="flex items-start gap-1.5">
-                  <span className="text-cyan-400 font-bold shrink-0">▸</span>
-                  <span>{ev}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          )}
+
+          {/* Deterministic Structured Evidence Items */}
+          {analysis.evidenceItems && analysis.evidenceItems.length > 0 && (
+            <div className="p-3 rounded-lg bg-slate-950/80 border border-slate-800/80 space-y-2">
+              <div className="flex items-center gap-1.5 text-cyan-400 font-bold text-xs uppercase tracking-wide">
+                <Layers className="w-3.5 h-3.5" />
+                <span>Observed Execution Evidence</span>
+              </div>
+              <div className="space-y-1.5">
+                {analysis.evidenceItems.map((item, idx) => (
+                  <div key={idx} className="flex items-start gap-2 text-[11px] p-1.5 rounded bg-slate-900/60 border border-slate-800/50">
+                    <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold border shrink-0 ${getEvidenceKindBadge(item.kind)}`}>
+                      {item.kind.replace("_", " ")}
+                    </span>
+                    <div className="flex-1 space-y-0.5">
+                      <p className="text-slate-300">{item.description}</p>
+                      {item.sourceLine && (
+                        <span className="inline-block text-[10px] text-slate-400 font-mono">
+                          Source: Line {item.sourceLine}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Metrics Grid */}
           <div className="grid grid-cols-2 gap-2 text-[11px]">
@@ -202,18 +244,20 @@ export default function ComplexityPanel() {
             </div>
           </div>
 
-          {/* Educational Caveats */}
-          <div className="p-2.5 rounded bg-slate-950/60 border border-slate-800/60 text-[10px] text-slate-400 space-y-1">
-            <div className="flex items-center gap-1 text-slate-300 font-bold">
-              <Info className="w-3 h-3 text-slate-400" />
-              <span>Educational Limitation & Caveats</span>
+          {/* Limitations & Caveats */}
+          {analysis.limitations && analysis.limitations.length > 0 && (
+            <div className="p-2.5 rounded bg-slate-950/60 border border-slate-800/60 text-[10px] text-slate-400 space-y-1">
+              <div className="flex items-center gap-1 text-slate-300 font-bold">
+                <Info className="w-3 h-3 text-slate-400" />
+                <span>Empirical Boundaries & Caveats</span>
+              </div>
+              <ul className="space-y-0.5 pl-3 list-disc text-slate-500">
+                {analysis.limitations.map((lim, idx) => (
+                  <li key={idx}>{lim}</li>
+                ))}
+              </ul>
             </div>
-            <ul className="space-y-0.5 pl-3 list-disc text-slate-500">
-              {analysis.caveats.map((cav, idx) => (
-                <li key={idx}>{cav}</li>
-              ))}
-            </ul>
-          </div>
+          )}
         </div>
       )}
     </div>

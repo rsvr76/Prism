@@ -111,7 +111,7 @@ export interface StateDiff {
 }
 
 /**
- * Phase 6B: Big-O & Complexity Analysis Types
+ * Phase 6B & 6C: Big-O & Complexity Analysis Types
  */
 export type ComplexityClass =
   | "O(1)"
@@ -124,6 +124,21 @@ export type ComplexityClass =
   | "unknown";
 
 export type ComplexityConfidence = "high" | "medium" | "low";
+
+export type ComplexityEvidenceKind =
+  | "loop_nesting"
+  | "line_repetition"
+  | "recursion"
+  | "halving"
+  | "heap_growth"
+  | "trace_boundary";
+
+export interface ComplexityEvidenceItem {
+  kind: ComplexityEvidenceKind;
+  description: string;
+  sourceLine?: number;
+  observedValue?: string | number;
+}
 
 export interface DeterministicComplexityMetrics {
   totalSteps: number;
@@ -138,6 +153,7 @@ export interface DeterministicComplexityMetrics {
   peakHeapObjects: number;
   observedTimeHeuristic: ComplexityClass;
   observedSpaceHeuristic: ComplexityClass;
+  evidenceItems: ComplexityEvidenceItem[];
 }
 
 export interface ComplexityAnalysis {
@@ -146,8 +162,10 @@ export interface ComplexityAnalysis {
   confidence: ComplexityConfidence;
   summary: string;
   why: string;
-  evidence: string[];
-  caveats: string[];
+  evidenceExplanation: string[];
+  educationalTakeaway: string;
+  limitations: string[];
+  evidenceItems: ComplexityEvidenceItem[];
   metrics: DeterministicComplexityMetrics;
 }
 

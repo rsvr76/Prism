@@ -1,4 +1,4 @@
-﻿import { create } from "zustand";
+import { create } from "zustand";
 import { PrismTrace, PrismFrame, ExecutionStatus, ExecutionRecord } from "@/types/trace";
 import {
   StepExplanation,
@@ -576,6 +576,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
 
       const fullAnalysis: ComplexityAnalysis = {
         ...data.data,
+        evidenceItems: metrics.evidenceItems,
         metrics,
       };
 
