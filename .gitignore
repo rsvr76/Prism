@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+
+# Local files
+LOGS.md
+MEMORY.md
+New Research/
+research/
+references/

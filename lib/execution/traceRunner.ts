@@ -1,0 +1,147 @@
+﻿import { ExecutionLimits, PrismTrace } from '@/types/trace';
+import { WorkerInMessage, WorkerOutMessage } from '@/types/worker';
+import { DEFAULT_EXECUTION_LIMITS } from '@/lib/config/executionLimits';
+import { validateCodePreflight } from './astValidator';
+import { PYTHON_TRACER_CODE } from './pythonTracerScript';
+
+class TraceRunnerService {
+  private worker: Worker | null = null;
+  private workerReady = false;
+  private pendingResolvers = new Map<string, {
+    resolve: (trace: PrismTrace) => void;
+    reject: (error: Error) => void;
+    timer: NodeJS.Timeout;
+  }>();
+
+  private getWorker(): Worker {
+    if (!this.worker && typeof window !== 'undefined') {
+      this.worker = new Worker('/pyodideWorker.js');
+      this.worker.onmessage = this.handleWorkerMessage.bind(this);
+      this.worker.onerror = (err) => {
+        console.error('Pyodide Web Worker error:', err);
+      };
+      // Send Init
+      this.worker.postMessage({
+        id: 'init_' + Date.now(),
+        command: 'INIT',
+      });
+    }
+    return this.worker!;
+  }
+
+  private handleWorkerMessage(event: MessageEvent<WorkerOutMessage>) {
+    const { id, type, trace, status, error } = event.data;
+
+    if (type === 'READY') {
+      this.workerReady = true;
+      return;
+    }
+
+    const pending = this.pendingResolvers.get(id);
+    if (!pending) return;
+
+    clearTimeout(pending.timer);
+    this.pendingResolvers.delete(id);
+
+    if (type === 'EXECUTION_COMPLETE' && trace) {
+      pending.resolve(trace);
+    } else if (type === 'EXECUTION_ERROR' || !trace) {
+      // Build fallback error trace
+      const errorTrace: PrismTrace = {
+        version: '1.0',
+        code: '',
+        language: 'python',
+        status: status || 'RUNTIME_ERROR',
+        errorMessage: error || 'Execution failed',
+        totalSteps: 0,
+        frames: [],
+        detectedStructures: [],
+        metrics: {
+          totalOperations: 0,
+          maxStackDepth: 0,
+          peakHeapObjects: 0,
+          executionDurationMs: 0,
+        },
+      };
+      pending.resolve(errorTrace);
+    }
+  }
+
+  /**
+   * Execute Python code in the Pyodide Web Worker sandbox with strict budgets and timeout.
+   */
+  public async runTrace(
+    code: string,
+    limits: ExecutionLimits = DEFAULT_EXECUTION_LIMITS
+  ): Promise<PrismTrace> {
+    // 1. Preflight Validation
+    const preflight = validateCodePreflight(code, limits);
+    if (!preflight.isValid) {
+      return {
+        version: '1.0',
+        code,
+        language: 'python',
+        status: preflight.status,
+        errorMessage: preflight.errorMessage,
+        totalSteps: 0,
+        frames: [],
+        detectedStructures: [],
+        metrics: {
+          totalOperations: 0,
+          maxStackDepth: 0,
+          peakHeapObjects: 0,
+          executionDurationMs: 0,
+        },
+      };
+    }
+
+    // 2. Dispatch to Web Worker with Watchdog Timer
+    const worker = this.getWorker();
+    const messageId = 'trace_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+
+    return new Promise<PrismTrace>((resolve, reject) => {
+      // Watchdog timeout to guarantee safety against infinite loops
+      const timer = setTimeout(() => {
+        this.pendingResolvers.delete(messageId);
+        // Terminate worker if hard timed out
+        if (this.worker) {
+          this.worker.terminate();
+          this.worker = null;
+          this.workerReady = false;
+        }
+        resolve({
+          version: '1.0',
+          code,
+          language: 'python',
+          status: 'TIMEOUT',
+          errorMessage: `Execution timed out (${limits.maxRuntimeMs}ms limit). Infinite loop detected.`,
+          totalSteps: 0,
+          frames: [],
+          detectedStructures: [],
+          metrics: {
+            totalOperations: 0,
+            maxStackDepth: 0,
+            peakHeapObjects: 0,
+            executionDurationMs: limits.maxRuntimeMs,
+          },
+        });
+      }, limits.maxRuntimeMs + 500); // 500ms grace period before hard worker kill
+
+      this.pendingResolvers.set(messageId, { resolve, reject, timer });
+
+      const message: WorkerInMessage = {
+        id: messageId,
+        command: 'RUN_CODE',
+        payload: {
+          code,
+          limits,
+          tracerCode: PYTHON_TRACER_CODE,
+        },
+      };
+
+      worker.postMessage(message);
+    });
+  }
+}
+
+export const traceRunner = new TraceRunnerService();
