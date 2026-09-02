@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useRef } from "react";
 import { useExecutionStore } from "@/store/useExecutionStore";
@@ -16,6 +16,18 @@ export default function WhatIfModal() {
   const createBranch = useExecutionStore((state) => state.createBranch);
 
   const parentFrame = trace?.frames?.[whatIfParentStep] || null;
+
+  // Accessibility: Close on Escape key
+  useEffect(() => {
+    if (!isWhatIfOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isRunning) {
+        closeWhatIfModal();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isWhatIfOpen, isRunning, closeWhatIfModal]);
 
   if (!isWhatIfOpen) return null;
 

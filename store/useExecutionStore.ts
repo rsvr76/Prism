@@ -135,6 +135,9 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   setCode: (code: string) => set({ code }),
 
   runCode: async () => {
+    // If already running, cancel previous execution and restart cleanly
+    traceRunner.cancelExecution();
+
     const epoch = ++activeExecutionEpoch;
     const { code } = get();
 
@@ -216,6 +219,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   setPlaybackSpeed: (speed: number) => set({ playbackSpeed: speed }),
 
   reset: () => {
+    traceRunner.cancelExecution();
     ++activeExecutionEpoch;
     branchCounter = 0;
     set({
@@ -432,6 +436,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   },
 
   createBranch: async (branchCodeParam?: string) => {
+    traceRunner.cancelExecution();
     const epoch = ++activeExecutionEpoch;
     const { whatIfDraftCode, whatIfParentStep, activeExecutionId } = get();
     const branchCode = branchCodeParam !== undefined ? branchCodeParam : whatIfDraftCode;

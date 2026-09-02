@@ -173,6 +173,22 @@ class TraceRunnerService {
       worker.postMessage(message);
     });
   }
+
+  /**
+   * Cancel any in-flight execution and terminate the Web Worker immediately.
+   */
+  public cancelExecution(): void {
+    for (const [, pending] of this.pendingResolvers.entries()) {
+      clearTimeout(pending.timer);
+    }
+    this.pendingResolvers.clear();
+
+    if (this.worker) {
+      this.worker.terminate();
+      this.worker = null;
+      this.workerReady = false;
+    }
+  }
 }
 
 export const traceRunner = new TraceRunnerService();
