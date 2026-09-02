@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { ObjectReference, SerializedValue } from "@/types/trace";
-import { Layers, Variable, Database, Terminal, AlertCircle } from "lucide-react";
+import { Layers, Variable, Database, Terminal, AlertCircle, Sparkles } from "lucide-react";
+import StepExplainer from "@/components/ai/StepExplainer";
 
 function isObjectRef(val: SerializedValue): val is ObjectReference {
   return typeof val === "object" && val !== null && "__type__" in val && (val as ObjectReference).__type__ === "object_ref";
@@ -14,19 +15,21 @@ export default function ExecutionStatePanel() {
   const currentStep = useExecutionStore((state) => state.currentStep);
   const status = useExecutionStore((state) => state.status);
   const errorMessage = useExecutionStore((state) => state.errorMessage);
+  const stepExplanations = useExecutionStore((state) => state.stepExplanations);
 
-  const [activeTab, setActiveTab] = useState<"scope" | "stack" | "heap" | "stdout">("scope");
+  const [activeTab, setActiveTab] = useState<"scope" | "stack" | "heap" | "stdout" | "ai">("scope");
 
   const currentFrame = trace?.frames?.[currentStep] || null;
+  const hasExplanation = !!stepExplanations[currentStep];
 
   return (
     <div className="w-full h-full flex flex-col bg-slate-900 border border-slate-800 rounded-lg overflow-hidden shadow-xl">
       {/* Tab Navigation */}
       <div className="flex items-center justify-between px-3 py-2 bg-slate-950/80 border-b border-slate-800 text-xs font-mono">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-wrap">
           <button
             onClick={() => setActiveTab("scope")}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded transition-colors ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
               activeTab === "scope"
                 ? "bg-slate-800 text-cyan-400 font-semibold"
                 : "text-slate-400 hover:text-slate-200"
@@ -42,8 +45,23 @@ export default function ExecutionStatePanel() {
           </button>
 
           <button
+            onClick={() => setActiveTab("ai")}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
+              activeTab === "ai"
+                ? "bg-slate-800 text-cyan-400 font-semibold"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span>AI Explainer</span>
+            {hasExplanation && (
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            )}
+          </button>
+
+          <button
             onClick={() => setActiveTab("stack")}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded transition-colors ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
               activeTab === "stack"
                 ? "bg-slate-800 text-cyan-400 font-semibold"
                 : "text-slate-400 hover:text-slate-200"
@@ -60,7 +78,7 @@ export default function ExecutionStatePanel() {
 
           <button
             onClick={() => setActiveTab("heap")}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded transition-colors ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
               activeTab === "heap"
                 ? "bg-slate-800 text-cyan-400 font-semibold"
                 : "text-slate-400 hover:text-slate-200"
@@ -77,7 +95,7 @@ export default function ExecutionStatePanel() {
 
           <button
             onClick={() => setActiveTab("stdout")}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded transition-colors ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
               activeTab === "stdout"
                 ? "bg-slate-800 text-cyan-400 font-semibold"
                 : "text-slate-400 hover:text-slate-200"
@@ -91,7 +109,7 @@ export default function ExecutionStatePanel() {
           </button>
         </div>
 
-        <div className="text-[11px] text-slate-400">
+        <div className="text-[11px] text-slate-400 hidden xl:block">
           {currentFrame?.description || "Awaiting Execution"}
         </div>
       </div>
@@ -107,17 +125,20 @@ export default function ExecutionStatePanel() {
       )}
 
       {/* Tab Content Body */}
-      <div className="flex-1 p-4 overflow-y-auto font-mono text-xs">
+      <div className="flex-1 overflow-hidden font-mono text-xs">
         {!currentFrame ? (
-          <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-2">
+          <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-2 p-4">
             <Layers className="w-8 h-8 opacity-40" />
             <p>Run code to inspect runtime state.</p>
           </div>
         ) : (
           <>
+            {/* AI Explainer Tab */}
+            {activeTab === "ai" && <StepExplainer />}
+
             {/* Scope Variables Table */}
             {activeTab === "scope" && (
-              <div className="space-y-2">
+              <div className="h-full p-4 overflow-y-auto space-y-2">
                 {Object.keys(currentFrame.scope).length === 0 ? (
                   <p className="text-slate-500 italic">No variables in current scope.</p>
                 ) : (
@@ -145,7 +166,7 @@ export default function ExecutionStatePanel() {
 
             {/* Call Stack Frame View */}
             {activeTab === "stack" && (
-              <div className="space-y-2">
+              <div className="h-full p-4 overflow-y-auto space-y-2">
                 {currentFrame.callStack.map((frame, idx) => (
                   <div
                     key={frame.frameId + idx}
@@ -173,7 +194,7 @@ export default function ExecutionStatePanel() {
 
             {/* Heap Objects Inspection */}
             {activeTab === "heap" && (
-              <div className="space-y-3">
+              <div className="h-full p-4 overflow-y-auto space-y-3">
                 {Object.keys(currentFrame.heap).length === 0 ? (
                   <p className="text-slate-500 italic">No heap objects allocated.</p>
                 ) : (
@@ -228,7 +249,7 @@ export default function ExecutionStatePanel() {
 
             {/* Console Output Tab */}
             {activeTab === "stdout" && (
-              <div className="h-full bg-slate-950 p-3 rounded border border-slate-800 font-mono text-xs overflow-y-auto">
+              <div className="h-full bg-slate-950 p-4 rounded border border-slate-800 font-mono text-xs overflow-y-auto">
                 {currentFrame.stdout.length === 0 ? (
                   <span className="text-slate-600 italic">&gt; No output generated yet.</span>
                 ) : (
