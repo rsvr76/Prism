@@ -62,6 +62,31 @@ b.next = a  # Circular reference
 
 print("Circular reference created:", a.val, "->", a.next.val, "->", a.next.next.val)`,
   },
+  {
+    name: "Binary Search Tree",
+    code: `class Node:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+# Build BST: 8 -> (3 -> 1, 6), (10 -> None, 14)
+root = Node(8)
+root.left = Node(3)
+root.right = Node(10)
+root.left.left = Node(1)
+root.left.right = Node(6)
+root.right.right = Node(14)
+
+# In-order traversal
+def inorder(node):
+    if not node:
+        return []
+    return inorder(node.left) + [node.value] + inorder(node.right)
+
+values = inorder(root)
+print("Inorder traversal:", values)`,
+  },
 ];
 
 export default function ExecutionHeader() {
