@@ -1,12 +1,18 @@
-/**
- * Configurable LLM Client for Prism AI Subsystem
+﻿/**
+ * Configurable LLM Client for Prism AI Subsystem (Step Explainer & Interactive Tutor)
  *
  * Supports Gemini REST, OpenAI-compatible REST, and Mock providers.
  * Enforces Zod validation on all structured responses.
  */
 
 import { GROUNDING_SYSTEM_PROMPT, formatUserPrompt } from "./groundingPrompt";
-import { StepExplanationSchema, StepExplanationOutput } from "./schemas";
+import { TUTOR_SYSTEM_PROMPT, formatTutorUserPrompt } from "./tutorGroundingPrompt";
+import {
+  StepExplanationSchema,
+  StepExplanationOutput,
+  TutorResponseSchema,
+  TutorResponseOutput,
+} from "./schemas";
 import { BoundedTraceContext } from "@/types/ai";
 
 export interface LLMRequestOptions {
@@ -17,12 +23,21 @@ export interface LLMRequestOptions {
   apiKey?: string;
 }
 
+export interface TutorLLMRequestOptions {
+  context: BoundedTraceContext;
+  sourceCode: string;
+  history: Array<{ role: "user" | "assistant"; text: string }>;
+  question: string;
+  provider?: string;
+  model?: string;
+  apiKey?: string;
+}
+
 /**
  * Extract clean JSON string from potential markdown code fences.
  */
 function extractJSONString(raw: string): string {
   const trimmed = raw.trim();
-  // Check for ```json ... ```
   const jsonBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/i;
   const match = trimmed.match(jsonBlockRegex);
   if (match && match[1]) {
@@ -33,7 +48,6 @@ function extractJSONString(raw: string): string {
 
 /**
  * Mock generator for local testing, offline development, or when no API key is set.
- * Returns deterministic grounded explanations derived strictly from the trace context.
  */
 function generateMockExplanation(context: BoundedTraceContext): StepExplanationOutput {
   const line = context.line;
@@ -84,10 +98,91 @@ function generateMockExplanation(context: BoundedTraceContext): StepExplanationO
 }
 
 /**
+ * Mock generator for Interactive Tutor Q&A.
+ */
+function generateMockTutorResponse(
+  context: BoundedTraceContext,
+  question: string
+): TutorResponseOutput {
+  const qLower = question.toLowerCase();
+  const line = context.line;
+  const lineCode = context.activeLineSource ? `\`${context.activeLineSource}\`` : `line ${line}`;
+  const diff = context.diff;
+  const scope = context.currentScope;
+
+  // Anti-prediction check
+  if (
+    qLower.includes("what will happen next") ||
+    qLower.includes("in the future") ||
+    qLower.includes("after next loop") ||
+    qLower.includes("will become")
+  ) {
+    return {
+      answer: `Prism Tutor only explains observed execution up to the current step (Step ${context.stepIndex}). I cannot speculate on future unexecuted steps. You can step forward on the timeline to inspect subsequent operations as they execute.`,
+      evidence: [
+        `Current execution point is Step ${context.stepIndex} at line ${line}`,
+        "Execution history beyond this step must be inspected via the timeline scrubber",
+      ],
+      learningPoint: "Grounding your mental model in real execution steps avoids incorrect assumptions about loop invariants.",
+    };
+  }
+
+  // Specific variable query
+  const matchingVar = Object.keys(scope).find((v) => qLower.includes(v.toLowerCase()));
+  if (matchingVar) {
+    const val = scope[matchingVar];
+    const changed = diff.variablesChanged.find((c) => c.name === matchingVar);
+    const added = diff.variablesAdded.find((a) => a.name === matchingVar);
+
+    const transitionText = changed
+      ? `changed from \`${changed.from}\` to \`${changed.to}\``
+      : added
+      ? `was initialized with value \`${val}\``
+      : `currently holds the value \`${val}\``;
+
+    return {
+      answer: `At Step ${context.stepIndex} (line ${line}), the variable \`${matchingVar}\` ${transitionText} following the execution of ${lineCode}.`,
+      evidence: [
+        `Line ${line}: ${context.activeLineSource || "statement executed"}`,
+        `Scope state: \`${matchingVar}\` = ${val}`,
+      ],
+      learningPoint: `Variables in local scope reflect the direct state of Python memory at Step ${context.stepIndex}.`,
+    };
+  }
+
+  // General "why did this happen" or "explain"
+  const evidenceList: string[] = [
+    `Executed line ${line}: ${context.activeLineSource || "statement"}`,
+  ];
+  if (diff.variablesChanged.length > 0) {
+    evidenceList.push(
+      `Mutations: ${diff.variablesChanged.map((c) => `${c.name}: ${c.from} → ${c.to}`).join(", ")}`
+    );
+  }
+  if (diff.pointersMoved.length > 0) {
+    evidenceList.push(
+      `Pointers: ${diff.pointersMoved.map((p) => `${p.name} → ${p.to}`).join(", ")}`
+    );
+  }
+  if (diff.heapReferencesChanged.length > 0) {
+    evidenceList.push(
+      `References: ${diff.heapReferencesChanged.map((r) => `${r.objectId}.${r.pointer} → ${r.to}`).join(", ")}`
+    );
+  }
+
+  return {
+    answer: `At Step ${context.stepIndex}, Python executed ${lineCode}. The local scope and memory references were updated as captured in the execution trace.`,
+    evidence: evidenceList.slice(0, 4),
+    learningPoint: "Analyzing individual execution frames reveals how algorithms build complex data structures step by step.",
+  };
+}
+
+/**
  * Call Google Gemini REST API.
  */
 async function callGemini(
-  prompt: string,
+  systemPrompt: string,
+  userPrompt: string,
   modelName: string,
   apiKey: string
 ): Promise<string> {
@@ -98,7 +193,7 @@ async function callGemini(
       {
         parts: [
           {
-            text: `${GROUNDING_SYSTEM_PROMPT}\n\n${prompt}`,
+            text: `${systemPrompt}\n\n${userPrompt}`,
           },
         ],
       },
@@ -133,7 +228,8 @@ async function callGemini(
  * Call OpenAI-compatible REST API.
  */
 async function callOpenAI(
-  prompt: string,
+  systemPrompt: string,
+  userPrompt: string,
   modelName: string,
   apiKey: string
 ): Promise<string> {
@@ -148,8 +244,8 @@ async function callOpenAI(
       temperature: 0.2,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: GROUNDING_SYSTEM_PROMPT },
-        { role: "user", content: prompt },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
       ],
     }),
   });
@@ -169,7 +265,7 @@ async function callOpenAI(
 }
 
 /**
- * Main service entrypoint to generate a grounded step explanation.
+ * Generate grounded step explanation.
  */
 export async function generateStepExplanation(
   options: LLMRequestOptions
@@ -194,7 +290,6 @@ export async function generateStepExplanation(
     process.env.AI_API_KEY ||
     "";
 
-  // Use mock if provider is explicitly mock or if no key is configured
   if (provider === "mock" || !apiKey) {
     return generateMockExplanation(context);
   }
@@ -203,14 +298,13 @@ export async function generateStepExplanation(
   let rawJsonText: string;
 
   if (provider === "gemini") {
-    rawJsonText = await callGemini(userPrompt, model, apiKey);
+    rawJsonText = await callGemini(GROUNDING_SYSTEM_PROMPT, userPrompt, model, apiKey);
   } else if (provider === "openai") {
-    rawJsonText = await callOpenAI(userPrompt, model, apiKey);
+    rawJsonText = await callOpenAI(GROUNDING_SYSTEM_PROMPT, userPrompt, model, apiKey);
   } else {
     return generateMockExplanation(context);
   }
 
-  // Parse and Zod validate
   const cleanJson = extractJSONString(rawJsonText);
   let parsed: unknown;
   try {
@@ -223,6 +317,64 @@ export async function generateStepExplanation(
   if (!validationResult.success) {
     const errors = validationResult.error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join("; ");
     throw new Error(`LLM output failed Zod schema validation: ${errors}`);
+  }
+
+  return validationResult.data;
+}
+
+/**
+ * Generate interactive Tutor response grounded in the execution trace.
+ */
+export async function generateTutorResponse(
+  options: TutorLLMRequestOptions
+): Promise<TutorResponseOutput> {
+  const { context, sourceCode, history, question } = options;
+
+  const provider =
+    options.provider ||
+    process.env.AI_PROVIDER ||
+    (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY ? "gemini" : "mock");
+
+  const model =
+    options.model ||
+    process.env.AI_MODEL ||
+    (provider === "gemini" ? "gemini-2.5-flash" : "gpt-4o-mini");
+
+  const apiKey =
+    options.apiKey ||
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+    process.env.OPENAI_API_KEY ||
+    process.env.AI_API_KEY ||
+    "";
+
+  if (provider === "mock" || !apiKey) {
+    return generateMockTutorResponse(context, question);
+  }
+
+  const userPrompt = formatTutorUserPrompt(context, sourceCode, history, question);
+  let rawJsonText: string;
+
+  if (provider === "gemini") {
+    rawJsonText = await callGemini(TUTOR_SYSTEM_PROMPT, userPrompt, model, apiKey);
+  } else if (provider === "openai") {
+    rawJsonText = await callOpenAI(TUTOR_SYSTEM_PROMPT, userPrompt, model, apiKey);
+  } else {
+    return generateMockTutorResponse(context, question);
+  }
+
+  const cleanJson = extractJSONString(rawJsonText);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(cleanJson);
+  } catch (err) {
+    throw new Error(`Invalid JSON returned by LLM: ${(err as Error).message}`);
+  }
+
+  const validationResult = TutorResponseSchema.safeParse(parsed);
+  if (!validationResult.success) {
+    const errors = validationResult.error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join("; ");
+    throw new Error(`LLM Tutor output failed Zod schema validation: ${errors}`);
   }
 
   return validationResult.data;

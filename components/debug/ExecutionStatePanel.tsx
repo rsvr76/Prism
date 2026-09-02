@@ -3,8 +3,9 @@
 import React, { useState } from "react";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { ObjectReference, SerializedValue } from "@/types/trace";
-import { Layers, Variable, Database, Terminal, AlertCircle, Sparkles } from "lucide-react";
+import { Layers, Variable, Database, Terminal, AlertCircle, Sparkles, MessageSquareQuote } from "lucide-react";
 import StepExplainer from "@/components/ai/StepExplainer";
+import TutorDrawer from "@/components/ai/TutorDrawer";
 
 function isObjectRef(val: SerializedValue): val is ObjectReference {
   return typeof val === "object" && val !== null && "__type__" in val && (val as ObjectReference).__type__ === "object_ref";
@@ -16,11 +17,13 @@ export default function ExecutionStatePanel() {
   const status = useExecutionStore((state) => state.status);
   const errorMessage = useExecutionStore((state) => state.errorMessage);
   const stepExplanations = useExecutionStore((state) => state.stepExplanations);
+  const tutorMessages = useExecutionStore((state) => state.tutorMessages);
 
-  const [activeTab, setActiveTab] = useState<"scope" | "stack" | "heap" | "stdout" | "ai">("scope");
+  const [activeTab, setActiveTab] = useState<"scope" | "ai" | "tutor" | "stack" | "heap" | "stdout">("scope");
 
   const currentFrame = trace?.frames?.[currentStep] || null;
   const hasExplanation = !!stepExplanations[currentStep];
+  const hasTutorMessages = tutorMessages.length > 0;
 
   return (
     <div className="w-full h-full flex flex-col bg-slate-900 border border-slate-800 rounded-lg overflow-hidden shadow-xl">
@@ -56,6 +59,23 @@ export default function ExecutionStatePanel() {
             <span>AI Explainer</span>
             {hasExplanation && (
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab("tutor")}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
+              activeTab === "tutor"
+                ? "bg-slate-800 text-purple-400 font-semibold"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <MessageSquareQuote className="w-3.5 h-3.5 text-purple-400" />
+            <span>AI Tutor</span>
+            {hasTutorMessages && (
+              <span className="text-[10px] px-1 bg-purple-950 text-purple-300 rounded font-bold">
+                {tutorMessages.length}
+              </span>
             )}
           </button>
 
@@ -135,6 +155,9 @@ export default function ExecutionStatePanel() {
           <>
             {/* AI Explainer Tab */}
             {activeTab === "ai" && <StepExplainer />}
+
+            {/* AI Tutor Tab (Phase 5) */}
+            {activeTab === "tutor" && <TutorDrawer />}
 
             {/* Scope Variables Table */}
             {activeTab === "scope" && (

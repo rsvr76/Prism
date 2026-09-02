@@ -1,9 +1,10 @@
 ﻿import { create } from "zustand";
 import { PrismTrace, PrismFrame, ExecutionStatus } from "@/types/trace";
-import { StepExplanation, ExplainStepRequest } from "@/types/ai";
+import { StepExplanation, ExplainStepRequest, TutorMessage, TutorResponse, TutorRequest } from "@/types/ai";
 import { traceRunner } from "@/lib/execution/traceRunner";
 import { DEFAULT_EXECUTION_LIMITS } from "@/lib/config/executionLimits";
 import { buildBoundedTraceContext } from "@/lib/ai/traceContextBuilder";
+import { buildBoundedTutorContext } from "@/lib/ai/tutorContextBuilder";
 
 export const DEFAULT_PYTHON_CODE = `# Prism Python Sandbox
 # Step through execution and watch variables, stack frames, and heap references mutate.
@@ -43,6 +44,11 @@ interface ExecutionStore {
   isExplaining: boolean;
   explanationError: string | null;
 
+  // AI Tutor state (Phase 5)
+  tutorMessages: TutorMessage[];
+  isTutorResponding: boolean;
+  tutorError: string | null;
+
   // Actions
   setCode: (code: string) => void;
   runCode: () => Promise<void>;
@@ -54,6 +60,8 @@ interface ExecutionStore {
   reset: () => void;
   getCurrentFrame: () => PrismFrame | null;
   explainCurrentStep: () => Promise<void>;
+  sendTutorQuestion: (question: string) => Promise<void>;
+  clearTutorMessages: () => void;
 }
 
 export const useExecutionStore = create<ExecutionStore>((set, get) => ({
@@ -70,6 +78,10 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   isExplaining: false,
   explanationError: null,
 
+  tutorMessages: [],
+  isTutorResponding: false,
+  tutorError: null,
+
   setCode: (code: string) => set({ code }),
 
   runCode: async () => {
@@ -80,6 +92,8 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
       errorMessage: null,
       stepExplanations: {},
       explanationError: null,
+      tutorMessages: [],
+      tutorError: null,
     });
 
     try {
@@ -91,6 +105,8 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
         status: trace.status,
         errorMessage: trace.errorMessage || null,
         stepExplanations: {},
+        tutorMessages: [],
+        tutorError: null,
       });
     } catch (err: any) {
       set({
@@ -136,6 +152,8 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
       errorMessage: null,
       stepExplanations: {},
       explanationError: null,
+      tutorMessages: [],
+      tutorError: null,
     });
   },
 
@@ -196,5 +214,82 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
         explanationError: err?.message || "Failed to communicate with AI explanation service.",
       });
     }
+  },
+
+  sendTutorQuestion: async (question: string) => {
+    const { trace, currentStep, tutorMessages, isTutorResponding } = get();
+    if (!trace || !trace.frames || isTutorResponding || !question.trim()) return;
+
+    const userMessage: TutorMessage = {
+      id: `user_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      role: "user",
+      text: question.trim(),
+      timestamp: Date.now(),
+      stepIndex: currentStep,
+    };
+
+    // Construct raw history
+    const rawHistory = tutorMessages.map((m) => ({
+      role: m.role,
+      text: m.text,
+    }));
+
+    const tutorPayload = buildBoundedTutorContext(
+      trace,
+      currentStep,
+      question.trim(),
+      rawHistory
+    );
+
+    if (!tutorPayload) {
+      set({ tutorError: "Unable to generate execution context for Tutor." });
+      return;
+    }
+
+    // Append user message immediately
+    set((state) => ({
+      tutorMessages: [...state.tutorMessages, userMessage],
+      isTutorResponding: true,
+      tutorError: null,
+    }));
+
+    try {
+      const res = await fetch("/api/ai/tutor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(tutorPayload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to get response from AI Tutor.");
+      }
+
+      const tutorResponse: TutorResponse = data.data;
+
+      const assistantMessage: TutorMessage = {
+        id: `tutor_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        role: "assistant",
+        text: tutorResponse.answer,
+        timestamp: Date.now(),
+        stepIndex: currentStep,
+        responseObj: tutorResponse,
+      };
+
+      set((state) => ({
+        tutorMessages: [...state.tutorMessages, assistantMessage],
+        isTutorResponding: false,
+      }));
+    } catch (err: any) {
+      set({
+        isTutorResponding: false,
+        tutorError: err?.message || "Failed to communicate with AI Tutor.",
+      });
+    }
+  },
+
+  clearTutorMessages: () => {
+    set({ tutorMessages: [], tutorError: null });
   },
 }));

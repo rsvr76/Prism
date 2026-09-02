@@ -1,5 +1,5 @@
-/**
- * Zod Validation Schemas for Prism AI Subsystem
+﻿/**
+ * Zod Validation Schemas for Prism AI Subsystem (Step Explainer & Interactive Tutor)
  */
 
 import { z } from "zod";
@@ -122,5 +122,49 @@ export const StepExplanationSchema = z.object({
     .max(500, "Learning point must be under 500 characters"),
 });
 
+/**
+ * Tutor Conversation History Message Schema
+ */
+export const TutorHistoryMessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  text: z.string().min(1).max(2000),
+});
+
+/**
+ * Tutor Request Schema
+ */
+export const TutorRequestSchema = z.object({
+  question: z
+    .string()
+    .min(2, "Question must be at least 2 characters")
+    .max(800, "Question must be under 800 characters"),
+  stepIndex: z.number().int().nonnegative(),
+  totalSteps: z.number().int().positive(),
+  sourceCode: z.string().max(15000),
+  history: z.array(TutorHistoryMessageSchema).max(20, "History capped at 20 messages"),
+  context: BoundedTraceContextSchema,
+});
+
+/**
+ * Tutor Response Schema
+ * Enforces structured responses with evidence citations.
+ */
+export const TutorResponseSchema = z.object({
+  answer: z
+    .string()
+    .min(5, "Answer must be at least 5 characters")
+    .max(2000, "Answer must be under 2000 characters"),
+  evidence: z
+    .array(z.string().max(300))
+    .min(1, "At least 1 piece of trace evidence is required")
+    .max(8, "No more than 8 evidence points"),
+  learningPoint: z
+    .string()
+    .max(500)
+    .optional(),
+});
+
 export type StepExplanationOutput = z.infer<typeof StepExplanationSchema>;
 export type ExplainStepRequestInput = z.infer<typeof ExplainStepRequestSchema>;
+export type TutorRequestInput = z.infer<typeof TutorRequestSchema>;
+export type TutorResponseOutput = z.infer<typeof TutorResponseSchema>;
