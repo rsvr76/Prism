@@ -59,13 +59,13 @@ Sandboxed Execution
        ↓
 Execution Trace
        ↓
- ┌────┴─────┐
+ ┌─────┴──────┐
  ↓            ↓
 Visual      AI Tutor
 Model       Explanation
  ↓             ↓
- └─────┬─────┘
-        ↓
+ └─────┬───────┘
+       ↓
 Student Understanding
 ```
 
