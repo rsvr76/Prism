@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * StepExplainer Component
@@ -24,13 +24,15 @@ import {
 export default function StepExplainer() {
   const trace = useExecutionStore((state) => state.trace);
   const currentStep = useExecutionStore((state) => state.currentStep);
+  const activeExecutionId = useExecutionStore((state) => state.activeExecutionId);
   const stepExplanations = useExecutionStore((state) => state.stepExplanations);
   const isExplaining = useExecutionStore((state) => state.isExplaining);
   const explanationError = useExecutionStore((state) => state.explanationError);
   const explainCurrentStep = useExecutionStore((state) => state.explainCurrentStep);
 
   const frame = trace?.frames?.[currentStep] ?? null;
-  const currentExplanation = stepExplanations[currentStep] || null;
+  const cacheKey = activeExecutionId ? `${activeExecutionId}_step_${currentStep}` : `step_${currentStep}`;
+  const currentExplanation = stepExplanations[cacheKey] || null;
 
   if (!trace || !frame) {
     return (

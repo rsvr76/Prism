@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Canonical AI Service Interfaces & Response Contracts
  * Isolates model providers and enforces strict structured output.
  */
@@ -110,9 +110,51 @@ export interface StateDiff {
   exceptionOccurred: boolean;
 }
 
+/**
+ * Phase 6B: Big-O & Complexity Analysis Types
+ */
+export type ComplexityClass =
+  | "O(1)"
+  | "O(log n)"
+  | "O(n)"
+  | "O(n log n)"
+  | "O(n²)"
+  | "O(n³)"
+  | "exponential"
+  | "unknown";
+
+export type ComplexityConfidence = "high" | "medium" | "low";
+
+export interface DeterministicComplexityMetrics {
+  totalSteps: number;
+  totalOperations: number;
+  maxCallStackDepth: number;
+  lineExecutionCounts: Record<number, number>;
+  maxLineExecutionCount: number;
+  maxLoopNesting: number;
+  isRecursive: boolean;
+  recursionDepth: number;
+  detectedStructures: string[];
+  peakHeapObjects: number;
+  observedTimeHeuristic: ComplexityClass;
+  observedSpaceHeuristic: ComplexityClass;
+}
+
 export interface ComplexityAnalysis {
-  timeComplexity: string;
-  spaceComplexity: string;
-  algorithmicPattern: string;
-  explanation: string;
+  timeComplexity: ComplexityClass;
+  spaceComplexity: ComplexityClass;
+  confidence: ComplexityConfidence;
+  summary: string;
+  why: string;
+  evidence: string[];
+  caveats: string[];
+  metrics: DeterministicComplexityMetrics;
+}
+
+export interface ComplexityRequest {
+  executionId: string;
+  sourceCode: string;
+  metrics: DeterministicComplexityMetrics;
+  detectedStructures: string[];
+  status: string;
 }

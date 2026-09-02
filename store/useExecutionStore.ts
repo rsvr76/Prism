@@ -1,10 +1,19 @@
 ﻿import { create } from "zustand";
-import { PrismTrace, PrismFrame, ExecutionStatus } from "@/types/trace";
-import { StepExplanation, ExplainStepRequest, TutorMessage, TutorResponse, TutorRequest } from "@/types/ai";
+import { PrismTrace, PrismFrame, ExecutionStatus, ExecutionRecord } from "@/types/trace";
+import {
+  StepExplanation,
+  ExplainStepRequest,
+  TutorMessage,
+  TutorResponse,
+  TutorRequest,
+  ComplexityAnalysis,
+  ComplexityRequest,
+} from "@/types/ai";
 import { traceRunner } from "@/lib/execution/traceRunner";
 import { DEFAULT_EXECUTION_LIMITS } from "@/lib/config/executionLimits";
 import { buildBoundedTraceContext } from "@/lib/ai/traceContextBuilder";
 import { buildBoundedTutorContext } from "@/lib/ai/tutorContextBuilder";
+import { extractComplexityMetrics } from "@/lib/ai/complexityAnalyzer";
 
 export const DEFAULT_PYTHON_CODE = `# Prism Python Sandbox
 # Step through execution and watch variables, stack frames, and heap references mutate.
@@ -30,6 +39,7 @@ print("Total sum:", total)
 `;
 
 interface ExecutionStore {
+  // Active Code & Trace (bound to activeExecutionId)
   code: string;
   trace: PrismTrace | null;
   currentStep: number;
@@ -39,15 +49,28 @@ interface ExecutionStore {
   status: ExecutionStatus;
   errorMessage: string | null;
 
-  // AI Step Explainer state
-  stepExplanations: Record<number, StepExplanation>;
+  // Phase 6A: What-If Branching & Execution History
+  executions: Record<string, ExecutionRecord>;
+  executionIds: string[];
+  activeExecutionId: string | null;
+  isWhatIfOpen: boolean;
+  whatIfDraftCode: string;
+  whatIfParentStep: number;
+
+  // AI Step Explainer state (Keyed by `${executionId}_step_${stepIndex}`)
+  stepExplanations: Record<string, StepExplanation>;
   isExplaining: boolean;
   explanationError: string | null;
 
-  // AI Tutor state (Phase 5)
-  tutorMessages: TutorMessage[];
+  // AI Tutor state (Isolated per active execution)
+  tutorMessages: Record<string, TutorMessage[]>;
   isTutorResponding: boolean;
   tutorError: string | null;
+
+  // Phase 6B: Big-O & Complexity Analysis (Keyed by `${executionId}`)
+  complexityAnalyses: Record<string, ComplexityAnalysis>;
+  isAnalyzingComplexity: boolean;
+  complexityError: string | null;
 
   // Actions
   setCode: (code: string) => void;
@@ -62,10 +85,21 @@ interface ExecutionStore {
   explainCurrentStep: () => Promise<void>;
   sendTutorQuestion: (question: string) => Promise<void>;
   clearTutorMessages: () => void;
+
+  // Phase 6A What-If Actions
+  openWhatIfModal: (stepIndex?: number) => void;
+  closeWhatIfModal: () => void;
+  setWhatIfDraftCode: (code: string) => void;
+  createBranch: (branchCode?: string) => Promise<void>;
+  switchExecution: (executionId: string) => void;
+
+  // Phase 6B Complexity Actions
+  analyzeComplexity: () => Promise<void>;
 }
 
 // Module-scoped execution epoch counter to prevent async race conditions
 let activeExecutionEpoch = 0;
+let branchCounter = 0;
 
 export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   code: DEFAULT_PYTHON_CODE,
@@ -77,13 +111,26 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   status: "IDLE",
   errorMessage: null,
 
+  // Phase 6A What-If initial state
+  executions: {},
+  executionIds: [],
+  activeExecutionId: null,
+  isWhatIfOpen: false,
+  whatIfDraftCode: DEFAULT_PYTHON_CODE,
+  whatIfParentStep: 0,
+
   stepExplanations: {},
   isExplaining: false,
   explanationError: null,
 
-  tutorMessages: [],
+  tutorMessages: {},
   isTutorResponding: false,
   tutorError: null,
+
+  // Phase 6B Complexity initial state
+  complexityAnalyses: {},
+  isAnalyzingComplexity: false,
+  complexityError: null,
 
   setCode: (code: string) => set({ code }),
 
@@ -91,30 +138,46 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
     const epoch = ++activeExecutionEpoch;
     const { code } = get();
 
+    const executionId = `exec_orig_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+
     set({
       isRunning: true,
       isPlaying: false,
       errorMessage: null,
-      stepExplanations: {},
       explanationError: null,
-      tutorMessages: [],
       tutorError: null,
+      complexityError: null,
     });
 
     try {
       const trace = await traceRunner.runTrace(code, DEFAULT_EXECUTION_LIMITS);
       if (epoch !== activeExecutionEpoch) return; // Stale execution result discarded
 
-      set({
+      const record: ExecutionRecord = {
+        executionId,
+        type: "original",
+        label: "Original",
+        code,
+        trace,
+        createdAt: Date.now(),
+      };
+
+      set((state) => ({
+        executions: {
+          ...state.executions,
+          [executionId]: record,
+        },
+        executionIds: state.executionIds.includes(executionId)
+          ? state.executionIds
+          : [...state.executionIds, executionId],
+        activeExecutionId: executionId,
+        code,
         trace,
         currentStep: 0,
         isRunning: false,
         status: trace.status,
         errorMessage: trace.errorMessage || null,
-        stepExplanations: {},
-        tutorMessages: [],
-        tutorError: null,
-      });
+      }));
     } catch (err: any) {
       if (epoch !== activeExecutionEpoch) return;
 
@@ -154,16 +217,28 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
 
   reset: () => {
     ++activeExecutionEpoch;
+    branchCounter = 0;
     set({
+      code: DEFAULT_PYTHON_CODE,
       trace: null,
       currentStep: 0,
       isPlaying: false,
+      isRunning: false,
       status: "IDLE",
       errorMessage: null,
+      executions: {},
+      executionIds: [],
+      activeExecutionId: null,
+      isWhatIfOpen: false,
+      whatIfDraftCode: DEFAULT_PYTHON_CODE,
+      whatIfParentStep: 0,
       stepExplanations: {},
       explanationError: null,
-      tutorMessages: [],
+      tutorMessages: {},
       tutorError: null,
+      complexityAnalyses: {},
+      isAnalyzingComplexity: false,
+      complexityError: null,
     });
   },
 
@@ -174,11 +249,13 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   },
 
   explainCurrentStep: async () => {
-    const { trace, currentStep, stepExplanations, isExplaining } = get();
-    if (!trace || !trace.frames || isExplaining) return;
+    const { trace, currentStep, activeExecutionId, stepExplanations, isExplaining } = get();
+    if (!trace || !trace.frames || isExplaining || !activeExecutionId) return;
+
+    const cacheKey = `${activeExecutionId}_step_${currentStep}`;
 
     // Check if already cached
-    if (stepExplanations[currentStep]) {
+    if (stepExplanations[cacheKey]) {
       return;
     }
 
@@ -190,6 +267,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
 
     const activeTrace = trace;
     const activeStep = currentStep;
+    const targetExecutionId = activeExecutionId;
 
     set({ isExplaining: true, explanationError: null });
 
@@ -214,18 +292,18 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
         throw new Error(data.error || "Failed to generate explanation.");
       }
 
-      // Invariant check: trace must not have changed during API call
-      if (get().trace !== activeTrace) return;
+      // Invariant check: active execution must not have changed during API call
+      if (get().activeExecutionId !== targetExecutionId || get().trace !== activeTrace) return;
 
       set((state) => ({
         isExplaining: false,
         stepExplanations: {
           ...state.stepExplanations,
-          [activeStep]: data.data,
+          [cacheKey]: data.data,
         },
       }));
     } catch (err: any) {
-      if (get().trace !== activeTrace) return;
+      if (get().activeExecutionId !== targetExecutionId || get().trace !== activeTrace) return;
       set({
         isExplaining: false,
         explanationError: err?.message || "Failed to communicate with AI explanation service.",
@@ -234,11 +312,12 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   },
 
   sendTutorQuestion: async (question: string) => {
-    const { trace, currentStep, tutorMessages, isTutorResponding } = get();
-    if (!trace || !trace.frames || isTutorResponding || !question.trim()) return;
+    const { trace, currentStep, activeExecutionId, tutorMessages, isTutorResponding } = get();
+    if (!trace || !trace.frames || isTutorResponding || !question.trim() || !activeExecutionId) return;
 
     const activeTrace = trace;
     const activeStep = currentStep;
+    const targetExecutionId = activeExecutionId;
 
     const userMessage: TutorMessage = {
       id: `user_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
@@ -248,8 +327,10 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
       stepIndex: activeStep,
     };
 
+    const currentHistory = tutorMessages[targetExecutionId] || [];
+
     // Construct raw history
-    const rawHistory = tutorMessages.map((m) => ({
+    const rawHistory = currentHistory.map((m) => ({
       role: m.role,
       text: m.text,
     }));
@@ -266,9 +347,12 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
       return;
     }
 
-    // Append user message immediately
+    // Append user message immediately under targetExecutionId
     set((state) => ({
-      tutorMessages: [...state.tutorMessages, userMessage],
+      tutorMessages: {
+        ...state.tutorMessages,
+        [targetExecutionId]: [...(state.tutorMessages[targetExecutionId] || []), userMessage],
+      },
       isTutorResponding: true,
       tutorError: null,
     }));
@@ -286,8 +370,8 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
         throw new Error(data.error || "Failed to get response from AI Tutor.");
       }
 
-      // Invariant check: trace must not have changed during API call
-      if (get().trace !== activeTrace) return;
+      // Invariant check: active execution must not have changed during API call
+      if (get().activeExecutionId !== targetExecutionId || get().trace !== activeTrace) return;
 
       const tutorResponse: TutorResponse = data.data;
 
@@ -301,11 +385,14 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
       };
 
       set((state) => ({
-        tutorMessages: [...state.tutorMessages, assistantMessage],
+        tutorMessages: {
+          ...state.tutorMessages,
+          [targetExecutionId]: [...(state.tutorMessages[targetExecutionId] || []), assistantMessage],
+        },
         isTutorResponding: false,
       }));
     } catch (err: any) {
-      if (get().trace !== activeTrace) return;
+      if (get().activeExecutionId !== targetExecutionId || get().trace !== activeTrace) return;
       set({
         isTutorResponding: false,
         tutorError: err?.message || "Failed to communicate with AI Tutor.",
@@ -314,6 +401,197 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   },
 
   clearTutorMessages: () => {
-    set({ tutorMessages: [], tutorError: null });
+    const { activeExecutionId } = get();
+    if (!activeExecutionId) return;
+    set((state) => ({
+      tutorMessages: {
+        ...state.tutorMessages,
+        [activeExecutionId]: [],
+      },
+      tutorError: null,
+    }));
+  },
+
+  // ─── Phase 6A: What-If Actions ──────────────────────────────────────────────
+
+  openWhatIfModal: (stepIndex?: number) => {
+    const { code, currentStep } = get();
+    set({
+      isWhatIfOpen: true,
+      whatIfDraftCode: code,
+      whatIfParentStep: stepIndex !== undefined ? stepIndex : currentStep,
+    });
+  },
+
+  closeWhatIfModal: () => {
+    set({ isWhatIfOpen: false });
+  },
+
+  setWhatIfDraftCode: (code: string) => {
+    set({ whatIfDraftCode: code });
+  },
+
+  createBranch: async (branchCodeParam?: string) => {
+    const epoch = ++activeExecutionEpoch;
+    const { whatIfDraftCode, whatIfParentStep, activeExecutionId } = get();
+    const branchCode = branchCodeParam !== undefined ? branchCodeParam : whatIfDraftCode;
+
+    branchCounter++;
+    const branchId = `exec_branch_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const branchLabel = `Branch ${branchCounter} (from Step ${whatIfParentStep + 1})`;
+
+    set({
+      isWhatIfOpen: false,
+      isRunning: true,
+      isPlaying: false,
+      errorMessage: null,
+      explanationError: null,
+      tutorError: null,
+      complexityError: null,
+    });
+
+    try {
+      const trace = await traceRunner.runTrace(branchCode, DEFAULT_EXECUTION_LIMITS);
+      if (epoch !== activeExecutionEpoch) return; // Stale execution result discarded
+
+      const record: ExecutionRecord = {
+        executionId: branchId,
+        type: "branch",
+        label: branchLabel,
+        code: branchCode,
+        trace,
+        parentExecutionId: activeExecutionId || undefined,
+        parentStepIndex: whatIfParentStep,
+        createdAt: Date.now(),
+      };
+
+      set((state) => ({
+        executions: {
+          ...state.executions,
+          [branchId]: record,
+        },
+        executionIds: state.executionIds.includes(branchId)
+          ? state.executionIds
+          : [...state.executionIds, branchId],
+        activeExecutionId: branchId,
+        code: branchCode,
+        trace,
+        currentStep: 0,
+        isRunning: false,
+        status: trace.status,
+        errorMessage: trace.errorMessage || null,
+      }));
+    } catch (err: any) {
+      if (epoch !== activeExecutionEpoch) return;
+
+      // Create failed branch record so original remains completely usable
+      const failedRecord: ExecutionRecord = {
+        executionId: branchId,
+        type: "branch",
+        label: `${branchLabel} [Failed]`,
+        code: branchCode,
+        trace: null,
+        parentExecutionId: activeExecutionId || undefined,
+        parentStepIndex: whatIfParentStep,
+        createdAt: Date.now(),
+      };
+
+      set((state) => ({
+        executions: {
+          ...state.executions,
+          [branchId]: failedRecord,
+        },
+        executionIds: [...state.executionIds, branchId],
+        activeExecutionId: branchId,
+        isRunning: false,
+        status: "RUNTIME_ERROR",
+        errorMessage: err?.message || "Branch execution failed",
+      }));
+    }
+  },
+
+  switchExecution: (executionId: string) => {
+    const { executions, activeExecutionId } = get();
+    if (executionId === activeExecutionId) return;
+
+    const targetRecord = executions[executionId];
+    if (!targetRecord) return;
+
+    ++activeExecutionEpoch; // Invalidate any in-flight requests from prior active execution
+
+    set({
+      activeExecutionId: executionId,
+      code: targetRecord.code,
+      trace: targetRecord.trace,
+      currentStep: 0,
+      isPlaying: false,
+      status: targetRecord.trace?.status || "IDLE",
+      errorMessage: targetRecord.trace?.errorMessage || null,
+      explanationError: null,
+      tutorError: null,
+      complexityError: null,
+    });
+  },
+
+  // ─── Phase 6B: Big-O Complexity Actions ─────────────────────────────────────
+
+  analyzeComplexity: async () => {
+    const { trace, activeExecutionId, complexityAnalyses, isAnalyzingComplexity } = get();
+    if (!trace || !activeExecutionId || isAnalyzingComplexity) return;
+
+    // Check if already cached for this execution
+    if (complexityAnalyses[activeExecutionId]) {
+      return;
+    }
+
+    const metrics = extractComplexityMetrics(trace);
+    const targetExecutionId = activeExecutionId;
+    const activeTrace = trace;
+
+    set({ isAnalyzingComplexity: true, complexityError: null });
+
+    try {
+      const payload: ComplexityRequest = {
+        executionId: targetExecutionId,
+        sourceCode: activeTrace.code,
+        metrics,
+        detectedStructures: metrics.detectedStructures,
+        status: activeTrace.status,
+      };
+
+      const res = await fetch("/api/ai/analyze-complexity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to analyze program complexity.");
+      }
+
+      // Invariant check: active execution must not have changed during API call
+      if (get().activeExecutionId !== targetExecutionId || get().trace !== activeTrace) return;
+
+      const fullAnalysis: ComplexityAnalysis = {
+        ...data.data,
+        metrics,
+      };
+
+      set((state) => ({
+        isAnalyzingComplexity: false,
+        complexityAnalyses: {
+          ...state.complexityAnalyses,
+          [targetExecutionId]: fullAnalysis,
+        },
+      }));
+    } catch (err: any) {
+      if (get().activeExecutionId !== targetExecutionId || get().trace !== activeTrace) return;
+      set({
+        isAnalyzingComplexity: false,
+        complexityError: err?.message || "Failed to communicate with complexity analysis service.",
+      });
+    }
   },
 }));

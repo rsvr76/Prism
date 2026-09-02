@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Zod Validation Schemas for Prism AI Subsystem (Step Explainer & Interactive Tutor)
  */
 
@@ -164,7 +164,70 @@ export const TutorResponseSchema = z.object({
     .optional(),
 });
 
+/**
+ * Phase 6B: Big-O Complexity Schemas
+ */
+export const ComplexityClassSchema = z.enum([
+  "O(1)",
+  "O(log n)",
+  "O(n)",
+  "O(n log n)",
+  "O(n²)",
+  "O(n³)",
+  "exponential",
+  "unknown",
+]);
+
+export const ComplexityConfidenceSchema = z.enum(["high", "medium", "low"]);
+
+export const DeterministicComplexityMetricsSchema = z.object({
+  totalSteps: z.number().int().nonnegative(),
+  totalOperations: z.number().int().nonnegative(),
+  maxCallStackDepth: z.number().int().nonnegative(),
+  lineExecutionCounts: z.record(z.string(), z.number().int().nonnegative()),
+  maxLineExecutionCount: z.number().int().nonnegative(),
+  maxLoopNesting: z.number().int().nonnegative(),
+  isRecursive: z.boolean(),
+  recursionDepth: z.number().int().nonnegative(),
+  detectedStructures: z.array(z.string()),
+  peakHeapObjects: z.number().int().nonnegative(),
+  observedTimeHeuristic: ComplexityClassSchema,
+  observedSpaceHeuristic: ComplexityClassSchema,
+});
+
+export const ComplexityRequestSchema = z.object({
+  executionId: z.string().min(1).max(100),
+  sourceCode: z.string().max(15000),
+  metrics: DeterministicComplexityMetricsSchema,
+  detectedStructures: z.array(z.string()).max(20),
+  status: z.string().max(50),
+});
+
+export const ComplexityResponseSchema = z.object({
+  timeComplexity: ComplexityClassSchema,
+  spaceComplexity: ComplexityClassSchema,
+  confidence: ComplexityConfidenceSchema,
+  summary: z
+    .string()
+    .min(5, "Summary must be at least 5 characters")
+    .max(600, "Summary must be under 600 characters"),
+  why: z
+    .string()
+    .min(5, "Why explanation must be at least 5 characters")
+    .max(1500, "Why explanation must be under 1500 characters"),
+  evidence: z
+    .array(z.string().max(300))
+    .min(1, "At least 1 piece of trace evidence is required")
+    .max(10, "No more than 10 evidence points"),
+  caveats: z
+    .array(z.string().max(300))
+    .min(1, "At least 1 caveat is required")
+    .max(6, "No more than 6 caveats"),
+});
+
 export type StepExplanationOutput = z.infer<typeof StepExplanationSchema>;
 export type ExplainStepRequestInput = z.infer<typeof ExplainStepRequestSchema>;
 export type TutorRequestInput = z.infer<typeof TutorRequestSchema>;
 export type TutorResponseOutput = z.infer<typeof TutorResponseSchema>;
+export type ComplexityRequestInput = z.infer<typeof ComplexityRequestSchema>;
+export type ComplexityResponseOutput = z.infer<typeof ComplexityResponseSchema>;

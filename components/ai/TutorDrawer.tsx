@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * TutorDrawer Component
@@ -31,6 +31,7 @@ const STARTER_PROMPTS = [
 export default function TutorDrawer() {
   const trace = useExecutionStore((state) => state.trace);
   const currentStep = useExecutionStore((state) => state.currentStep);
+  const activeExecutionId = useExecutionStore((state) => state.activeExecutionId);
   const tutorMessages = useExecutionStore((state) => state.tutorMessages);
   const isTutorResponding = useExecutionStore((state) => state.isTutorResponding);
   const tutorError = useExecutionStore((state) => state.tutorError);
@@ -41,11 +42,12 @@ export default function TutorDrawer() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const frame = trace?.frames?.[currentStep] ?? null;
+  const currentMessages = (activeExecutionId && tutorMessages[activeExecutionId]) || [];
 
   // Auto scroll to bottom of chat
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [tutorMessages, isTutorResponding]);
+  }, [currentMessages, isTutorResponding]);
 
   const handleSend = async (questionText: string) => {
     const text = questionText.trim();
@@ -86,7 +88,7 @@ export default function TutorDrawer() {
           </span>
         </div>
 
-        {tutorMessages.length > 0 && (
+        {currentMessages.length > 0 && (
           <button
             onClick={() => clearTutorMessages()}
             className="flex items-center gap-1 px-2 py-0.5 text-[11px] text-slate-400 hover:text-rose-300 hover:bg-rose-950/40 rounded transition-colors"
@@ -101,7 +103,7 @@ export default function TutorDrawer() {
       {/* ── Chat Messages Stream ── */}
       <div className="flex-1 overflow-y-auto space-y-3 pr-1 min-h-0">
         {/* Empty State with Starter Prompts */}
-        {tutorMessages.length === 0 && !isTutorResponding && (
+        {currentMessages.length === 0 && !isTutorResponding && (
           <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-6">
             <div className="w-10 h-10 rounded-full bg-purple-950/60 border border-purple-800/40 flex items-center justify-center text-purple-400">
               <MessageSquareQuote className="w-5 h-5" />
@@ -133,7 +135,7 @@ export default function TutorDrawer() {
         )}
 
         {/* Rendered Messages */}
-        {tutorMessages.map((msg) => (
+        {currentMessages.map((msg) => (
           <div
             key={msg.id}
             className={`space-y-1.5 ${

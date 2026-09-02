@@ -106,3 +106,16 @@ export interface PrismTrace {
   detectedStructures: DetectedStructure[];
   metrics: TraceMetrics;
 }
+
+export type ExecutionType = 'original' | 'branch';
+
+export interface ExecutionRecord {
+  executionId: string;
+  type: ExecutionType;
+  label: string;
+  code: string;
+  trace: PrismTrace | null;
+  parentExecutionId?: string;
+  parentStepIndex?: number;
+  createdAt: number;
+}

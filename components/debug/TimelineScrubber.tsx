@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useExecutionStore } from "@/store/useExecutionStore";
-import { Play, Pause, SkipBack, SkipForward, FastForward } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, FastForward, GitBranch } from "lucide-react";
 
 export default function TimelineScrubber() {
   const trace = useExecutionStore((state) => state.trace);
@@ -14,6 +14,7 @@ export default function TimelineScrubber() {
   const prevStep = useExecutionStore((state) => state.prevStep);
   const togglePlay = useExecutionStore((state) => state.togglePlay);
   const setPlaybackSpeed = useExecutionStore((state) => state.setPlaybackSpeed);
+  const openWhatIfModal = useExecutionStore((state) => state.openWhatIfModal);
 
   const totalFrames = trace?.frames?.length || 0;
 
@@ -107,7 +108,7 @@ export default function TimelineScrubber() {
         />
       </div>
 
-      {/* Step Counter & Line Indicator */}
+      {/* Step Counter, Line Indicator, and What-If Button */}
       <div className="flex items-center gap-3 text-xs font-mono">
         <span className="px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">
           Step <strong className="text-cyan-400">{currentStep + 1}</strong> / {totalFrames}
@@ -115,6 +116,16 @@ export default function TimelineScrubber() {
         <span className="px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-400">
           Line <strong className="text-amber-400">{trace.frames[currentStep]?.line || "-"}</strong>
         </span>
+
+        {/* Phase 6A: What-If Branch Button */}
+        <button
+          onClick={() => openWhatIfModal(currentStep)}
+          className="flex items-center gap-1.5 px-3 py-1 rounded bg-purple-950/80 hover:bg-purple-900/80 border border-purple-500/50 hover:border-purple-400 text-purple-300 text-xs font-semibold shadow-md shadow-purple-950/50 transition-all cursor-pointer"
+          title="Branch execution from this step with modified code"
+        >
+          <GitBranch className="w-3.5 h-3.5 text-purple-400" />
+          <span>What If?</span>
+        </button>
       </div>
     </div>
   );

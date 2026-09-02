@@ -1,5 +1,6 @@
-﻿/**
- * Configurable LLM Client for Prism AI Subsystem (Step Explainer & Interactive Tutor)
+/**
+ * Configurable LLM Client for Prism AI Subsystem
+ * Supports Step Explainer, Interactive Tutor, and Phase 6B Complexity Analyzer.
  *
  * Supports Gemini REST, OpenAI-compatible REST, and Mock providers.
  * Enforces Zod validation on all structured responses.
@@ -7,13 +8,16 @@
 
 import { GROUNDING_SYSTEM_PROMPT, formatUserPrompt } from "./groundingPrompt";
 import { TUTOR_SYSTEM_PROMPT, formatTutorUserPrompt } from "./tutorGroundingPrompt";
+import { COMPLEXITY_SYSTEM_PROMPT, formatComplexityUserPrompt } from "./complexityPrompt";
 import {
   StepExplanationSchema,
   StepExplanationOutput,
   TutorResponseSchema,
   TutorResponseOutput,
+  ComplexityResponseSchema,
+  ComplexityResponseOutput,
 } from "./schemas";
-import { BoundedTraceContext } from "@/types/ai";
+import { BoundedTraceContext, ComplexityRequest } from "@/types/ai";
 
 export interface LLMRequestOptions {
   context: BoundedTraceContext;
@@ -28,6 +32,13 @@ export interface TutorLLMRequestOptions {
   sourceCode: string;
   history: Array<{ role: "user" | "assistant"; text: string }>;
   question: string;
+  provider?: string;
+  model?: string;
+  apiKey?: string;
+}
+
+export interface ComplexityLLMRequestOptions {
+  request: ComplexityRequest;
   provider?: string;
   model?: string;
   apiKey?: string;
@@ -98,116 +109,134 @@ function generateMockExplanation(context: BoundedTraceContext): StepExplanationO
 }
 
 /**
- * Mock generator for Interactive Tutor Q&A.
+ * Mock generator for interactive Tutor responses.
  */
 function generateMockTutorResponse(
   context: BoundedTraceContext,
   question: string
 ): TutorResponseOutput {
-  const qLower = question.toLowerCase();
   const line = context.line;
-  const lineCode = context.activeLineSource ? `\`${context.activeLineSource}\`` : `line ${line}`;
-  const diff = context.diff;
-  const scope = context.currentScope;
+  const scopeKeys = Object.keys(context.currentScope);
+  const scopeSummary =
+    scopeKeys.length > 0
+      ? scopeKeys.map((k) => `${k} = ${context.currentScope[k]}`).join(", ")
+      : "No variables in scope";
 
-  // Anti-prediction check
-  if (
-    qLower.includes("what will happen next") ||
-    qLower.includes("in the future") ||
-    qLower.includes("after next loop") ||
-    qLower.includes("will become")
-  ) {
-    return {
-      answer: `Prism Tutor only explains observed execution up to the current step (Step ${context.stepIndex}). I cannot speculate on future unexecuted steps. You can step forward on the timeline to inspect subsequent operations as they execute.`,
-      evidence: [
-        `Current execution point is Step ${context.stepIndex} at line ${line}`,
-        "Execution history beyond this step must be inspected via the timeline scrubber",
-      ],
-      learningPoint: "Grounding your mental model in real execution steps avoids incorrect assumptions about loop invariants.",
-    };
-  }
+  const lowerQ = question.toLowerCase();
+  const isFutureQ =
+    lowerQ.includes("future") ||
+    lowerQ.includes("will happen") ||
+    lowerQ.includes("next loop") ||
+    lowerQ.includes("predict");
 
-  // Specific variable query
-  const matchingVar = Object.keys(scope).find((v) => qLower.includes(v.toLowerCase()));
-  if (matchingVar) {
-    const val = scope[matchingVar];
-    const changed = diff.variablesChanged.find((c) => c.name === matchingVar);
-    const added = diff.variablesAdded.find((a) => a.name === matchingVar);
-
-    const transitionText = changed
-      ? `changed from \`${changed.from}\` to \`${changed.to}\``
-      : added
-      ? `was initialized with value \`${val}\``
-      : `currently holds the value \`${val}\``;
-
-    return {
-      answer: `At Step ${context.stepIndex} (line ${line}), the variable \`${matchingVar}\` ${transitionText} following the execution of ${lineCode}.`,
-      evidence: [
-        `Line ${line}: ${context.activeLineSource || "statement executed"}`,
-        `Scope state: \`${matchingVar}\` = ${val}`,
-      ],
-      learningPoint: `Variables in local scope reflect the direct state of Python memory at Step ${context.stepIndex}.`,
-    };
-  }
-
-  // General "why did this happen" or "explain"
-  const evidenceList: string[] = [
-    `Executed line ${line}: ${context.activeLineSource || "statement"}`,
+  const evidence: string[] = [
+    `At Step ${context.stepIndex}, execution reached line ${line}.`,
+    `Local scope variables: [${scopeSummary}].`,
   ];
-  if (diff.variablesChanged.length > 0) {
-    evidenceList.push(
-      `Mutations: ${diff.variablesChanged.map((c) => `${c.name}: ${c.from} → ${c.to}`).join(", ")}`
-    );
+
+  if (context.diff.variablesChanged.length > 0) {
+    const vc = context.diff.variablesChanged[0];
+    evidence.push(`Variable \`${vc.name}\` transitioned from \`${vc.from}\` to \`${vc.to}\`.`);
   }
-  if (diff.pointersMoved.length > 0) {
-    evidenceList.push(
-      `Pointers: ${diff.pointersMoved.map((p) => `${p.name} → ${p.to}`).join(", ")}`
-    );
+
+  if (context.diff.heapReferencesChanged.length > 0) {
+    const hr = context.diff.heapReferencesChanged[0];
+    evidence.push(`Heap References updated: \`${hr.objectId}.${hr.pointer}\` → \`${hr.to}\`.`);
   }
-  if (diff.heapReferencesChanged.length > 0) {
-    evidenceList.push(
-      `References: ${diff.heapReferencesChanged.map((r) => `${r.objectId}.${r.pointer} → ${r.to}`).join(", ")}`
-    );
+
+  let answer: string;
+  if (isFutureQ) {
+    answer = `Prism only explains observed execution up to the current step (Step ${context.stepIndex}). It does not predict future iterations or simulate unexecuted code.`;
+  } else {
+    answer = `At Step ${context.stepIndex} (Line ${line}), the program evaluates the statement with active state: ${scopeSummary}. Regarding your question "${question}": the step performs an atomic operation advancing the algorithm toward its termination condition.`;
   }
 
   return {
-    answer: `At Step ${context.stepIndex}, Python executed ${lineCode}. The local scope and memory references were updated as captured in the execution trace.`,
-    evidence: evidenceList.slice(0, 4),
-    learningPoint: "Analyzing individual execution frames reveals how algorithms build complex data structures step by step.",
+    answer,
+    evidence: evidence.slice(0, 4),
+    learningPoint: "Observing variable state at each step verifies that the algorithm's loop or recursive invariant holds true.",
   };
 }
 
 /**
- * Call Google Gemini REST API.
+ * Mock generator for Phase 6B Complexity analysis.
+ */
+function generateMockComplexityAnalysis(
+  request: ComplexityRequest
+): ComplexityResponseOutput {
+  const { metrics, detectedStructures } = request;
+  const timeClass = metrics.observedTimeHeuristic;
+  const spaceClass = metrics.observedSpaceHeuristic;
+
+  const evidence: string[] = [
+    `Total trace operations recorded: ${metrics.totalOperations} across ${metrics.totalSteps} steps.`,
+    `Max loop nesting level: ${metrics.maxLoopNesting} (inner line repeated ${metrics.maxLineExecutionCount} times).`,
+  ];
+
+  if (metrics.isRecursive) {
+    evidence.push(`Recursive execution observed with max call stack depth ${metrics.maxCallStackDepth} and recursion depth ${metrics.recursionDepth}.`);
+  }
+
+  if (metrics.peakHeapObjects > 0) {
+    evidence.push(`Peak heap objects observed: ${metrics.peakHeapObjects} (${detectedStructures.join(", ") || "custom objects"}).`);
+  }
+
+  let whyExplanation = `The observed execution exhibits ${timeClass} time scaling based on loop nesting and repetition factors. `;
+  if (timeClass === "O(1)") {
+    whyExplanation += "The program executes a constant number of statements with no repeated loop iterations.";
+  } else if (timeClass === "O(n)") {
+    whyExplanation += "A single loop or linear chain of recursive calls iterates directly proportional to the input size.";
+  } else if (timeClass === "O(n²)") {
+    whyExplanation += "Nested loops repeat inner iterations quadratically relative to the outer loop count.";
+  } else if (timeClass === "O(n³)") {
+    whyExplanation += "Triple nested loops exhibit cubic scaling relative to the input bounds.";
+  } else if (timeClass === "O(log n)") {
+    whyExplanation += "The execution step count scales logarithmically with problem size (e.g. repeated halving).";
+  } else {
+    whyExplanation += "The trace exhibits complex execution patterns across branches.";
+  }
+
+  const caveats: string[] = [
+    "This complexity classification is inferred empirically from the observed trace on this specific input.",
+    "Dynamic execution trace measurement demonstrates empirical behavior and does not constitute a universal mathematical asymptotic proof for all inputs.",
+  ];
+
+  return {
+    timeComplexity: timeClass,
+    spaceComplexity: spaceClass,
+    confidence: metrics.totalSteps > 3 ? "high" : "medium",
+    summary: `Observed execution is consistent with ${timeClass} time and ${spaceClass} auxiliary space complexity.`,
+    why: whyExplanation,
+    evidence,
+    caveats,
+  };
+}
+
+/**
+ * Direct HTTP call to Gemini API using generateContent with JSON mode.
  */
 async function callGemini(
-  systemPrompt: string,
+  systemInstruction: string,
   userPrompt: string,
-  modelName: string,
+  modelName: string = "gemini-2.5-flash",
   apiKey: string
 ): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
-  const payload = {
-    contents: [
-      {
-        parts: [
-          {
-            text: `${systemPrompt}\n\n${userPrompt}`,
-          },
-        ],
-      },
-    ],
+  const body = {
+    contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+    systemInstruction: { parts: [{ text: systemInstruction }] },
     generationConfig: {
-      temperature: 0.2,
       responseMimeType: "application/json",
+      temperature: 0.1,
+      maxOutputTokens: 1500,
     },
   };
 
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
@@ -216,38 +245,44 @@ async function callGemini(
   }
 
   const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
   if (!text) {
-    throw new Error("Empty response received from Gemini API");
+    throw new Error("Gemini returned empty response candidate.");
   }
 
   return text;
 }
 
 /**
- * Call OpenAI-compatible REST API.
+ * Direct HTTP call to OpenAI API using chat completions with JSON mode.
  */
 async function callOpenAI(
-  systemPrompt: string,
+  systemInstruction: string,
   userPrompt: string,
-  modelName: string,
+  modelName: string = "gpt-4o-mini",
   apiKey: string
 ): Promise<string> {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+  const url = "https://api.openai.com/v1/chat/completions";
+
+  const body = {
+    model: modelName,
+    messages: [
+      { role: "system", content: systemInstruction },
+      { role: "user", content: userPrompt },
+    ],
+    response_format: { type: "json_object" },
+    temperature: 0.1,
+    max_tokens: 1500,
+  };
+
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({
-      model: modelName,
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
@@ -256,16 +291,17 @@ async function callOpenAI(
   }
 
   const data = await response.json();
-  const text = data?.choices?.[0]?.message?.content;
+  const text = data.choices?.[0]?.message?.content;
+
   if (!text) {
-    throw new Error("Empty response received from OpenAI API");
+    throw new Error("OpenAI returned empty response choice.");
   }
 
   return text;
 }
 
 /**
- * Generate grounded step explanation.
+ * Main entrypoint for generating step explanations.
  */
 export async function generateStepExplanation(
   options: LLMRequestOptions
@@ -375,6 +411,64 @@ export async function generateTutorResponse(
   if (!validationResult.success) {
     const errors = validationResult.error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join("; ");
     throw new Error(`LLM Tutor output failed Zod schema validation: ${errors}`);
+  }
+
+  return validationResult.data;
+}
+
+/**
+ * Generate Phase 6B Complexity analysis grounded in execution metrics.
+ */
+export async function generateComplexityAnalysis(
+  options: ComplexityLLMRequestOptions
+): Promise<ComplexityResponseOutput> {
+  const { request } = options;
+
+  const provider =
+    options.provider ||
+    process.env.AI_PROVIDER ||
+    (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY ? "gemini" : "mock");
+
+  const model =
+    options.model ||
+    process.env.AI_MODEL ||
+    (provider === "gemini" ? "gemini-2.5-flash" : "gpt-4o-mini");
+
+  const apiKey =
+    options.apiKey ||
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+    process.env.OPENAI_API_KEY ||
+    process.env.AI_API_KEY ||
+    "";
+
+  if (provider === "mock" || !apiKey) {
+    return generateMockComplexityAnalysis(request);
+  }
+
+  const userPrompt = formatComplexityUserPrompt(request);
+  let rawJsonText: string;
+
+  if (provider === "gemini") {
+    rawJsonText = await callGemini(COMPLEXITY_SYSTEM_PROMPT, userPrompt, model, apiKey);
+  } else if (provider === "openai") {
+    rawJsonText = await callOpenAI(COMPLEXITY_SYSTEM_PROMPT, userPrompt, model, apiKey);
+  } else {
+    return generateMockComplexityAnalysis(request);
+  }
+
+  const cleanJson = extractJSONString(rawJsonText);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(cleanJson);
+  } catch (err) {
+    throw new Error(`Invalid JSON returned by LLM: ${(err as Error).message}`);
+  }
+
+  const validationResult = ComplexityResponseSchema.safeParse(parsed);
+  if (!validationResult.success) {
+    const errors = validationResult.error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join("; ");
+    throw new Error(`LLM Complexity output failed Zod schema validation: ${errors}`);
   }
 
   return validationResult.data;

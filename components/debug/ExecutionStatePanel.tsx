@@ -1,11 +1,12 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { ObjectReference, SerializedValue } from "@/types/trace";
-import { Layers, Variable, Database, Terminal, AlertCircle, Sparkles, MessageSquareQuote } from "lucide-react";
+import { Layers, Variable, Database, Terminal, AlertCircle, Sparkles, MessageSquareQuote, Activity } from "lucide-react";
 import StepExplainer from "@/components/ai/StepExplainer";
 import TutorDrawer from "@/components/ai/TutorDrawer";
+import ComplexityPanel from "@/components/ai/ComplexityPanel";
 
 function isObjectRef(val: SerializedValue): val is ObjectReference {
   return typeof val === "object" && val !== null && "__type__" in val && (val as ObjectReference).__type__ === "object_ref";
@@ -15,15 +16,20 @@ export default function ExecutionStatePanel() {
   const trace = useExecutionStore((state) => state.trace);
   const currentStep = useExecutionStore((state) => state.currentStep);
   const status = useExecutionStore((state) => state.status);
+  const activeExecutionId = useExecutionStore((state) => state.activeExecutionId);
   const errorMessage = useExecutionStore((state) => state.errorMessage);
   const stepExplanations = useExecutionStore((state) => state.stepExplanations);
   const tutorMessages = useExecutionStore((state) => state.tutorMessages);
+  const complexityAnalyses = useExecutionStore((state) => state.complexityAnalyses);
 
-  const [activeTab, setActiveTab] = useState<"scope" | "ai" | "tutor" | "stack" | "heap" | "stdout">("scope");
+  const [activeTab, setActiveTab] = useState<"scope" | "ai" | "tutor" | "complexity" | "stack" | "heap" | "stdout">("scope");
 
   const currentFrame = trace?.frames?.[currentStep] || null;
-  const hasExplanation = !!stepExplanations[currentStep];
-  const hasTutorMessages = tutorMessages.length > 0;
+  const cacheKey = activeExecutionId ? `${activeExecutionId}_step_${currentStep}` : `step_${currentStep}`;
+  const hasExplanation = !!stepExplanations[cacheKey];
+  const activeTutorMsgs = (activeExecutionId && tutorMessages[activeExecutionId]) || [];
+  const hasTutorMessages = activeTutorMsgs.length > 0;
+  const hasComplexity = !!(activeExecutionId && complexityAnalyses[activeExecutionId]);
 
   return (
     <div className="w-full h-full flex flex-col bg-slate-900 border border-slate-800 rounded-lg overflow-hidden shadow-xl">
@@ -74,8 +80,23 @@ export default function ExecutionStatePanel() {
             <span>AI Tutor</span>
             {hasTutorMessages && (
               <span className="text-[10px] px-1 bg-purple-950 text-purple-300 rounded font-bold">
-                {tutorMessages.length}
+                {activeTutorMsgs.length}
               </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab("complexity")}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
+              activeTab === "complexity"
+                ? "bg-slate-800 text-amber-400 font-semibold"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5 text-amber-400" />
+            <span>Big-O</span>
+            {hasComplexity && (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
             )}
           </button>
 
@@ -135,115 +156,118 @@ export default function ExecutionStatePanel() {
       </div>
 
       {/* Error Alert Banner if any */}
-      {errorMessage && (
-        <div className="flex items-start gap-2.5 px-4 py-2.5 bg-rose-950/40 border-b border-rose-500/30 text-rose-300 text-xs font-mono">
-          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-          <div>
-            <span className="font-bold text-rose-400">[{status}]</span> {errorMessage}
-          </div>
+      {status !== "SUCCESS" && status !== "RUNNING" && status !== "IDLE" && errorMessage && (
+        <div className="flex items-center gap-2 p-3 bg-rose-950/80 border-b border-rose-800/80 text-rose-300 text-xs font-mono">
+          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+          <span className="font-semibold">{status}:</span>
+          <span className="truncate">{errorMessage}</span>
         </div>
       )}
 
-      {/* Tab Content Body */}
-      <div className="flex-1 overflow-hidden font-mono text-xs">
-        {!currentFrame ? (
-          <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-2 p-4">
-            <Layers className="w-8 h-8 opacity-40" />
-            <p>Run code to inspect runtime state.</p>
+      {/* Tab Panels */}
+      <div className="flex-1 p-3 overflow-hidden">
+        {activeTab === "ai" ? (
+          <StepExplainer />
+        ) : activeTab === "tutor" ? (
+          <TutorDrawer />
+        ) : activeTab === "complexity" ? (
+          <ComplexityPanel />
+        ) : !currentFrame ? (
+          <div className="h-full flex items-center justify-center text-slate-600 text-xs font-mono">
+            No active frame data. Click &quot;Run Trace&quot; to execute.
           </div>
         ) : (
           <>
-            {/* AI Explainer Tab */}
-            {activeTab === "ai" && <StepExplainer />}
-
-            {/* AI Tutor Tab (Phase 5) */}
-            {activeTab === "tutor" && <TutorDrawer />}
-
-            {/* Scope Variables Table */}
+            {/* Scope Variables Tab */}
             {activeTab === "scope" && (
-              <div className="h-full p-4 overflow-y-auto space-y-2">
+              <div className="h-full overflow-y-auto space-y-2 pr-1 font-mono text-xs">
                 {Object.keys(currentFrame.scope).length === 0 ? (
-                  <p className="text-slate-500 italic">No variables in current scope.</p>
+                  <div className="text-slate-500 italic p-2">No variables currently in local scope.</div>
                 ) : (
-                  <div className="divide-y divide-slate-800 border border-slate-800 rounded bg-slate-950/50">
-                    {Object.entries(currentFrame.scope).map(([varName, val]) => (
-                      <div key={varName} className="flex items-center justify-between px-3 py-2">
-                        <span className="text-cyan-400 font-semibold">{varName}</span>
-                        <div className="text-right">
-                          {isObjectRef(val) ? (
-                            <span className="px-2 py-0.5 rounded bg-purple-950/60 border border-purple-500/30 text-purple-300">
-                              {String(val.className)} ({String(val.id)})
-                            </span>
-                          ) : (
-                            <span className="text-emerald-400 font-medium">
-                              {JSON.stringify(val)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  Object.entries(currentFrame.scope).map(([name, val]) => (
+                    <div
+                      key={name}
+                      className="flex items-center justify-between p-2 rounded bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 transition-colors"
+                    >
+                      <span className="text-cyan-300 font-semibold">{name}</span>
+                      <span className="text-slate-200">
+                        {isObjectRef(val) ? (
+                          <span className="text-purple-400 font-bold underline cursor-help">
+                            {val.className} ({val.id})
+                          </span>
+                        ) : (
+                          JSON.stringify(val)
+                        )}
+                      </span>
+                    </div>
+                  ))
                 )}
               </div>
             )}
 
-            {/* Call Stack Frame View */}
+            {/* Call Stack Tab */}
             {activeTab === "stack" && (
-              <div className="h-full p-4 overflow-y-auto space-y-2">
-                {currentFrame.callStack.map((frame, idx) => (
-                  <div
-                    key={frame.frameId + idx}
-                    className={`p-3 rounded border transition-colors ${
-                      idx === currentFrame.callStack.length - 1
-                        ? "bg-cyan-950/30 border-cyan-500/50 text-cyan-200"
-                        : "bg-slate-950/40 border-slate-800 text-slate-400"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-bold text-sm">
-                        {frame.functionName}()
-                      </span>
-                      <span className="text-xs px-1.5 py-0.5 rounded bg-slate-800 text-amber-400">
-                        Line {frame.line}
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-slate-400">
-                      Locals: {Object.keys(frame.localVariables).join(", ") || "none"}
-                    </div>
-                  </div>
-                ))}
+              <div className="h-full overflow-y-auto space-y-2 pr-1 font-mono text-xs">
+                {currentFrame.callStack.length === 0 ? (
+                  <div className="text-slate-500 italic p-2">&lt;module&gt; (Global Frame)</div>
+                ) : (
+                  currentFrame.callStack
+                    .slice()
+                    .reverse()
+                    .map((frameInfo, idx) => (
+                      <div
+                        key={idx}
+                        className={`p-2.5 rounded border ${
+                          idx === 0
+                            ? "bg-cyan-950/40 border-cyan-500/50 text-cyan-200 font-bold"
+                            : "bg-slate-950/60 border-slate-800 text-slate-400"
+                        }`}
+                      >
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm">{frameInfo.functionName}()</span>
+                          <span className="text-[10px] opacity-70">Line {frameInfo.line}</span>
+                        </div>
+                        {frameInfo.localVariables && Object.keys(frameInfo.localVariables).length > 0 && (
+                          <div className="mt-1.5 pt-1.5 border-t border-slate-800/60 text-[11px] font-normal text-slate-300 space-y-0.5">
+                            {Object.entries(frameInfo.localVariables).map(([k, v]) => (
+                              <div key={k} className="flex justify-between">
+                                <span className="text-slate-400">{k}:</span>
+                                <span>{JSON.stringify(v)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                )}
               </div>
             )}
 
-            {/* Heap Objects Inspection */}
+            {/* Heap Objects Tab */}
             {activeTab === "heap" && (
-              <div className="h-full p-4 overflow-y-auto space-y-3">
+              <div className="h-full overflow-y-auto space-y-3 pr-1 font-mono text-xs">
                 {Object.keys(currentFrame.heap).length === 0 ? (
-                  <p className="text-slate-500 italic">No heap objects allocated.</p>
+                  <div className="text-slate-500 italic p-2">No custom objects allocated in heap.</div>
                 ) : (
-                  Object.entries(currentFrame.heap).map(([objId, obj]) => (
+                  Object.entries(currentFrame.heap).map(([id, obj]) => (
                     <div
-                      key={objId}
-                      className="p-3 rounded bg-slate-950/60 border border-slate-800"
+                      key={id}
+                      className="p-3 rounded-lg bg-slate-950/80 border border-slate-800 space-y-2"
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-purple-400 font-bold">
-                          {obj.className}
-                        </span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
-                          {obj.id}
-                        </span>
+                      <div className="flex items-center justify-between pb-1.5 border-b border-slate-800">
+                        <span className="text-purple-400 font-bold">{obj.className}</span>
+                        <span className="text-[10px] text-slate-500">{id}</span>
                       </div>
 
                       {/* Fields */}
-                      <div className="text-xs space-y-1 mb-2">
+                      <div className="text-xs space-y-1">
                         <div className="text-slate-500 uppercase text-[10px] font-bold">Fields:</div>
                         {Object.entries(obj.fields).length === 0 ? (
                           <div className="text-slate-600 italic">None</div>
                         ) : (
                           Object.entries(obj.fields).map(([k, v]) => (
                             <div key={k} className="flex justify-between pl-2">
-                              <span className="text-slate-300">{k}:</span>
+                              <span className="text-slate-400">.{k}</span>
                               <span className="text-emerald-400">{JSON.stringify(v)}</span>
                             </div>
                           ))
