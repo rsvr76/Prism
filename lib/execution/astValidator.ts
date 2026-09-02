@@ -19,11 +19,16 @@ const DISALLOWED_MODULES = [
   'http',
   'threading',
   'multiprocessing',
+  'js',
+  'pyodide',
+  '_pyodide',
+  'importlib',
+  'builtins',
 ];
 
 /**
  * Preflight AST & Safety Validator
- * Fast initial checks before sending code to the Pyodide Web Worker.
+ * Fast initial checks before sending code to the Pyodide Web Worker sandbox.
  */
 export function validateCodePreflight(code: string, limits: ExecutionLimits): PreflightResult {
   if (!code || code.trim().length === 0) {
@@ -43,7 +48,16 @@ export function validateCodePreflight(code: string, limits: ExecutionLimits): Pr
     };
   }
 
-  // Check for disallowed system modules
+  // Reject dynamic __import__ calls
+  if (/\b__import__\s*\(/.test(code)) {
+    return {
+      isValid: false,
+      status: 'UNSUPPORTED',
+      errorMessage: "Dynamic '__import__' is disallowed in the Prism sandbox.",
+    };
+  }
+
+  // Check for disallowed system & runtime modules
   for (const mod of DISALLOWED_MODULES) {
     const importRegex = new RegExp(`\\b(import\\s+${mod}\\b|from\\s+${mod}\\s+import)`, 'i');
     if (importRegex.test(code)) {

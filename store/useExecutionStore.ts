@@ -64,6 +64,9 @@ interface ExecutionStore {
   clearTutorMessages: () => void;
 }
 
+// Module-scoped execution epoch counter to prevent async race conditions
+let activeExecutionEpoch = 0;
+
 export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   code: DEFAULT_PYTHON_CODE,
   trace: null,
@@ -85,7 +88,9 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   setCode: (code: string) => set({ code }),
 
   runCode: async () => {
+    const epoch = ++activeExecutionEpoch;
     const { code } = get();
+
     set({
       isRunning: true,
       isPlaying: false,
@@ -98,6 +103,8 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
 
     try {
       const trace = await traceRunner.runTrace(code, DEFAULT_EXECUTION_LIMITS);
+      if (epoch !== activeExecutionEpoch) return; // Stale execution result discarded
+
       set({
         trace,
         currentStep: 0,
@@ -109,6 +116,8 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
         tutorError: null,
       });
     } catch (err: any) {
+      if (epoch !== activeExecutionEpoch) return;
+
       set({
         isRunning: false,
         status: "RUNTIME_ERROR",
@@ -144,6 +153,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   setPlaybackSpeed: (speed: number) => set({ playbackSpeed: speed }),
 
   reset: () => {
+    ++activeExecutionEpoch;
     set({
       trace: null,
       currentStep: 0,
@@ -178,13 +188,16 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
       return;
     }
 
+    const activeTrace = trace;
+    const activeStep = currentStep;
+
     set({ isExplaining: true, explanationError: null });
 
     try {
       const payload: ExplainStepRequest = {
-        stepIndex: currentStep,
-        totalSteps: trace.frames.length,
-        sourceCode: trace.code,
+        stepIndex: activeStep,
+        totalSteps: activeTrace.frames.length,
+        sourceCode: activeTrace.code,
         currentLineCode: context.activeLineSource,
         context,
       };
@@ -201,14 +214,18 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
         throw new Error(data.error || "Failed to generate explanation.");
       }
 
+      // Invariant check: trace must not have changed during API call
+      if (get().trace !== activeTrace) return;
+
       set((state) => ({
         isExplaining: false,
         stepExplanations: {
           ...state.stepExplanations,
-          [currentStep]: data.data,
+          [activeStep]: data.data,
         },
       }));
     } catch (err: any) {
+      if (get().trace !== activeTrace) return;
       set({
         isExplaining: false,
         explanationError: err?.message || "Failed to communicate with AI explanation service.",
@@ -220,12 +237,15 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
     const { trace, currentStep, tutorMessages, isTutorResponding } = get();
     if (!trace || !trace.frames || isTutorResponding || !question.trim()) return;
 
+    const activeTrace = trace;
+    const activeStep = currentStep;
+
     const userMessage: TutorMessage = {
       id: `user_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       role: "user",
       text: question.trim(),
       timestamp: Date.now(),
-      stepIndex: currentStep,
+      stepIndex: activeStep,
     };
 
     // Construct raw history
@@ -235,8 +255,8 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
     }));
 
     const tutorPayload = buildBoundedTutorContext(
-      trace,
-      currentStep,
+      activeTrace,
+      activeStep,
       question.trim(),
       rawHistory
     );
@@ -266,6 +286,9 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
         throw new Error(data.error || "Failed to get response from AI Tutor.");
       }
 
+      // Invariant check: trace must not have changed during API call
+      if (get().trace !== activeTrace) return;
+
       const tutorResponse: TutorResponse = data.data;
 
       const assistantMessage: TutorMessage = {
@@ -273,7 +296,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
         role: "assistant",
         text: tutorResponse.answer,
         timestamp: Date.now(),
-        stepIndex: currentStep,
+        stepIndex: activeStep,
         responseObj: tutorResponse,
       };
 
@@ -282,6 +305,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
         isTutorResponding: false,
       }));
     } catch (err: any) {
+      if (get().trace !== activeTrace) return;
       set({
         isTutorResponding: false,
         tutorError: err?.message || "Failed to communicate with AI Tutor.",

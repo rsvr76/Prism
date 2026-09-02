@@ -1,6 +1,8 @@
 ﻿/**
  * Embedded Python Tracer Script
  * Executed inside Pyodide via sys.settrace to capture ground-truth execution snapshots.
+ * Hardened with safe __import__ sandbox hooks, exception-safe attribute traversal,
+ * and strict collection/string/depth bounds.
  */
 export const PYTHON_TRACER_CODE = `
 import sys
@@ -97,7 +99,7 @@ class PrismPythonTracer:
             'heap': heap,
             'activePointers': [],
             'stdout': stdout_lines,
-            'exception': {'type': type(arg).__name__, 'message': str(arg)} if event == 'exception' else None
+            'exception': {'type': type(arg).__name__, 'message': str(arg)[:200]} if event == 'exception' else None
         }
 
         # Deduplication: avoid recording consecutive identical frames
@@ -107,31 +109,38 @@ class PrismPythonTracer:
 
     def serialize_val(self, val):
         if val is None: return None
-        if isinstance(val, (int, float, str, bool)): return val
+        if isinstance(val, (int, float, bool)): return val
+        if isinstance(val, str): return val[:200]
         if isinstance(val, (list, tuple)): return [self.serialize_val(x) for x in val[:50]]
-        if isinstance(val, dict): return {str(k): self.serialize_val(v) for k, v in list(val.items())[:50]}
+        if isinstance(val, dict): return {str(k)[:50]: self.serialize_val(v) for k, v in list(val.items())[:50]}
         if isinstance(val, set): return [self.serialize_val(x) for x in list(val)[:50]]
-        # Custom classes and user defined objects
+        
+        # Exception-safe string representation for custom objects
+        try:
+            repr_str = repr(val)[:50]
+        except Exception:
+            repr_str = f"<{type(val).__name__} object>"
+
         return {
             '__type__': 'object_ref',
             'id': f"obj_{id(val)}",
             'className': type(val).__name__,
-            'repr': repr(val)[:50]
+            'repr': repr_str
         }
 
     def extract_heap_objects(self, obj, heap_map, visited, depth=0):
-        if depth > 10 or obj is None: return
+        if depth > 5 or len(heap_map) >= 30 or obj is None: return
         obj_id = f"obj_{id(obj)}"
         if obj_id in visited or isinstance(obj, (int, float, str, bool)): return
         visited.add(obj_id)
 
         # Collections
         if isinstance(obj, (list, tuple, set)):
-            for item in obj:
+            for item in list(obj)[:20]:
                 self.extract_heap_objects(item, heap_map, visited, depth + 1)
             return
         if isinstance(obj, dict):
-            for v in obj.values():
+            for v in list(obj.values())[:20]:
                 self.extract_heap_objects(v, heap_map, visited, depth + 1)
             return
 
@@ -143,14 +152,22 @@ class PrismPythonTracer:
                 'fields': {},
                 'references': {}
             }
-            for attr, val in vars(obj).items():
+            try:
+                obj_items = list(vars(obj).items())[:20]
+            except Exception:
+                obj_items = []
+
+            for attr, val in obj_items:
                 if attr.startswith('__'): continue
-                if hasattr(val, '__dict__'):
-                    ref_id = f"obj_{id(val)}"
-                    heap_map[obj_id]['references'][attr] = ref_id
-                    self.extract_heap_objects(val, heap_map, visited, depth + 1)
-                else:
-                    heap_map[obj_id]['fields'][attr] = self.serialize_val(val)
+                try:
+                    if hasattr(val, '__dict__'):
+                        ref_id = f"obj_{id(val)}"
+                        heap_map[obj_id]['references'][attr] = ref_id
+                        self.extract_heap_objects(val, heap_map, visited, depth + 1)
+                    else:
+                        heap_map[obj_id]['fields'][attr] = self.serialize_val(val)
+                except Exception:
+                    pass
 
     def is_duplicate(self, current):
         if not self.last_snapshot: return False
@@ -169,7 +186,24 @@ def __run_prism_trace__(code_str, max_frames=1000, max_ops=5000, max_stack_depth
     
     old_stdout = sys.stdout
     sys.stdout = tracer.stdout_buffer
-    user_globals = {}
+    
+    # Defense-in-depth: Runtime __import__ sandbox hook to block disallowed modules
+    safe_builtins = dict(__builtins__ if isinstance(__builtins__, dict) else vars(__builtins__))
+    original_import = safe_builtins.get('__import__', __import__)
+    
+    def safe_import(name, *args, **kwargs):
+        banned = {
+            'os', 'subprocess', 'socket', 'sys', 'shutil', 'ctypes', 'pathlib',
+            'urllib', 'requests', 'http', 'threading', 'multiprocessing',
+            'js', 'pyodide', '_pyodide', 'importlib', 'builtins'
+        }
+        top_module = name.split('.')[0] if name else ''
+        if top_module in banned:
+            raise ImportError(f"Importing '{name}' is disallowed in the Prism sandbox.")
+        return original_import(name, *args, **kwargs)
+    
+    safe_builtins['__import__'] = safe_import
+    user_globals = {'__builtins__': safe_builtins, '__name__': '__main__'}
     
     try:
         compiled = compile(code_str, '<user_code>', 'exec')
