@@ -17,4 +17,6 @@ references/
 LOGS.md
 MEMORY.md
 
-
+# Test artifacts
+test-results/
+playwright-report/

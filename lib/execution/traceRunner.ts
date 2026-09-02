@@ -11,6 +11,8 @@ class TraceRunnerService {
     resolve: (trace: PrismTrace) => void;
     reject: (error: Error) => void;
     timer: NodeJS.Timeout;
+    code: string;
+    limits: ExecutionLimits;
   }>();
 
   private getWorker(): Worker {
@@ -39,6 +41,36 @@ class TraceRunnerService {
 
     const pending = this.pendingResolvers.get(id);
     if (!pending) return;
+
+    if (type === 'EXECUTION_STARTED') {
+      // Worker finished initializing Pyodide WASM; now arm strict runtime limit timer
+      clearTimeout(pending.timer);
+      pending.timer = setTimeout(() => {
+        this.pendingResolvers.delete(id);
+        if (this.worker) {
+          this.worker.terminate();
+          this.worker = null;
+          this.workerReady = false;
+        }
+        pending.resolve({
+          version: '1.0',
+          code: pending.code,
+          language: 'python',
+          status: 'TIMEOUT',
+          errorMessage: `Execution timed out (${pending.limits.maxRuntimeMs}ms limit). Infinite loop detected.`,
+          totalSteps: 0,
+          frames: [],
+          detectedStructures: [],
+          metrics: {
+            totalOperations: 0,
+            maxStackDepth: 0,
+            peakHeapObjects: 0,
+            executionDurationMs: pending.limits.maxRuntimeMs,
+          },
+        });
+      }, pending.limits.maxRuntimeMs + 500);
+      return;
+    }
 
     clearTimeout(pending.timer);
     this.pendingResolvers.delete(id);
@@ -131,10 +163,9 @@ class TraceRunnerService {
     const messageId = 'trace_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
 
     return new Promise<PrismTrace>((resolve, reject) => {
-      // Watchdog timeout to guarantee safety against infinite loops
+      // Initial startup/load timer (allows network download of Pyodide WASM)
       const timer = setTimeout(() => {
         this.pendingResolvers.delete(messageId);
-        // Terminate worker if hard timed out
         if (this.worker) {
           this.worker.terminate();
           this.worker = null;
@@ -145,7 +176,7 @@ class TraceRunnerService {
           code,
           language: 'python',
           status: 'TIMEOUT',
-          errorMessage: `Execution timed out (${limits.maxRuntimeMs}ms limit). Infinite loop detected.`,
+          errorMessage: 'Pyodide initialization timed out.',
           totalSteps: 0,
           frames: [],
           detectedStructures: [],
@@ -156,9 +187,9 @@ class TraceRunnerService {
             executionDurationMs: limits.maxRuntimeMs,
           },
         });
-      }, limits.maxRuntimeMs + 500); // 500ms grace period before hard worker kill
+      }, 45000); // 45s allowance for Pyodide WASM cold start
 
-      this.pendingResolvers.set(messageId, { resolve, reject, timer });
+      this.pendingResolvers.set(messageId, { resolve, reject, timer, code, limits });
 
       const message: WorkerInMessage = {
         id: messageId,

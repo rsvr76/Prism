@@ -60,7 +60,7 @@ export const StateDiffSchema = z.object({
  */
 export const BoundedTraceContextSchema = z.object({
   stepIndex: z.number().int().nonnegative(),
-  line: z.number().int().positive(),
+  line: z.number().int().nonnegative(),
   eventType: z.string(),
   description: z.string(),
   activeLineSource: z.string().optional(),
