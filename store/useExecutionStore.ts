@@ -72,8 +72,12 @@ interface ExecutionStore {
   isAnalyzingComplexity: boolean;
   complexityError: string | null;
 
+  // Phase 8A: Algorithm Library Integration
+  loadedAlgorithmTitle: string | null;
+
   // Actions
   setCode: (code: string) => void;
+  loadAlgorithmCode: (title: string, code: string) => void;
   runCode: () => Promise<void>;
   setStep: (step: number) => void;
   nextStep: () => void;
@@ -132,7 +136,39 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   isAnalyzingComplexity: false,
   complexityError: null,
 
+  // Phase 8A: Algorithm Library initial state
+  loadedAlgorithmTitle: null,
+
   setCode: (code: string) => set({ code }),
+
+  loadAlgorithmCode: (title: string, code: string) => {
+    traceRunner.cancelExecution();
+    ++activeExecutionEpoch;
+    branchCounter = 0;
+    set({
+      code,
+      loadedAlgorithmTitle: title,
+      trace: null,
+      currentStep: 0,
+      isPlaying: false,
+      isRunning: false,
+      status: "IDLE",
+      errorMessage: null,
+      executions: {},
+      executionIds: [],
+      activeExecutionId: null,
+      isWhatIfOpen: false,
+      whatIfDraftCode: code,
+      whatIfParentStep: 0,
+      stepExplanations: {},
+      explanationError: null,
+      tutorMessages: {},
+      tutorError: null,
+      complexityAnalyses: {},
+      isAnalyzingComplexity: false,
+      complexityError: null,
+    });
+  },
 
   runCode: async () => {
     // If already running, cancel previous execution and restart cleanly
@@ -243,6 +279,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
       complexityAnalyses: {},
       isAnalyzingComplexity: false,
       complexityError: null,
+      loadedAlgorithmTitle: null,
     });
   },
 

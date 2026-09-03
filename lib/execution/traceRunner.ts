@@ -68,7 +68,7 @@ class TraceRunnerService {
             executionDurationMs: pending.limits.maxRuntimeMs,
           },
         });
-      }, pending.limits.maxRuntimeMs + 500);
+      }, Math.max(pending.limits.maxRuntimeMs * 3, 10000));
       return;
     }
 
@@ -205,12 +205,25 @@ class TraceRunnerService {
     });
   }
 
-  /**
-   * Cancel any in-flight execution and terminate the Web Worker immediately.
-   */
   public cancelExecution(): void {
     for (const [, pending] of this.pendingResolvers.entries()) {
       clearTimeout(pending.timer);
+      pending.resolve({
+        version: '1.0',
+        code: pending.code,
+        language: 'python',
+        status: 'TIMEOUT',
+        errorMessage: 'Execution was cancelled.',
+        totalSteps: 0,
+        frames: [],
+        detectedStructures: [],
+        metrics: {
+          totalOperations: 0,
+          maxStackDepth: 0,
+          peakHeapObjects: 0,
+          executionDurationMs: 0,
+        },
+      });
     }
     this.pendingResolvers.clear();
 

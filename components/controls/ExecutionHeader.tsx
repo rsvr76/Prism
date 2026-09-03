@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import { useExecutionStore } from "@/store/useExecutionStore";
+import Link from "next/link";
 import {
   Play,
   RotateCcw,
@@ -12,6 +13,8 @@ import {
   XCircle,
   Clock,
   GitBranch,
+  BookOpen,
+  Code2,
 } from "lucide-react";
 import WhatIfModal from "./WhatIfModal";
 
@@ -113,6 +116,7 @@ export default function ExecutionHeader() {
   const executionIds = useExecutionStore((state) => state.executionIds);
   const activeExecutionId = useExecutionStore((state) => state.activeExecutionId);
   const switchExecution = useExecutionStore((state) => state.switchExecution);
+  const loadedAlgorithmTitle = useExecutionStore((state) => state.loadedAlgorithmTitle);
 
   const getStatusBadge = () => {
     switch (status) {
@@ -170,10 +174,35 @@ export default function ExecutionHeader() {
               PRISM
             </h1>
             <p className="text-[10px] text-cyan-400 font-mono tracking-wider uppercase">
-              Phase 6A: What-If Branching
+              DSA Learning Environment
             </p>
           </div>
         </div>
+
+        {/* Top Navigation Tabs */}
+        <nav aria-label="Main Navigation" className="flex items-center gap-1 bg-slate-900 border border-slate-800 p-1 rounded-lg text-xs font-medium">
+          <Link
+            href="/"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors bg-cyan-950 border border-cyan-500/40 text-cyan-300 font-semibold"
+          >
+            <Code2 className="w-3.5 h-3.5" />
+            <span>Workbench</span>
+          </Link>
+          <Link
+            href="/library"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>Algorithm Library</span>
+          </Link>
+        </nav>
+
+        {loadedAlgorithmTitle && (
+          <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 text-xs font-mono">
+            <span className="text-slate-400">Loaded:</span>
+            <span className="font-semibold text-cyan-200">{loadedAlgorithmTitle}</span>
+          </div>
+        )}
 
         {/* Phase 6A: Branch Switcher Tabs */}
         {executionIds.length > 0 && (

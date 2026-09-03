@@ -6,6 +6,7 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   timeout: 90000,
+  globalTimeout: 600000,
   use: {
     baseURL: 'http://127.0.0.1:3000',
     trace: 'on-first-retry',
@@ -18,7 +19,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm.cmd run start -- -p 3000',
+    command: 'npm.cmd run start -- -H 127.0.0.1 -p 3000',
     url: 'http://127.0.0.1:3000',
     reuseExistingServer: true,
     timeout: 90000,

@@ -267,7 +267,7 @@ async function callGemini(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(15000),
+        signal: AbortSignal.timeout(20000),
       });
 
       if (response.ok) {
@@ -283,8 +283,8 @@ async function callGemini(
       const sanitizedError = errorText.replace(new RegExp(apiKey, "g"), "[REDACTED]");
       lastError = new Error(`Gemini API Error (${response.status} on model ${model}): ${sanitizedError.substring(0, 300)}`);
       
-      // If 404 (model retired) or 503 (model overloaded), continue to next fallback model
-      if (response.status === 404 || response.status === 503) {
+      // If 404 (model retired), 503 (model overloaded), or 429 (quota rate limit), continue to next fallback model
+      if (response.status === 404 || response.status === 503 || response.status === 429) {
         continue;
       } else {
         break;
