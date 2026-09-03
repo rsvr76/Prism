@@ -7,6 +7,7 @@ import CodeEditor from "@/components/editor/CodeEditor";
 import ExecutionStatePanel from "@/components/debug/ExecutionStatePanel";
 import TimelineScrubber from "@/components/debug/TimelineScrubber";
 import VisualizerCanvas from "@/components/visualization/VisualizerCanvas";
+import WelcomeHeroBanner from "@/components/onboarding/WelcomeHeroBanner";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { getAlgorithmBySlug } from "@/lib/content/algorithms";
 import { getLessonBySlug } from "@/lib/content/learningPaths";
@@ -55,6 +56,9 @@ export default function PrismWorkbench() {
 
       {/* Top Navigation & Run Controls */}
       <ExecutionHeader />
+
+      {/* Dismissible Onboarding & Core Pipeline Banner */}
+      <WelcomeHeroBanner />
 
       {/* Main 3-Panel Workbench */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_1.2fr_1fr] gap-3 p-3 overflow-hidden min-h-0">

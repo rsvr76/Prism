@@ -129,9 +129,14 @@ export default function StepExplainer() {
         <div className="flex-1 space-y-3 min-h-0">
           {/* Summary Card */}
           <div className="p-3 rounded-lg bg-slate-900/90 border border-slate-800 space-y-1">
-            <div className="flex items-center gap-1.5 text-cyan-400 text-xs font-mono font-bold">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>What Happened</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-cyan-400 text-xs font-mono font-bold">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>What Happened</span>
+              </div>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 font-mono">
+                Prism Explains
+              </span>
             </div>
             <p className="text-xs text-slate-200 leading-relaxed">
               {currentExplanation.summary}
@@ -140,9 +145,14 @@ export default function StepExplainer() {
 
           {/* Why It Happened Card */}
           <div className="p-3 rounded-lg bg-slate-900/90 border border-slate-800 space-y-1">
-            <div className="flex items-center gap-1.5 text-amber-400 text-xs font-mono font-bold">
-              <Lightbulb className="w-3.5 h-3.5" />
-              <span>Why It Happened</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-amber-400 text-xs font-mono font-bold">
+                <Lightbulb className="w-3.5 h-3.5" />
+                <span>Why It Happened</span>
+              </div>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-950/80 border border-amber-500/30 text-amber-300 font-mono">
+                Prism Explains
+              </span>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
               {currentExplanation.why}
@@ -152,9 +162,14 @@ export default function StepExplainer() {
           {/* Observed State Changes */}
           {currentExplanation.changes.length > 0 && (
             <div className="p-3 rounded-lg bg-slate-900/90 border border-slate-800 space-y-1.5">
-              <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-mono font-bold">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Observed State Transitions</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-mono font-bold">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Observed State Transitions</span>
+                </div>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 font-mono">
+                  Observed in Execution
+                </span>
               </div>
               <ul className="space-y-1 text-xs text-slate-300 font-mono">
                 {currentExplanation.changes.map((change, idx) => (

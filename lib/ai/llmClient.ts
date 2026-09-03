@@ -238,13 +238,12 @@ function generateMockComplexityAnalysis(
 async function callGemini(
   systemInstruction: string,
   userPrompt: string,
-  modelName: string = "gemini-flash-lite-latest",
+  modelName: string = "gemini-3.6-flash",
   apiKey: string
 ): Promise<string> {
   const modelsToTry = [
-    modelName,
-    "gemini-flash-lite-latest",
-    "gemini-3.5-flash",
+    modelName || "gemini-3.6-flash",
+    "gemini-3.6-flash",
   ].filter((m, i, arr) => arr.indexOf(m) === i);
 
   let lastError: Error | null = null;
@@ -361,7 +360,7 @@ export async function generateStepExplanation(
   const model =
     options.model ||
     process.env.AI_MODEL ||
-    (provider === "gemini" ? "gemini-flash-lite-latest" : "gpt-4o-mini");
+    (provider === "gemini" ? "gemini-3.6-flash" : "gpt-4o-mini");
 
   const apiKey =
     options.apiKey ||
@@ -425,7 +424,7 @@ export async function generateTutorResponse(
   const model =
     options.model ||
     process.env.AI_MODEL ||
-    (provider === "gemini" ? "gemini-flash-lite-latest" : "gpt-4o-mini");
+    (provider === "gemini" ? "gemini-3.6-flash" : "gpt-4o-mini");
 
   const apiKey =
     options.apiKey ||
@@ -489,7 +488,7 @@ export async function generateComplexityAnalysis(
   const model =
     options.model ||
     process.env.AI_MODEL ||
-    (provider === "gemini" ? "gemini-flash-lite-latest" : "gpt-4o-mini");
+    (provider === "gemini" ? "gemini-3.6-flash" : "gpt-4o-mini");
 
   const apiKey =
     options.apiKey ||

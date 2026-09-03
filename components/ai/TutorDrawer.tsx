@@ -156,7 +156,7 @@ export default function TutorDrawer() {
                 <div className="flex items-center justify-between text-purple-400 text-[11px] font-bold pb-1 border-b border-slate-800/60">
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>Prism Tutor</span>
+                    <span>Prism Explains</span>
                   </div>
                   <span className="text-[10px] text-slate-500 font-normal">
                     Step {msg.stepIndex}
@@ -173,7 +173,7 @@ export default function TutorDrawer() {
                   <div className="p-2 rounded bg-slate-950/80 border border-slate-800/80 space-y-1">
                     <div className="flex items-center gap-1 text-[10px] text-emerald-400 font-bold uppercase">
                       <CheckCircle2 className="w-3 h-3" />
-                      <span>Trace Evidence</span>
+                      <span>Observed in Execution (Trace Evidence)</span>
                     </div>
                     <ul className="space-y-0.5 text-[11px] text-slate-300">
                       {msg.responseObj.evidence.map((ev, idx) => (

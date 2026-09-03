@@ -149,6 +149,8 @@ export default function ExecutionHeader() {
       case "TIMEOUT":
       case "TRACE_LIMIT":
       case "RECURSION_LIMIT":
+      case "OUTPUT_LIMIT":
+      case "UNSUPPORTED":
         return (
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-950/80 border border-amber-500/30 text-amber-400 text-xs font-mono">
             <AlertTriangle className="w-3.5 h-3.5" />

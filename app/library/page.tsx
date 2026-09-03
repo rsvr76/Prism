@@ -16,6 +16,8 @@ import {
   Filter,
   CheckCircle2,
   Compass,
+  Target,
+  LayoutDashboard,
 } from "lucide-react";
 import { ALGORITHM_REGISTRY, searchAlgorithms } from "@/lib/content/algorithms";
 import { useExecutionStore } from "@/store/useExecutionStore";
@@ -92,6 +94,20 @@ export default function AlgorithmLibraryPage() {
           >
             <Compass className="w-3.5 h-3.5" />
             <span>Learning Paths</span>
+          </Link>
+          <Link
+            href="/practice"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+          >
+            <Target className="w-3.5 h-3.5" />
+            <span>Practice</span>
+          </Link>
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+          >
+            <LayoutDashboard className="w-3.5 h-3.5" />
+            <span>Dashboard</span>
           </Link>
         </nav>
 
