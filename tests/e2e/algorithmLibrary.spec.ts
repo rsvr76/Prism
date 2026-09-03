@@ -8,6 +8,7 @@ test.describe('Phase 8A: Algorithm Library & Learning Content E2E Validation', (
 
     // Brand and navigation links exist
     await expect(page.locator('h1')).toHaveText('PRISM');
+    await page.getByRole('button', { name: 'Navigation menu' }).click();
     const libraryNav = page.getByRole('link', { name: 'Algorithm Library' });
     await expect(libraryNav).toBeVisible();
 

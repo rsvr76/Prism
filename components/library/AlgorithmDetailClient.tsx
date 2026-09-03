@@ -18,9 +18,11 @@ import {
   HelpCircle,
   Lightbulb,
   ExternalLink,
+  Menu,
 } from "lucide-react";
 import { AlgorithmDefinition } from "@/types/content";
 import { useExecutionStore } from "@/store/useExecutionStore";
+import { useNavDrawerStore } from "@/store/useNavDrawerStore";
 
 interface AlgorithmDetailClientProps {
   algorithm: AlgorithmDefinition;
@@ -29,6 +31,7 @@ interface AlgorithmDetailClientProps {
 export default function AlgorithmDetailClient({ algorithm }: AlgorithmDetailClientProps) {
   const router = useRouter();
   const loadAlgorithmCode = useExecutionStore((state) => state.loadAlgorithmCode);
+  const toggleDrawer = useNavDrawerStore((state) => state.toggleDrawer);
   const [copied, setCopied] = useState(false);
 
   const handleCopyCode = async () => {
@@ -67,36 +70,28 @@ export default function AlgorithmDetailClient({ algorithm }: AlgorithmDetailClie
       {/* Top Header */}
       <header className="flex flex-wrap items-center justify-between gap-4 px-6 py-3.5 bg-slate-950/90 backdrop-blur border-b border-slate-800 sticky top-0 z-20 shadow-md">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/20">
-            <Sparkles className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-              PRISM
-            </h1>
-            <p className="text-[10px] text-cyan-400 font-mono tracking-wider uppercase">
-              DSA Learning Environment
-            </p>
-          </div>
+          <button
+            onClick={toggleDrawer}
+            aria-label="Navigation menu"
+            className="p-2 -ml-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Navigation Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                PRISM
+              </h1>
+              <p className="text-[10px] text-cyan-400 font-mono tracking-wider uppercase">
+                DSA Learning Environment
+              </p>
+            </div>
+          </Link>
         </div>
-
-        {/* Navigation Tabs */}
-        <nav aria-label="Main Navigation" className="flex items-center gap-1 bg-slate-900 border border-slate-800 p-1 rounded-lg text-xs font-medium">
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-          >
-            <Code2 className="w-3.5 h-3.5" />
-            <span>Workbench</span>
-          </Link>
-          <Link
-            href="/library"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors bg-cyan-950 border border-cyan-500/40 text-cyan-300 font-semibold"
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Algorithm Library</span>
-          </Link>
-        </nav>
       </header>
 
       {/* Main Content */}

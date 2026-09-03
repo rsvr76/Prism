@@ -6,7 +6,8 @@ test.describe('Phase 8B: Guided Learning Paths & Progression E2E Validation', ()
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
 
-    // Learning Paths link in top nav
+    // Learning Paths link in nav drawer
+    await page.getByRole('button', { name: 'Navigation menu' }).click();
     const pathsNav = page.getByRole('link', { name: 'Learning Paths' });
     await expect(pathsNav).toBeVisible();
     await pathsNav.click();

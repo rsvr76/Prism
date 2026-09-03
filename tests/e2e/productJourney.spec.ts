@@ -9,6 +9,7 @@ test.describe('Phase 8E: Complete Student Product Flows & Release Readiness', ()
     await expect(page.locator('h1')).toHaveText('PRISM');
 
     // 2. Navigate to Learning Paths
+    await page.getByRole('button', { name: 'Navigation menu' }).click();
     const pathsLink = page.getByRole('navigation', { name: 'Main Navigation' }).getByRole('link', { name: 'Learning Paths' });
     await pathsLink.click();
     await expect(page).toHaveURL(/\/paths/);
@@ -91,26 +92,31 @@ test.describe('Phase 8E: Complete Student Product Flows & Release Readiness', ()
     const mainNav = page.getByRole('navigation', { name: 'Main Navigation' });
 
     // 2. Algorithm Library
+    await page.getByRole('button', { name: 'Navigation menu' }).click();
     await mainNav.getByRole('link', { name: /Library/i }).click();
     await expect(page).toHaveURL(/\/library/);
     await expect(page.getByRole('heading', { name: /Algorithm/i }).first()).toBeVisible();
 
     // 3. Learning Paths
+    await page.getByRole('button', { name: 'Navigation menu' }).click();
     await page.getByRole('navigation', { name: 'Main Navigation' }).getByRole('link', { name: /Paths/i }).click();
     await expect(page).toHaveURL(/\/paths/);
     await expect(page.getByRole('heading', { name: 'Structured Learning Journeys' })).toBeVisible();
 
     // 4. Practice
+    await page.getByRole('button', { name: 'Navigation menu' }).click();
     await page.getByRole('navigation', { name: 'Main Navigation' }).getByRole('link', { name: 'Practice' }).click();
     await expect(page).toHaveURL(/\/practice/);
     await expect(page.getByRole('heading', { name: 'Practice Challenges' })).toBeVisible();
 
     // 5. Dashboard
+    await page.getByRole('button', { name: 'Navigation menu' }).click();
     await page.getByRole('navigation', { name: 'Main Navigation' }).getByRole('link', { name: 'Dashboard' }).click();
     await expect(page).toHaveURL(/\/dashboard/);
     await expect(page.getByRole('heading', { name: 'Learning Progress' })).toBeVisible();
 
     // 6. Return to Workbench
+    await page.getByRole('button', { name: 'Navigation menu' }).click();
     await page.getByRole('navigation', { name: 'Main Navigation' }).getByRole('link', { name: 'Workbench' }).click();
     await expect(page).toHaveURL('/');
     await expect(page.locator('h1')).toHaveText('PRISM');

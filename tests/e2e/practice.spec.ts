@@ -6,7 +6,8 @@ test.describe('Phase 8C: Practice & Challenges E2E Validation', () => {
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
 
-    // Practice tab in top navigation
+    // Practice tab in navigation drawer
+    await page.getByRole('button', { name: 'Navigation menu' }).click();
     const practiceNav = page.getByRole('navigation', { name: 'Main Navigation' }).getByRole('link', { name: 'Practice' });
     await expect(practiceNav).toBeVisible();
     await practiceNav.click();

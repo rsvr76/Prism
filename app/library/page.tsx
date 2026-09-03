@@ -18,9 +18,11 @@ import {
   Compass,
   Target,
   LayoutDashboard,
+  Menu,
 } from "lucide-react";
 import { ALGORITHM_REGISTRY, searchAlgorithms } from "@/lib/content/algorithms";
 import { useExecutionStore } from "@/store/useExecutionStore";
+import { useNavDrawerStore } from "@/store/useNavDrawerStore";
 import { AlgorithmDefinition } from "@/types/content";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
@@ -28,6 +30,7 @@ export default function AlgorithmLibraryPage() {
   const router = useRouter();
   const loadAlgorithmCode = useExecutionStore((state) => state.loadAlgorithmCode);
   const loadedAlgorithmTitle = useExecutionStore((state) => state.loadedAlgorithmTitle);
+  const toggleDrawer = useNavDrawerStore((state) => state.toggleDrawer);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -60,57 +63,28 @@ export default function AlgorithmLibraryPage() {
       {/* Top Header */}
       <header className="flex flex-wrap items-center justify-between gap-4 px-6 py-3.5 bg-white/90 dark:bg-slate-950/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20 shadow-xs dark:shadow-md">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 shadow-sm">
-            <Sparkles className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
-              PRISM
-            </h1>
-            <p className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono tracking-wider uppercase">
-              DSA Learning Environment
-            </p>
-          </div>
+          <button
+            onClick={toggleDrawer}
+            aria-label="Navigation menu"
+            className="p-2 -ml-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Navigation Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 shadow-sm group-hover:scale-105 transition-transform">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
+                PRISM
+              </h1>
+              <p className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono tracking-wider uppercase">
+                DSA Learning Environment
+              </p>
+            </div>
+          </Link>
         </div>
-
-        {/* Navigation Tabs */}
-        <nav aria-label="Main Navigation" className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-lg text-xs font-medium">
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800"
-          >
-            <Code2 className="w-3.5 h-3.5" />
-            <span>Workbench</span>
-          </Link>
-          <Link
-            href="/library"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all bg-white border border-slate-300 text-cyan-800 font-semibold shadow-xs dark:bg-cyan-950 dark:border-cyan-500/40 dark:text-cyan-300"
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Algorithm Library</span>
-          </Link>
-          <Link
-            href="/paths"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800"
-          >
-            <Compass className="w-3.5 h-3.5" />
-            <span>Learning Paths</span>
-          </Link>
-          <Link
-            href="/practice"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800"
-          >
-            <Target className="w-3.5 h-3.5" />
-            <span>Practice</span>
-          </Link>
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800"
-          >
-            <LayoutDashboard className="w-3.5 h-3.5" />
-            <span>Dashboard</span>
-          </Link>
-        </nav>
 
         <div className="flex items-center gap-3">
           {loadedAlgorithmTitle && (

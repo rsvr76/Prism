@@ -105,6 +105,9 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
   });
 
   test('5. Data Structure Visualization (Linked List Preset)', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
     const presetSelect = page.locator('select');
     await presetSelect.selectOption('Linked List Traversal');
 
@@ -178,6 +181,9 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
   });
 
   test('8. Modal Keyboard Accessibility (Escape key closes What-If)', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
     const runBtn = page.getByRole('button', { name: 'Run Trace' });
     await expect(runBtn).toBeEnabled({ timeout: 15000 });
     await runBtn.click();

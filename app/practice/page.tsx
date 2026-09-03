@@ -16,11 +16,13 @@ import {
   Filter,
   Search,
   LayoutDashboard,
+  Menu,
 } from "lucide-react";
 import {
   getAllChallenges,
   searchChallenges,
 } from "@/lib/content/challenges";
+import { useNavDrawerStore } from "@/store/useNavDrawerStore";
 import {
   getChallengeProgress,
 } from "@/lib/practice/challengeProgressManager";
@@ -130,6 +132,7 @@ export default function PracticeDashboard() {
   const [difficulty, setDifficulty] = useState<ChallengeDifficulty | "all">("all");
   const [type, setType] = useState<ChallengeType | "all">("all");
   const [progress, setProgress] = useState<ChallengeProgressState>({ attempts: {}, lastUpdated: 0 });
+  const toggleDrawer = useNavDrawerStore((state) => state.toggleDrawer);
 
   useEffect(() => {
     setProgress(getChallengeProgress());
@@ -145,6 +148,14 @@ export default function PracticeDashboard() {
       {/* Header */}
       <header className="h-14 border-b border-slate-200 dark:border-slate-800/80 bg-white/90 dark:bg-slate-950/80 backdrop-blur sticky top-0 px-6 flex items-center justify-between z-20 shadow-xs dark:shadow-md">
         <div className="flex items-center gap-3">
+          <button
+            onClick={toggleDrawer}
+            aria-label="Navigation menu"
+            className="p-2 -ml-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Navigation Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
               <Sparkles className="w-4 h-4 text-white" />
@@ -159,28 +170,6 @@ export default function PracticeDashboard() {
             </div>
           </Link>
         </div>
-        <nav className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-lg text-xs font-medium" aria-label="Main Navigation">
-          <Link href="/" className="flex items-center gap-1.5 px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 transition-colors">
-            <Code2 className="w-3.5 h-3.5" />
-            <span>Workbench</span>
-          </Link>
-          <Link href="/library" className="flex items-center gap-1.5 px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 transition-colors">
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Algorithm Library</span>
-          </Link>
-          <Link href="/paths" className="flex items-center gap-1.5 px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 transition-colors">
-            <Compass className="w-3.5 h-3.5" />
-            <span>Learning Paths</span>
-          </Link>
-          <Link href="/practice" className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-all bg-white border border-slate-300 text-cyan-800 font-semibold shadow-xs dark:bg-cyan-950 dark:border-cyan-500/40 dark:text-cyan-300">
-            <Target className="w-3.5 h-3.5" />
-            <span>Practice</span>
-          </Link>
-          <Link href="/dashboard" className="flex items-center gap-1.5 px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 transition-colors">
-            <LayoutDashboard className="w-3.5 h-3.5" />
-            <span>Dashboard</span>
-          </Link>
-        </nav>
         <ThemeToggle />
       </header>
 

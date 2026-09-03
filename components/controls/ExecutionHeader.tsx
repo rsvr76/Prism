@@ -11,14 +11,12 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
-  Code2,
-  BookOpen,
+  Menu,
   Compass,
-  Target,
-  LayoutDashboard,
 } from "lucide-react";
 import WhatIfModal from "@/components/controls/WhatIfModal";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+import { useNavDrawerStore } from "@/store/useNavDrawerStore";
 
 // Quick Starter Python Code Presets for common DSA concepts
 export const PRESETS = [
@@ -95,6 +93,7 @@ export default function ExecutionHeader() {
   const switchExecution = useExecutionStore((state) => state.switchExecution);
   const loadedAlgorithmTitle = useExecutionStore((state) => state.loadedAlgorithmTitle);
   const loadedLessonContext = useExecutionStore((state) => state.loadedLessonContext);
+  const toggleDrawer = useNavDrawerStore((state) => state.toggleDrawer);
 
   const getStatusBadge = () => {
     switch (status) {
@@ -138,10 +137,19 @@ export default function ExecutionHeader() {
   return (
     <>
       <header className="h-14 flex items-center justify-between gap-3 px-4 md:px-6 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 shadow-xs z-20 select-none">
-        {/* Left Side: Brand Logo & Navigation */}
-        <div className="flex items-center gap-4 lg:gap-6 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 shadow-sm">
+        {/* Left Side: Hamburger & Brand Logo */}
+        <div className="flex items-center gap-3 lg:gap-4 shrink-0">
+          <button
+            onClick={toggleDrawer}
+            aria-label="Navigation menu"
+            className="p-2 -ml-1 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Navigation Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 shadow-sm group-hover:scale-105 transition-transform">
               <Sparkles className="w-3.5 h-3.5 text-white" />
             </div>
             <div>
@@ -152,46 +160,7 @@ export default function ExecutionHeader() {
                 DSA Learning Environment
               </p>
             </div>
-          </div>
-
-          {/* Top Navigation Tabs */}
-          <nav aria-label="Main Navigation" className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/80 p-1 rounded-lg text-xs font-medium shrink-0">
-            <Link
-              href="/"
-              className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-all bg-white border border-slate-300 text-cyan-700 font-semibold shadow-xs dark:bg-cyan-950/80 dark:border-cyan-500/40 dark:text-cyan-300"
-            >
-              <Code2 className="w-3.5 h-3.5" />
-              <span>Workbench</span>
-            </Link>
-            <Link
-              href="/library"
-              className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60"
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>Algorithm Library</span>
-            </Link>
-            <Link
-              href="/paths"
-              className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60"
-            >
-              <Compass className="w-3.5 h-3.5" />
-              <span>Learning Paths</span>
-            </Link>
-            <Link
-              href="/practice"
-              className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60"
-            >
-              <Target className="w-3.5 h-3.5" />
-              <span>Practice</span>
-            </Link>
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60"
-            >
-              <LayoutDashboard className="w-3.5 h-3.5" />
-              <span>Dashboard</span>
-            </Link>
-          </nav>
+          </Link>
 
           {/* Active Lesson or Algorithm Context Badges */}
           {loadedLessonContext ? (

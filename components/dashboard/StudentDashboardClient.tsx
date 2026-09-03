@@ -22,11 +22,13 @@ import {
   BookMarked,
   Activity,
   Layers,
+  Menu,
 } from "lucide-react";
 import {
   getUnifiedStudentProgress,
   resetAllStudentProgress,
 } from "@/lib/progress/studentProgress";
+import { useNavDrawerStore } from "@/store/useNavDrawerStore";
 import { UnifiedStudentProgress } from "@/types/progress";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
@@ -34,6 +36,7 @@ export default function StudentDashboardClient() {
   const [progress, setProgress] = useState<UnifiedStudentProgress | null>(null);
   const [showResetModal, setShowResetModal] = useState<boolean>(false);
   const [resetSuccess, setResetSuccess] = useState<boolean>(false);
+  const toggleDrawer = useNavDrawerStore((state) => state.toggleDrawer);
 
   const refreshProgress = () => {
     const data = getUnifiedStudentProgress();
@@ -71,6 +74,14 @@ export default function StudentDashboardClient() {
       {/* Top Navigation Header */}
       <header className="h-14 border-b border-slate-200 dark:border-slate-800/80 bg-white/90 dark:bg-slate-950/80 backdrop-blur sticky top-0 px-4 sm:px-6 flex items-center justify-between z-20 shadow-xs dark:shadow-md">
         <div className="flex items-center gap-3">
+          <button
+            onClick={toggleDrawer}
+            aria-label="Navigation menu"
+            className="p-2 -ml-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Navigation Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
               <Sparkles className="w-4 h-4 text-white" />
@@ -85,47 +96,6 @@ export default function StudentDashboardClient() {
             </div>
           </Link>
         </div>
-
-        {/* Navigation Tabs */}
-        <nav aria-label="Main Navigation" className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-lg text-xs font-medium">
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800"
-          >
-            <Code2 className="w-3.5 h-3.5" />
-            <span>Workbench</span>
-          </Link>
-          <Link
-            href="/library"
-            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800"
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Algorithm Library</span>
-            <span className="sm:hidden">Library</span>
-          </Link>
-          <Link
-            href="/paths"
-            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800"
-          >
-            <Compass className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Learning Paths</span>
-            <span className="sm:hidden">Paths</span>
-          </Link>
-          <Link
-            href="/practice"
-            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800"
-          >
-            <Target className="w-3.5 h-3.5" />
-            <span>Practice</span>
-          </Link>
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-all bg-white border border-slate-300 text-cyan-800 font-semibold shadow-xs dark:bg-cyan-950 dark:border-cyan-500/40 dark:text-cyan-300"
-          >
-            <LayoutDashboard className="w-3.5 h-3.5" />
-            <span>Dashboard</span>
-          </Link>
-        </nav>
 
         <ThemeToggle />
       </header>

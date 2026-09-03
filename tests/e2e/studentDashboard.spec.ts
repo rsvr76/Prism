@@ -6,7 +6,8 @@ test.describe('Phase 8D: Unified Student Progress & Dashboard E2E Validation', (
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
 
-    // Dashboard link in top nav
+    // Dashboard link in nav drawer
+    await page.getByRole('button', { name: 'Navigation menu' }).click();
     const dashboardNav = page.getByRole('navigation', { name: 'Main Navigation' }).getByRole('link', { name: 'Dashboard' });
     await expect(dashboardNav).toBeVisible();
     await dashboardNav.click();
