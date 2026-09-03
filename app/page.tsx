@@ -48,7 +48,7 @@ function AlgorithmLoader() {
 
 export default function PrismWorkbench() {
   return (
-    <main className="flex flex-col min-h-screen lg:h-screen w-screen overflow-y-auto lg:overflow-hidden bg-[#070a13] text-slate-100">
+    <main className="flex flex-col min-h-screen lg:h-screen w-screen overflow-y-auto lg:overflow-hidden bg-slate-50 dark:bg-[#070a13] text-slate-900 dark:text-slate-100">
       {/* Parameter-based Algorithm loader */}
       <Suspense fallback={null}>
         <AlgorithmLoader />

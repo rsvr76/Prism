@@ -3,12 +3,14 @@
 import React, { useRef, useEffect } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
 import { useExecutionStore } from "@/store/useExecutionStore";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 export default function CodeEditor() {
   const code = useExecutionStore((state) => state.code);
   const setCode = useExecutionStore((state) => state.setCode);
   const currentStep = useExecutionStore((state) => state.currentStep);
   const trace = useExecutionStore((state) => state.trace);
+  const { isDark } = useTheme();
 
   const editorRef = useRef<any>(null);
   const decorationsRef = useRef<string[]>([]);
@@ -53,15 +55,15 @@ export default function CodeEditor() {
   const currentFrame = trace?.frames?.[currentStep];
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#0a0f1d] border border-slate-800/80 rounded-xl overflow-hidden shadow-lg">
-      <div className="flex items-center justify-between px-3.5 py-2 bg-slate-900/70 border-b border-slate-800/80 text-xs text-slate-400 font-mono">
+    <div className="w-full h-full flex flex-col bg-white dark:bg-[#0a0f1d] border border-slate-200 dark:border-slate-800/80 rounded-xl overflow-hidden shadow-xs dark:shadow-lg">
+      <div className="flex items-center justify-between px-3.5 py-2 bg-slate-100/90 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-800/80 text-xs text-slate-600 dark:text-slate-400 font-mono">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-          <span className="font-semibold text-slate-200">Python 3.12 Editor</span>
+          <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
+          <span className="font-semibold text-slate-800 dark:text-slate-200">Python 3.12 Editor</span>
         </div>
-        <div className="flex items-center gap-2 text-[11px] text-slate-500">
+        <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
           {currentFrame?.line ? (
-            <span className="text-cyan-400 font-medium">Executing Line {currentFrame.line}</span>
+            <span className="text-cyan-700 dark:text-cyan-400 font-medium">Executing Line {currentFrame.line}</span>
           ) : (
             <span>Ready</span>
           )}
@@ -71,7 +73,7 @@ export default function CodeEditor() {
         <Editor
           height="100%"
           language="python"
-          theme="vs-dark"
+          theme={isDark ? "vs-dark" : "vs"}
           value={code}
           onChange={(value) => setCode(value || "")}
           onMount={handleEditorDidMount}

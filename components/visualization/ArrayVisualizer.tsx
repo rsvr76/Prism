@@ -34,38 +34,38 @@ function getStateStyle(state: ArrayElementVisualState) {
   switch (state) {
     case "swapping":
       return {
-        border: "border-emerald-400 shadow-lg shadow-emerald-500/30 bg-emerald-950/70 text-emerald-200",
-        bar: "bg-emerald-400 shadow-emerald-500/50",
+        border: "border-emerald-500 shadow-md bg-emerald-50 text-emerald-900 dark:border-emerald-400 dark:shadow-emerald-500/30 dark:bg-emerald-950/70 dark:text-emerald-200",
+        bar: "bg-emerald-500 dark:bg-emerald-400 shadow-emerald-500/50",
         glow: "ring-2 ring-emerald-400/60",
       };
     case "comparing":
       return {
-        border: "border-amber-400 shadow-lg shadow-amber-500/30 bg-amber-950/70 text-amber-200",
-        bar: "bg-amber-400 shadow-amber-500/50",
+        border: "border-amber-500 shadow-md bg-amber-50 text-amber-900 dark:border-amber-400 dark:shadow-amber-500/30 dark:bg-amber-950/70 dark:text-amber-200",
+        bar: "bg-amber-500 dark:bg-amber-400 shadow-amber-500/50",
         glow: "ring-2 ring-amber-400/60",
       };
     case "pivot":
       return {
-        border: "border-purple-400 shadow-lg shadow-purple-500/30 bg-purple-950/70 text-purple-200",
-        bar: "bg-purple-400 shadow-purple-500/50",
+        border: "border-purple-500 shadow-md bg-purple-50 text-purple-900 dark:border-purple-400 dark:shadow-purple-500/30 dark:bg-purple-950/70 dark:text-purple-200",
+        bar: "bg-purple-500 dark:bg-purple-400 shadow-purple-500/50",
         glow: "ring-2 ring-purple-400/60",
       };
     case "active":
       return {
-        border: "border-cyan-400 shadow-md shadow-cyan-500/20 bg-cyan-950/60 text-cyan-200",
-        bar: "bg-cyan-400 shadow-cyan-500/40",
+        border: "border-cyan-500 shadow-md bg-cyan-50 text-cyan-900 dark:border-cyan-400 dark:shadow-cyan-500/20 dark:bg-cyan-950/60 dark:text-cyan-200",
+        bar: "bg-cyan-500 dark:bg-cyan-400 shadow-cyan-500/40",
         glow: "ring-2 ring-cyan-400/50",
       };
     case "sorted":
       return {
-        border: "border-emerald-500/50 bg-emerald-950/30 text-emerald-300",
-        bar: "bg-emerald-500/70",
+        border: "border-emerald-400 bg-emerald-50/80 text-emerald-800 dark:border-emerald-500/50 dark:bg-emerald-950/30 dark:text-emerald-300",
+        bar: "bg-emerald-500/80 dark:bg-emerald-500/70",
         glow: "",
       };
     default:
       return {
-        border: "border-slate-700 bg-slate-900/90 text-slate-100",
-        bar: "bg-slate-600/80 hover:bg-slate-500",
+        border: "border-slate-300 bg-white text-slate-900 shadow-xs dark:border-slate-700 dark:bg-slate-900/90 dark:text-slate-100",
+        bar: "bg-slate-300 hover:bg-slate-400 dark:bg-slate-600/80 dark:hover:bg-slate-500",
         glow: "",
       };
   }
@@ -107,22 +107,22 @@ export default function ArrayVisualizer({
   }
 
   return (
-    <div className="w-full h-full flex flex-col justify-between p-4 bg-slate-950/60 rounded-lg overflow-hidden select-none">
+    <div className="w-full h-full flex flex-col justify-between p-4 bg-slate-50/70 dark:bg-slate-950/60 rounded-lg overflow-hidden select-none">
       {/* ── Top Header & Status ── */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800/80">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-200 dark:border-slate-800/80">
         <div className="flex items-center gap-2">
-          <span className="px-2 py-0.5 text-[11px] font-mono rounded bg-slate-900 border border-slate-700 text-cyan-400 font-bold">
+          <span className="px-2 py-0.5 text-[11px] font-mono rounded bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-cyan-700 dark:text-cyan-400 font-bold shadow-xs">
             1D Array
           </span>
-          <span className="text-xs font-mono text-slate-300">
-            <strong className="text-white">{variableName}</strong>
+          <span className="text-xs font-mono text-slate-700 dark:text-slate-300">
+            <strong className="text-slate-900 dark:text-white">{variableName}</strong>
             <span className="text-slate-500 ml-1.5 font-normal">
               [{elements.length} item{elements.length !== 1 ? "s" : ""}]
             </span>
           </span>
 
           {isSorted && elements.length > 1 && (
-            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-400">
+            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono rounded-full bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-400">
               <CheckCircle className="w-3 h-3" />
               <span>Sorted</span>
             </span>
@@ -135,7 +135,7 @@ export default function ArrayVisualizer({
             {boundaries.map((b) => (
               <span
                 key={b.name}
-                className="px-2 py-0.5 text-[10px] font-mono rounded bg-purple-950/60 border border-purple-500/30 text-purple-300"
+                className="px-2 py-0.5 text-[10px] font-mono rounded bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-300"
               >
                 {b.name}
               </span>
@@ -146,9 +146,9 @@ export default function ArrayVisualizer({
 
       {/* ── Operation Alert / Action Tag ── */}
       {operationDescription && (
-        <div className="my-2 px-3 py-1.5 rounded bg-slate-900/90 border border-slate-800 flex items-center gap-2 text-xs font-mono">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-          <span className="text-slate-300">{operationDescription}</span>
+        <div className="my-2 px-3 py-1.5 rounded bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 flex items-center gap-2 text-xs font-mono shadow-xs">
+          <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
+          <span className="text-slate-700 dark:text-slate-300">{operationDescription}</span>
         </div>
       )}
 
@@ -174,7 +174,7 @@ export default function ArrayVisualizer({
                   {el.pointerLabels.map((lbl) => (
                     <span
                       key={lbl}
-                      className="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded-md bg-cyan-950/90 border border-cyan-400/60 text-cyan-300 shadow-xs leading-none"
+                      className="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded-md bg-cyan-100 dark:bg-cyan-950/90 border border-cyan-400/60 text-cyan-800 dark:text-cyan-300 shadow-xs leading-none"
                     >
                       {lbl}
                     </span>
@@ -183,7 +183,7 @@ export default function ArrayVisualizer({
 
                 {/* Vertical Bar (Height visual for numbers) */}
                 {hasNumericValues && (
-                  <div className="w-full h-28 flex items-end justify-center bg-slate-900/40 rounded-t-lg border-b border-slate-800 p-0.5">
+                  <div className="w-full h-28 flex items-end justify-center bg-slate-200/60 dark:bg-slate-900/40 rounded-t-lg border-b border-slate-300 dark:border-slate-800 p-0.5">
                     <div
                       className={`w-full rounded-t-md transition-all duration-200 ${style.bar}`}
                       style={{ height: `${el.heightPercent}%`, minHeight: "6px" }}
@@ -201,7 +201,7 @@ export default function ArrayVisualizer({
                 </div>
 
                 {/* Index Subscript */}
-                <span className="text-[11px] font-mono text-slate-400 font-medium">
+                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 font-medium">
                   [{el.index}]
                 </span>
               </div>
@@ -211,26 +211,26 @@ export default function ArrayVisualizer({
       </div>
 
       {/* ── Bottom Color Legend ── */}
-      <div className="flex flex-wrap items-center justify-center gap-3 pt-2.5 border-t border-slate-800/60 text-[10px] font-mono text-slate-400">
+      <div className="flex flex-wrap items-center justify-center gap-3 pt-2.5 border-t border-slate-200 dark:border-slate-800/60 text-[10px] font-mono text-slate-600 dark:text-slate-400">
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm bg-slate-700 border border-slate-600"></span>
+          <span className="w-2.5 h-2.5 rounded-sm bg-slate-200 border border-slate-300 dark:bg-slate-700 dark:border-slate-600"></span>
           <span>Normal</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-sm bg-amber-400"></span>
-          <span className="text-amber-300">Comparing</span>
+          <span className="text-amber-700 dark:text-amber-300">Comparing</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400"></span>
-          <span className="text-emerald-300">Swapping</span>
+          <span className="text-emerald-700 dark:text-emerald-300">Swapping</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-sm bg-purple-400"></span>
-          <span className="text-purple-300">Pivot</span>
+          <span className="text-purple-700 dark:text-purple-300">Pivot</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-sm bg-cyan-400"></span>
-          <span className="text-cyan-300">Active</span>
+          <span className="text-cyan-700 dark:text-cyan-300">Active</span>
         </div>
       </div>
     </div>

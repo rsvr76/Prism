@@ -30,14 +30,14 @@ function NoStructureState({ hasTrace }: { hasTrace: boolean }) {
   if (!hasTrace) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-3.5 p-6">
-        <div className="w-12 h-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600">
+        <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 shadow-xs">
           <Layers className="w-6 h-6" />
         </div>
         <div className="text-center space-y-1">
-          <p className="text-sm font-semibold text-slate-300">
+          <p className="text-sm font-semibold text-slate-800 dark:text-slate-300">
             Interactive Visualizer Canvas
           </p>
-          <p className="text-xs font-mono text-slate-500">
+          <p className="text-xs font-mono text-slate-500 dark:text-slate-400">
             Run your code to visualize data structures here.
           </p>
         </div>
@@ -47,13 +47,13 @@ function NoStructureState({ hasTrace }: { hasTrace: boolean }) {
 
   return (
     <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-3 p-6">
-      <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600">
+      <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 shadow-xs">
         <Layers className="w-5 h-5" />
       </div>
-      <p className="text-xs font-mono text-center text-slate-400">
+      <p className="text-xs font-mono text-center text-slate-700 dark:text-slate-400">
         No supported structure detected at this execution step.
       </p>
-      <p className="text-[11px] font-mono text-slate-600 text-center">
+      <p className="text-[11px] font-mono text-slate-500 text-center">
         Supported structures: Singly Linked Lists, 1D Arrays, Binary Search Trees
       </p>
     </div>
@@ -78,14 +78,14 @@ export default function VisualizerCanvas() {
 
   if (!frame || !primaryStructure) {
     return (
-      <div className="w-full h-full bg-[#0a0f1d] rounded-xl border border-slate-800/80 overflow-hidden shadow-lg">
+      <div className="w-full h-full bg-white dark:bg-[#0a0f1d] rounded-xl border border-slate-200 dark:border-slate-800/80 overflow-hidden shadow-xs dark:shadow-lg">
         <NoStructureState hasTrace={!!trace} />
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full bg-[#0a0f1d] rounded-xl border border-slate-800/80 overflow-hidden shadow-lg relative">
+    <div className="w-full h-full bg-white dark:bg-[#0a0f1d] rounded-xl border border-slate-200 dark:border-slate-800/80 overflow-hidden shadow-xs dark:shadow-lg relative">
       {primaryStructure.structureType === "singly_linked_list" && primaryStructure.rootHeapId && (
         <LinkedListVisualizer
           frame={frame}

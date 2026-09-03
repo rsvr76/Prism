@@ -33,6 +33,7 @@ import {
   getScopePointersToHeapId,
   getNodeDisplayValue,
 } from "@/lib/visualization/structureDetector";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 // ─── Node Layout Constants ────────────────────────────────────────────────────
 
@@ -72,13 +73,13 @@ function LinkedListNodeComponent({ data }: NodeProps<Node<LinkedListNodeData>>) 
                 key={label}
                 className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded-md shadow-xs flex items-center gap-1 ${
                   isThisHead
-                    ? "bg-emerald-950/90 border border-emerald-500/60 text-emerald-300 ring-1 ring-emerald-500/30"
+                    ? "bg-emerald-100 border border-emerald-400 text-emerald-800 ring-1 ring-emerald-500/30 dark:bg-emerald-950/90 dark:border-emerald-500/60 dark:text-emerald-300"
                     : isCurr
-                    ? "bg-cyan-950/90 border border-cyan-400/60 text-cyan-300 ring-1 ring-cyan-400/30"
-                    : "bg-slate-900/90 border border-slate-700 text-slate-300"
+                    ? "bg-cyan-100 border border-cyan-400 text-cyan-800 ring-1 ring-cyan-400/30 dark:bg-cyan-950/90 dark:border-cyan-400/60 dark:text-cyan-300"
+                    : "bg-slate-100 border border-slate-300 text-slate-700 dark:bg-slate-900/90 dark:border-slate-700 dark:text-slate-300"
                 }`}
               >
-                {isThisHead && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>}
+                {isThisHead && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>}
                 {label}
               </span>
             );
@@ -88,23 +89,25 @@ function LinkedListNodeComponent({ data }: NodeProps<Node<LinkedListNodeData>>) 
 
       {/* Node box: val | next */}
       <div
-        className={`flex items-stretch rounded-lg border-2 overflow-hidden shadow-lg transition-all duration-200 ${
+        className={`flex items-stretch rounded-lg border-2 overflow-hidden transition-all duration-200 shadow-sm ${
           isActive
-            ? "border-cyan-400 shadow-cyan-500/25 bg-[#0a1628] ring-2 ring-cyan-400/40"
+            ? "border-cyan-500 bg-cyan-50/90 shadow-md ring-2 ring-cyan-400/40 dark:border-cyan-400 dark:shadow-cyan-500/25 dark:bg-[#0a1628]"
             : isHead
-            ? "border-slate-600 bg-slate-900/95 hover:border-slate-500"
-            : "border-slate-700/80 bg-slate-900/90 hover:border-slate-600"
+            ? "border-emerald-400 bg-white hover:border-emerald-500 dark:border-slate-600 dark:bg-slate-900/95 dark:hover:border-slate-500"
+            : "border-slate-300 bg-white hover:border-slate-400 dark:border-slate-700/80 dark:bg-slate-900/90 dark:hover:border-slate-600"
         }`}
         style={{ width: NODE_WIDTH, height: NODE_HEIGHT }}
       >
         {/* Value compartment */}
-        <div className="flex-1 flex flex-col items-center justify-center border-r border-slate-700/80 px-2.5 bg-slate-950/30">
-          <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider font-semibold leading-none mb-1">
+        <div className="flex-1 flex flex-col items-center justify-center border-r border-slate-200 dark:border-slate-700/80 px-2.5 bg-slate-50/60 dark:bg-slate-950/30">
+          <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold leading-none mb-1">
             {className}
           </span>
           <span
             className={`font-mono font-bold text-base leading-none tracking-tight ${
-              isActive ? "text-cyan-200" : "text-slate-100"
+              isActive
+                ? "text-cyan-800 dark:text-cyan-200"
+                : "text-slate-900 dark:text-slate-100"
             }`}
           >
             {displayValue}
@@ -112,9 +115,9 @@ function LinkedListNodeComponent({ data }: NodeProps<Node<LinkedListNodeData>>) 
         </div>
 
         {/* Next pointer socket */}
-        <div className="w-9 flex flex-col items-center justify-center bg-slate-950/60 text-slate-400">
+        <div className="w-9 flex flex-col items-center justify-center bg-slate-100/80 dark:bg-slate-950/60 text-slate-500 dark:text-slate-400">
           <span className="text-[8px] font-mono text-slate-500 uppercase leading-none mb-0.5">next</span>
-          <span className="text-xs font-mono text-cyan-400 leading-none">●</span>
+          <span className="text-xs font-mono text-cyan-600 dark:text-cyan-400 leading-none">●</span>
         </div>
       </div>
 
@@ -122,13 +125,13 @@ function LinkedListNodeComponent({ data }: NodeProps<Node<LinkedListNodeData>>) 
       <Handle
         type="target"
         position={Position.Left}
-        className="!w-2.5 !h-2.5 !bg-slate-500 !border-slate-300"
+        className="!w-2.5 !h-2.5 !bg-slate-400 dark:!bg-slate-500 !border-slate-300"
         style={{ left: -5 }}
       />
       <Handle
         type="source"
         position={Position.Right}
-        className="!w-2.5 !h-2.5 !bg-cyan-400 !border-cyan-200"
+        className="!w-2.5 !h-2.5 !bg-cyan-500 dark:!bg-cyan-400 !border-cyan-300 dark:!border-cyan-200"
         style={{ right: -5 }}
       />
     </div>
@@ -140,16 +143,16 @@ function LinkedListNodeComponent({ data }: NodeProps<Node<LinkedListNodeData>>) 
 function NullNodeComponent(_props: NodeProps) {
   return (
     <div
-      className="flex items-center justify-center rounded-lg border-2 border-dashed border-slate-700 bg-slate-950/50 shadow-sm"
+      className="flex items-center justify-center rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-100/70 dark:bg-slate-950/50 shadow-xs"
       style={{ width: 72, height: NODE_HEIGHT }}
     >
       <Handle
         type="target"
         position={Position.Left}
-        className="!w-2.5 !h-2.5 !bg-slate-600 !border-slate-400"
+        className="!w-2.5 !h-2.5 !bg-slate-400 dark:!bg-slate-600 !border-slate-300 dark:!border-slate-400"
         style={{ left: -5 }}
       />
-      <span className="text-slate-500 font-mono text-xs font-bold tracking-wider">⏚ NULL</span>
+      <span className="text-slate-600 dark:text-slate-500 font-mono text-xs font-bold tracking-wider">⏚ NULL</span>
     </div>
   );
 }
@@ -272,6 +275,7 @@ export default function LinkedListVisualizer({
   rootHeapId,
   structureName,
 }: LinkedListVisualizerProps) {
+  const { isDark } = useTheme();
   const { nodes, edges } = useMemo(
     () => buildGraphFromFrame(frame, rootHeapId),
     [frame, rootHeapId]
@@ -285,11 +289,11 @@ export default function LinkedListVisualizer({
     <div className="w-full h-full relative">
       {/* Structure label */}
       <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-        <span className="px-2.5 py-0.5 text-[11px] font-mono rounded-md bg-slate-900/90 border border-slate-700/80 text-cyan-400 font-bold shadow-xs">
+        <span className="px-2.5 py-0.5 text-[11px] font-mono rounded-md bg-white/95 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700/80 text-cyan-700 dark:text-cyan-400 font-bold shadow-xs">
           Singly Linked List
         </span>
-        <span className="text-[11px] font-mono text-slate-400">
-          <strong className="text-white">{structureName}</strong>
+        <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+          <strong className="text-slate-900 dark:text-white">{structureName}</strong>
           {" · "}
           {nodes.filter((n) => n.type === "linkedListNode").length} node(s)
         </span>
@@ -313,14 +317,14 @@ export default function LinkedListVisualizer({
           variant={BackgroundVariant.Dots}
           gap={22}
           size={1.2}
-          color="#334155"
+          color={isDark ? "#334155" : "#cbd5e1"}
         />
         <Controls
           showZoom
           showFitView
           showInteractive={false}
           position="bottom-right"
-          className="!bg-slate-900 !border-slate-800"
+          className="!bg-white dark:!bg-slate-900 !border-slate-300 dark:!border-slate-800 !text-slate-700 dark:!text-slate-300 shadow-sm"
         />
       </ReactFlow>
     </div>

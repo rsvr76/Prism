@@ -1,27 +1,27 @@
 "use client";
 
 import React from "react";
-import { useExecutionStore } from "@/store/useExecutionStore";
 import Link from "next/link";
+import { useExecutionStore } from "@/store/useExecutionStore";
 import {
   Play,
   RotateCcw,
-  Loader2,
   Sparkles,
-  CheckCircle2,
-  AlertTriangle,
-  XCircle,
-  Clock,
   GitBranch,
-  BookOpen,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
   Code2,
+  BookOpen,
   Compass,
   Target,
   LayoutDashboard,
 } from "lucide-react";
-import WhatIfModal from "./WhatIfModal";
+import WhatIfModal from "@/components/controls/WhatIfModal";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
-const PRESETS = [
+// Quick Starter Python Code Presets for common DSA concepts
+export const PRESETS = [
   {
     name: "Linked List Traversal",
     code: `class Node:
@@ -39,7 +39,7 @@ while curr:
     total += curr.val
     curr = curr.next
 
-print("Sum:", total)`,
+print("Total sum:", total)`,
   },
   {
     name: "Recursive Factorial",
@@ -79,31 +79,6 @@ b.next = a  # Circular reference
 
 print("Circular reference created:", a.val, "->", a.next.val, "->", a.next.next.val)`,
   },
-  {
-    name: "Binary Search Tree",
-    code: `class Node:
-    def __init__(self, value):
-        self.value = value
-        self.left = None
-        self.right = None
-
-# Build BST: 8 -> (3 -> 1, 6), (10 -> None, 14)
-root = Node(8)
-root.left = Node(3)
-root.right = Node(10)
-root.left.left = Node(1)
-root.left.right = Node(6)
-root.right.right = Node(14)
-
-# In-order traversal
-def inorder(node):
-    if not node:
-        return []
-    return inorder(node.left) + [node.value] + inorder(node.right)
-
-values = inorder(root)
-print("Inorder traversal:", values)`,
-  },
 ];
 
 export default function ExecutionHeader() {
@@ -114,7 +89,6 @@ export default function ExecutionHeader() {
   const reset = useExecutionStore((state) => state.reset);
   const setCode = useExecutionStore((state) => state.setCode);
 
-  // Phase 6A: Execution history & branch switching
   const executions = useExecutionStore((state) => state.executions);
   const executionIds = useExecutionStore((state) => state.executionIds);
   const activeExecutionId = useExecutionStore((state) => state.activeExecutionId);
@@ -126,41 +100,35 @@ export default function ExecutionHeader() {
     switch (status) {
       case "SUCCESS":
         return (
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-400 text-xs font-mono">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-mono">
             <CheckCircle2 className="w-3.5 h-3.5" />
             <span>Executed ({trace?.totalSteps} steps)</span>
           </div>
         );
       case "RUNNING":
         return (
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-400 text-xs font-mono animate-pulse">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-50 dark:bg-cyan-950/80 border border-cyan-300 dark:border-cyan-500/30 text-cyan-700 dark:text-cyan-400 text-xs font-mono animate-pulse">
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
             <span>Tracing Execution...</span>
           </div>
         );
       case "SYNTAX_ERROR":
       case "RUNTIME_ERROR":
-        return (
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-950/80 border border-rose-500/30 text-rose-400 text-xs font-mono">
-            <XCircle className="w-3.5 h-3.5" />
-            <span>{status}</span>
-          </div>
-        );
       case "TIMEOUT":
       case "TRACE_LIMIT":
       case "RECURSION_LIMIT":
       case "OUTPUT_LIMIT":
       case "UNSUPPORTED":
         return (
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-950/80 border border-amber-500/30 text-amber-400 text-xs font-mono">
-            <AlertTriangle className="w-3.5 h-3.5" />
-            <span>{status}</span>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/80 border border-rose-300 dark:border-rose-500/30 text-rose-700 dark:text-rose-400 text-xs font-mono">
+            <AlertCircle className="w-3.5 h-3.5" />
+            <span>Failed: {status}</span>
           </div>
         );
       default:
         return (
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-400 text-xs font-mono">
-            <Clock className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 text-xs font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
             <span>Ready</span>
           </div>
         );
@@ -169,125 +137,120 @@ export default function ExecutionHeader() {
 
   return (
     <>
-      <header className="h-14 border-b border-slate-800 bg-[#0a0f1d]/90 backdrop-blur-md px-4 flex items-center justify-between shrink-0 select-none z-20 gap-3">
-        {/* Brand & Title */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-md shadow-cyan-500/25">
-            <Sparkles className="w-4 h-4 text-white" />
+      <header className="h-14 flex items-center justify-between gap-3 px-4 md:px-6 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 shadow-xs z-20 select-none">
+        {/* Left Side: Brand Logo & Navigation */}
+        <div className="flex items-center gap-4 lg:gap-6 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white leading-none">
+                PRISM
+              </h1>
+              <p className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono tracking-wider uppercase leading-none mt-1">
+                DSA Learning Environment
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-base font-bold tracking-tight text-white leading-none">
-              PRISM
-            </h1>
-            <p className="text-[10px] text-cyan-400 font-mono tracking-wider uppercase leading-none mt-1">
-              DSA Learning Environment
-            </p>
-          </div>
+
+          {/* Top Navigation Tabs */}
+          <nav aria-label="Main Navigation" className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/80 p-1 rounded-lg text-xs font-medium shrink-0">
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-all bg-white border border-slate-300 text-cyan-700 font-semibold shadow-xs dark:bg-cyan-950/80 dark:border-cyan-500/40 dark:text-cyan-300"
+            >
+              <Code2 className="w-3.5 h-3.5" />
+              <span>Workbench</span>
+            </Link>
+            <Link
+              href="/library"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Algorithm Library</span>
+            </Link>
+            <Link
+              href="/paths"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60"
+            >
+              <Compass className="w-3.5 h-3.5" />
+              <span>Learning Paths</span>
+            </Link>
+            <Link
+              href="/practice"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60"
+            >
+              <Target className="w-3.5 h-3.5" />
+              <span>Practice</span>
+            </Link>
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60"
+            >
+              <LayoutDashboard className="w-3.5 h-3.5" />
+              <span>Dashboard</span>
+            </Link>
+          </nav>
+
+          {/* Active Lesson or Algorithm Context Badges */}
+          {loadedLessonContext ? (
+            <Link
+              href={`/paths/${loadedLessonContext.pathSlug}/${loadedLessonContext.lessonSlug}`}
+              className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-500/40 text-purple-700 dark:text-purple-300 hover:text-purple-900 hover:border-purple-300 dark:hover:text-purple-200 dark:hover:border-purple-400 text-xs font-mono transition-colors shrink-0"
+              title="Return to Guided Lesson"
+            >
+              <Compass className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
+              <span className="text-slate-500 dark:text-slate-400">Lesson:</span>
+              <span className="font-semibold text-purple-800 dark:text-purple-200 truncate max-w-[140px]">{loadedLessonContext.lessonTitle}</span>
+              <span className="text-[10px] text-purple-600 dark:text-purple-400 underline ml-1">Return →</span>
+            </Link>
+          ) : loadedAlgorithmTitle ? (
+            <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 text-cyan-800 dark:text-cyan-300 text-xs font-mono shrink-0">
+              <span className="text-slate-500 dark:text-slate-400">Loaded:</span>
+              <span className="font-semibold text-cyan-700 dark:text-cyan-200 truncate max-w-[140px]">{loadedAlgorithmTitle}</span>
+            </div>
+          ) : null}
+
+          {/* Phase 6A: Branch Switcher Tabs */}
+          {executionIds.length > 0 && (
+            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 p-1 rounded-lg font-mono text-xs overflow-x-auto max-w-xs shrink-0">
+              {executionIds.map((id) => {
+                const exec = executions[id];
+                if (!exec) return null;
+
+                const isActive = activeExecutionId === id;
+                const isBranch = exec.type === "branch";
+
+                return (
+                  <button
+                    key={id}
+                    onClick={() => switchExecution(id)}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded transition-colors cursor-pointer ${
+                      isActive
+                        ? isBranch
+                          ? "bg-purple-100 text-purple-900 border border-purple-300 font-bold dark:bg-purple-900 dark:text-purple-200 dark:border-purple-400"
+                          : "bg-cyan-100 text-cyan-900 border border-cyan-300 font-bold dark:bg-cyan-900 dark:text-cyan-200 dark:border-cyan-400"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800"
+                    }`}
+                  >
+                    {isBranch && <GitBranch className="w-3 h-3 text-purple-600 dark:text-purple-400" />}
+                    <span>{exec.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Top Navigation Tabs */}
-        <nav aria-label="Main Navigation" className="flex items-center gap-1 bg-slate-900/90 border border-slate-800/80 p-1 rounded-lg text-xs font-medium shrink-0">
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-all bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-semibold shadow-xs"
-          >
-            <Code2 className="w-3.5 h-3.5" />
-            <span>Workbench</span>
-          </Link>
-          <Link
-            href="/library"
-            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Algorithm Library</span>
-          </Link>
-          <Link
-            href="/paths"
-            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-          >
-            <Compass className="w-3.5 h-3.5" />
-            <span>Learning Paths</span>
-          </Link>
-          <Link
-            href="/practice"
-            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-          >
-            <Target className="w-3.5 h-3.5" />
-            <span>Practice</span>
-          </Link>
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-          >
-            <LayoutDashboard className="w-3.5 h-3.5" />
-            <span>Dashboard</span>
-          </Link>
-        </nav>
-
-        {/* Active Lesson or Algorithm Context Badges */}
-        {loadedLessonContext ? (
-          <Link
-            href={`/paths/${loadedLessonContext.pathSlug}/${loadedLessonContext.lessonSlug}`}
-            className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-950/60 border border-purple-500/40 text-purple-300 hover:text-purple-200 hover:border-purple-400 text-xs font-mono transition-colors shrink-0"
-            title="Return to Guided Lesson"
-          >
-            <Compass className="w-3.5 h-3.5 text-purple-400" />
-            <span className="text-slate-400">Lesson:</span>
-            <span className="font-semibold text-purple-200 truncate max-w-[140px]">{loadedLessonContext.lessonTitle}</span>
-            <span className="text-[10px] text-purple-400 underline ml-1">Return →</span>
-          </Link>
-        ) : loadedAlgorithmTitle ? (
-          <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 text-xs font-mono shrink-0">
-            <span className="text-slate-400">Loaded:</span>
-            <span className="font-semibold text-cyan-200 truncate max-w-[140px]">{loadedAlgorithmTitle}</span>
-          </div>
-        ) : null}
-
-        {/* Phase 6A: Branch Switcher Tabs */}
-        {executionIds.length > 0 && (
-          <div className="flex items-center gap-1.5 bg-slate-900/90 border border-slate-800/90 p-1 rounded-lg font-mono text-xs overflow-x-auto max-w-xs shrink-0">
-            {executionIds.map((id) => {
-              const exec = executions[id];
-              if (!exec) return null;
-              const isActive = id === activeExecutionId;
-              const isBranch = exec.type === "branch";
-
-              return (
-                <button
-                  key={id}
-                  onClick={() => switchExecution(id)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all whitespace-nowrap cursor-pointer ${
-                    isActive
-                      ? isBranch
-                        ? "bg-purple-900/80 border border-purple-500/50 text-purple-200 font-bold shadow-xs"
-                        : "bg-cyan-900/80 border border-cyan-500/50 text-cyan-200 font-bold shadow-xs"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-                  }`}
-                >
-                  {isBranch ? (
-                    <GitBranch className="w-3 h-3 text-purple-400 shrink-0" />
-                  ) : (
-                    <Sparkles className="w-3 h-3 text-cyan-400 shrink-0" />
-                  )}
-                  <span>{exec.label}</span>
-                  {exec.trace && (
-                    <span className="text-[10px] opacity-70">
-                      ({exec.trace.totalSteps})
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Preset Selector & Run Controls */}
+        {/* Right Side: Presets, Controls & Theme Toggle */}
         <div className="flex items-center gap-2.5 shrink-0">
           {/* Preset Selector */}
-          <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400">
-            <span className="text-[11px] uppercase tracking-wider text-slate-500 font-mono">Preset</span>
+          <div className="flex items-center gap-1.5">
+            <span className="hidden sm:inline text-xs text-slate-500 dark:text-slate-400 font-mono">Example:</span>
             <select
-              className="bg-slate-900/90 border border-slate-800 rounded-md px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-cyan-500/60 font-mono cursor-pointer"
+              defaultValue={PRESETS[0].name}
+              className="bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-md px-2 py-1 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500/60 font-mono cursor-pointer"
               onChange={(e) => {
                 const selected = PRESETS.find((p) => p.name === e.target.value);
                 if (selected) {
@@ -305,15 +268,13 @@ export default function ExecutionHeader() {
           </div>
 
           {/* Status Badge */}
-          <div className="hidden md:block">
-            {getStatusBadge()}
-          </div>
+          <div className="hidden md:block">{getStatusBadge()}</div>
 
           {/* Run Trace CTA */}
           <button
             onClick={runCode}
             disabled={isRunning}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs tracking-wide transition-all shadow-md shadow-cyan-500/20 hover:shadow-cyan-500/30 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs tracking-wide transition-all shadow-sm active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {isRunning ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -327,11 +288,14 @@ export default function ExecutionHeader() {
           <button
             onClick={reset}
             disabled={isRunning}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition-colors cursor-pointer disabled:opacity-40"
+            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/80 transition-colors cursor-pointer disabled:opacity-40"
             title="Reset All Executions"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
+
+          {/* Theme Toggle (Light / Dark) */}
+          <ThemeToggle />
         </div>
       </header>
 

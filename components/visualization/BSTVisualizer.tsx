@@ -34,6 +34,7 @@ import {
 } from "@/lib/visualization/structureDetector";
 import { computeTreeLayout, getTreeChildId } from "@/lib/visualization/treeLayout";
 import { Network } from "lucide-react";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 const LEFT_ATTRS = ["left", "left_child", "leftChild"];
 const RIGHT_ATTRS = ["right", "right_child", "rightChild"];
@@ -57,7 +58,7 @@ function BSTNodeComponent({ data }: NodeProps<Node<BSTNodeData>>) {
       <Handle
         type="target"
         position={Position.Top}
-        className="!w-2.5 !h-2.5 !bg-slate-500 !border-slate-300"
+        className="!w-2.5 !h-2.5 !bg-slate-400 dark:!bg-slate-500 !border-slate-300"
         style={{ top: -5 }}
       />
 
@@ -67,7 +68,7 @@ function BSTNodeComponent({ data }: NodeProps<Node<BSTNodeData>>) {
           {pointerLabels.map((lbl) => (
             <span
               key={lbl}
-              className="px-2 py-0.5 text-[10px] font-mono font-bold rounded-md bg-cyan-950/90 border border-cyan-400/60 text-cyan-300 shadow-xs"
+              className="px-2 py-0.5 text-[10px] font-mono font-bold rounded-md bg-cyan-100 dark:bg-cyan-950/90 border border-cyan-400/60 text-cyan-800 dark:text-cyan-300 shadow-xs"
             >
               {lbl}
             </span>
@@ -77,18 +78,20 @@ function BSTNodeComponent({ data }: NodeProps<Node<BSTNodeData>>) {
 
       {/* Circular / Rounded Tree Node Box */}
       <div
-        className={`w-16 h-16 rounded-full flex flex-col items-center justify-center border-2 transition-all duration-200 shadow-lg ${
+        className={`w-16 h-16 rounded-full flex flex-col items-center justify-center border-2 transition-all duration-200 shadow-xs ${
           isActive
-            ? "border-cyan-400 bg-[#0a1628] shadow-cyan-500/30 ring-2 ring-cyan-400/50 scale-105"
-            : "border-slate-600/90 bg-slate-900/90 hover:border-slate-500 shadow-md"
+            ? "border-cyan-500 bg-cyan-50/90 shadow-md ring-2 ring-cyan-400/50 scale-105 dark:border-cyan-400 dark:bg-[#0a1628] dark:shadow-cyan-500/30"
+            : "border-slate-300 bg-white hover:border-slate-400 shadow-xs dark:border-slate-600/90 dark:bg-slate-900/90 dark:hover:border-slate-500"
         }`}
       >
-        <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider font-semibold leading-none mb-0.5">
+        <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold leading-none mb-0.5">
           {className}
         </span>
         <span
           className={`font-mono font-bold text-sm leading-tight truncate max-w-[54px] px-1 text-center ${
-            isActive ? "text-cyan-200" : "text-white"
+            isActive
+              ? "text-cyan-800 dark:text-cyan-200"
+              : "text-slate-900 dark:text-white"
           }`}
         >
           {displayValue}
@@ -99,7 +102,7 @@ function BSTNodeComponent({ data }: NodeProps<Node<BSTNodeData>>) {
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!w-2.5 !h-2.5 !bg-purple-400 !border-purple-200"
+        className="!w-2.5 !h-2.5 !bg-purple-500 dark:!bg-purple-400 !border-purple-300 dark:!border-purple-200"
         style={{ bottom: -5 }}
       />
     </div>
@@ -199,6 +202,7 @@ export default function BSTVisualizer({
   rootHeapId,
   structureName,
 }: BSTVisualizerProps) {
+  const { isDark } = useTheme();
   const { nodes, edges } = useMemo(
     () => buildTreeGraph(frame, rootHeapId),
     [frame, rootHeapId]
@@ -217,11 +221,11 @@ export default function BSTVisualizer({
     <div className="w-full h-full relative">
       {/* Structure Header Tag */}
       <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-        <span className="px-2.5 py-0.5 text-[11px] font-mono rounded-md bg-slate-900/90 border border-slate-700/80 text-purple-400 font-bold shadow-xs">
+        <span className="px-2.5 py-0.5 text-[11px] font-mono rounded-md bg-white/95 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700/80 text-purple-700 dark:text-purple-400 font-bold shadow-xs">
           Binary Search Tree
         </span>
-        <span className="text-[11px] font-mono text-slate-400">
-          <strong className="text-cyan-400">{structureName}</strong>
+        <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+          <strong className="text-cyan-700 dark:text-cyan-400">{structureName}</strong>
           {" · "}
           {nodes.length} node{nodes.length !== 1 ? "s" : ""}
         </span>
@@ -245,14 +249,14 @@ export default function BSTVisualizer({
           variant={BackgroundVariant.Dots}
           gap={22}
           size={1.2}
-          color="#334155"
+          color={isDark ? "#334155" : "#cbd5e1"}
         />
         <Controls
           showZoom
           showFitView
           showInteractive={false}
           position="bottom-right"
-          className="!bg-slate-900 !border-slate-800"
+          className="!bg-white dark:!bg-slate-900 !border-slate-300 dark:!border-slate-800 !text-slate-700 dark:!text-slate-300 shadow-sm"
         />
       </ReactFlow>
     </div>
