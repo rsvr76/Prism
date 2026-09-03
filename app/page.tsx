@@ -4,10 +4,10 @@ import React, { Suspense, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import ExecutionHeader from "@/components/controls/ExecutionHeader";
 import CodeEditor from "@/components/editor/CodeEditor";
-import ExecutionStatePanel from "@/components/debug/ExecutionStatePanel";
+import AutoRevealRightPanel from "@/components/debug/AutoRevealRightPanel";
+import ExecutionOutputTab from "@/components/debug/ExecutionOutputTab";
 import TimelineScrubber from "@/components/debug/TimelineScrubber";
 import VisualizerCanvas from "@/components/visualization/VisualizerCanvas";
-import WelcomeHeroBanner from "@/components/onboarding/WelcomeHeroBanner";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { getAlgorithmBySlug } from "@/lib/content/algorithms";
 import { getLessonBySlug } from "@/lib/content/learningPaths";
@@ -54,28 +54,26 @@ export default function PrismWorkbench() {
         <AlgorithmLoader />
       </Suspense>
 
-      {/* Top Navigation & Run Controls */}
+      {/* Top Navigation & Controls */}
       <ExecutionHeader />
 
-      {/* Dismissible Onboarding & Core Pipeline Banner */}
-      <WelcomeHeroBanner />
-
-      {/* Main 3-Panel Workbench */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_1.6fr_1.1fr] xl:grid-cols-[0.95fr_1.7fr_1.1fr] gap-3 p-2.5 md:p-3 lg:overflow-hidden min-h-0">
-        {/* Left Column: Monaco Code Editor */}
-        <div className="h-[360px] lg:h-full lg:overflow-hidden min-h-0 flex flex-col">
+      {/* Main 2-Screen Workbench: Left = Code, Right = Visualizer */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 p-2.5 md:p-3 lg:overflow-hidden min-h-0 relative">
+        {/* Left Screen: Monaco Code Editor with Execute & Output Action Bar */}
+        <div className="h-[460px] lg:h-full lg:overflow-hidden min-h-0 flex flex-col">
           <CodeEditor />
         </div>
 
-        {/* Center Column: Linked List / Structure Visualizer (HERO) */}
-        <div className="h-[400px] lg:h-full lg:overflow-hidden min-h-0 flex flex-col">
+        {/* Right Screen: Linked List / Structure Visualizer (HERO) */}
+        <div className="h-[460px] lg:h-full lg:overflow-hidden min-h-0 flex flex-col">
           <VisualizerCanvas />
         </div>
 
-        {/* Right Column: Execution State & Grounded AI Pedagogy */}
-        <div className="h-[380px] lg:h-full lg:overflow-hidden min-h-0 flex flex-col">
-          <ExecutionStatePanel />
-        </div>
+        {/* Small/Dynamic Output Tab between Code and Visualizer (Does not affect code or visualizer size) */}
+        <ExecutionOutputTab />
+
+        {/* Auto-Revealing Right Tab Drawer: AI Explainer, Tutor & Diagnostics */}
+        <AutoRevealRightPanel />
       </div>
 
       {/* Bottom Dock: Timeline Playback & Scrubber */}

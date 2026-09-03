@@ -136,9 +136,9 @@ export default function ExecutionHeader() {
 
   return (
     <>
-      <header className="h-14 flex items-center justify-between gap-3 px-4 md:px-6 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 shadow-xs z-20 select-none">
+      <header className="h-14 flex items-center justify-between gap-3 px-4 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 shadow-xs z-20 select-none">
         {/* Left Side: Hamburger & Brand Logo */}
-        <div className="flex items-center gap-3 lg:gap-4 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={toggleDrawer}
             aria-label="Navigation menu"
@@ -212,58 +212,8 @@ export default function ExecutionHeader() {
           )}
         </div>
 
-        {/* Right Side: Presets, Controls & Theme Toggle */}
+        {/* Right Side: Theme Toggle */}
         <div className="flex items-center gap-2.5 shrink-0">
-          {/* Preset Selector */}
-          <div className="flex items-center gap-1.5">
-            <span className="hidden sm:inline text-xs text-slate-500 dark:text-slate-400 font-mono">Example:</span>
-            <select
-              defaultValue={PRESETS[0].name}
-              className="bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-md px-2 py-1 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500/60 font-mono cursor-pointer"
-              onChange={(e) => {
-                const selected = PRESETS.find((p) => p.name === e.target.value);
-                if (selected) {
-                  setCode(selected.code);
-                  reset();
-                }
-              }}
-            >
-              {PRESETS.map((p) => (
-                <option key={p.name} value={p.name}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Status Badge */}
-          <div className="hidden md:block">{getStatusBadge()}</div>
-
-          {/* Run Trace CTA */}
-          <button
-            onClick={runCode}
-            disabled={isRunning}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs tracking-wide transition-all shadow-sm active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {isRunning ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Play className="w-3.5 h-3.5 fill-current" />
-            )}
-            <span>Run Trace</span>
-          </button>
-
-          {/* Reset button */}
-          <button
-            onClick={reset}
-            disabled={isRunning}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/80 transition-colors cursor-pointer disabled:opacity-40"
-            title="Reset All Executions"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
-
-          {/* Theme Toggle (Light / Dark) */}
           <ThemeToggle />
         </div>
       </header>

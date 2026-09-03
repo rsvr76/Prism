@@ -12,8 +12,6 @@ import {
   Compass,
   Target,
   LayoutDashboard,
-  CheckCircle2,
-  Cpu,
 } from "lucide-react";
 import { useNavDrawerStore } from "@/store/useNavDrawerStore";
 import ThemeToggle from "@/components/theme/ThemeToggle";
@@ -61,7 +59,10 @@ const NAV_ITEMS: NavItem[] = [
 export default function NavigationDrawer() {
   const isOpen = useNavDrawerStore((state) => state.isOpen);
   const closeDrawer = useNavDrawerStore((state) => state.closeDrawer);
+  const openDrawer = useNavDrawerStore((state) => state.openDrawer);
   const pathname = usePathname();
+
+  const [touchStartX, setTouchStartX] = React.useState<number | null>(null);
 
   // Close on Escape key press
   useEffect(() => {
@@ -86,21 +87,87 @@ export default function NavigationDrawer() {
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  // Left-screen edge swipe-to-open gesture (pull from left screen edge)
+  useEffect(() => {
+    let startX = 0;
+    let startY = 0;
+
+    const handleEdgeTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1 && e.touches[0].clientX < 28) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      } else {
+        startX = 0;
+      }
+    };
+
+    const handleEdgeTouchMove = (e: TouchEvent) => {
+      if (startX > 0 && e.touches.length === 1) {
+        const deltaX = e.touches[0].clientX - startX;
+        const deltaY = Math.abs(e.touches[0].clientY - startY);
+        if (deltaX > 45 && deltaX > deltaY && !isOpen) {
+          openDrawer();
+          startX = 0;
+        }
+      }
+    };
+
+    window.addEventListener("touchstart", handleEdgeTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleEdgeTouchMove, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", handleEdgeTouchStart);
+      window.removeEventListener("touchmove", handleEdgeTouchMove);
+    };
+  }, [isOpen, openDrawer]);
+
+  // Swipe left to close gesture on the drawer panel
+  const handlePanelTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handlePanelTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX !== null) {
+      const currentX = e.touches[0].clientX;
+      const diff = currentX - touchStartX;
+      if (diff < -50) {
+        closeDrawer();
+        setTouchStartX(null);
+      }
+    }
+  };
+
+  const handlePanelTouchEnd = () => {
+    setTouchStartX(null);
+  };
 
   return (
-    <div className="fixed inset-0 z-50 font-sans" role="dialog" aria-modal="true" aria-label="Navigation Drawer">
-      {/* Backdrop Scrim */}
+    <div
+      className={`fixed inset-0 z-50 font-sans pointer-events-none`}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Navigation Drawer"
+      aria-hidden={!isOpen}
+    >
+      {/* Transparent Click-Outside Dismissal Area (Preserves original screen 100%, does not darken or blank out) */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-fade-in cursor-pointer"
+        className={`fixed inset-0 cursor-pointer ${
+          isOpen ? "pointer-events-auto" : "pointer-events-none"
+        }`}
         onClick={closeDrawer}
         aria-hidden="true"
       />
 
-      {/* Drawer Panel (YouTube Style) */}
+      {/* Drawer Panel (YouTube Style Slide-Out / Pull Screen) */}
       <aside
-        className="fixed inset-y-0 left-0 w-72 sm:w-80 bg-white dark:bg-[#0b101e] border-r border-slate-200 dark:border-slate-800/90 shadow-2xl z-50 flex flex-col animate-slide-in-right"
-        style={{ animationDuration: "200ms" }}
+        onTouchStart={handlePanelTouchStart}
+        onTouchMove={handlePanelTouchMove}
+        onTouchEnd={handlePanelTouchEnd}
+        className={`fixed inset-y-0 left-0 w-72 sm:w-80 bg-white dark:bg-[#0b101e] border-r border-slate-200 dark:border-slate-800/90 shadow-2xl z-50 flex flex-col will-change-transform ${
+          isOpen ? "translate-x-0 pointer-events-auto" : "-translate-x-full pointer-events-none"
+        }`}
+        style={{
+          transition: "transform 320ms cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
       >
         {/* Drawer Header (Hamburger + PRISM Logo) */}
         <div className="h-14 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800/80 shrink-0">
@@ -118,12 +185,12 @@ export default function NavigationDrawer() {
                 <Sparkles className="w-3.5 h-3.5 text-white" />
               </div>
               <div>
-                <span className="text-sm font-bold tracking-tight text-slate-900 dark:text-white block leading-none">
+                <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white leading-none">
                   PRISM
-                </span>
-                <span className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono tracking-wider uppercase leading-none mt-0.5 block">
-                  DSA Learning
-                </span>
+                </h1>
+                <p className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono tracking-wider uppercase leading-none mt-1">
+                  DSA Learning Environment
+                </p>
               </div>
             </Link>
           </div>
@@ -206,18 +273,6 @@ export default function NavigationDrawer() {
                 Core memory models, arrays, pointer manipulation & sorting.
               </p>
             </Link>
-          </div>
-
-          {/* Runtime Guarantee Badges */}
-          <div className="px-3 pt-3 space-y-2 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>Verified Python 3.12 (WASM)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Cpu className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
-              <span>sys.settrace Ground Truth</span>
-            </div>
           </div>
         </nav>
 

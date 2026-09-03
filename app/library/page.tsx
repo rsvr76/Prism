@@ -61,25 +61,25 @@ export default function AlgorithmLibraryPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans">
       {/* Top Header */}
-      <header className="flex flex-wrap items-center justify-between gap-4 px-6 py-3.5 bg-white/90 dark:bg-slate-950/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20 shadow-xs dark:shadow-md">
-        <div className="flex items-center gap-3">
+      <header className="h-14 flex items-center justify-between gap-3 px-4 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 sticky top-0 z-20 shadow-xs select-none">
+        <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={toggleDrawer}
             aria-label="Navigation menu"
-            className="p-2 -ml-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-2 -ml-1 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors cursor-pointer"
             title="Navigation Menu"
           >
             <Menu className="w-5 h-5" />
           </button>
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 shadow-sm group-hover:scale-105 transition-transform">
-              <Sparkles className="w-4 h-4 text-white" />
+            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 shadow-sm group-hover:scale-105 transition-transform">
+              <Sparkles className="w-3.5 h-3.5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
+              <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white leading-none">
                 PRISM
               </h1>
-              <p className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono tracking-wider uppercase">
+              <p className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono tracking-wider uppercase leading-none mt-1">
                 DSA Learning Environment
               </p>
             </div>

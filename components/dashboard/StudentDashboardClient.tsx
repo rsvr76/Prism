@@ -72,27 +72,27 @@ export default function StudentDashboardClient() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-cyan-500/30 font-sans">
       {/* Top Navigation Header */}
-      <header className="h-14 border-b border-slate-200 dark:border-slate-800/80 bg-white/90 dark:bg-slate-950/80 backdrop-blur sticky top-0 px-4 sm:px-6 flex items-center justify-between z-20 shadow-xs dark:shadow-md">
-        <div className="flex items-center gap-3">
+      <header className="h-14 border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md sticky top-0 px-4 flex items-center justify-between z-20 shadow-xs select-none">
+        <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={toggleDrawer}
             aria-label="Navigation menu"
-            className="p-2 -ml-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-2 -ml-1 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors cursor-pointer"
             title="Navigation Menu"
           >
             <Menu className="w-5 h-5" />
           </button>
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-              <Sparkles className="w-4 h-4 text-white" />
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+              <Sparkles className="w-3.5 h-3.5 text-white" />
             </div>
             <div>
-              <span className="font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
-                Prism
-              </span>
-              <span className="text-[10px] text-cyan-800 dark:text-cyan-400 font-mono ml-1.5 px-1.5 py-0.5 rounded bg-cyan-100 dark:bg-cyan-950/80 border border-cyan-300 dark:border-cyan-500/30">
-                Dashboard
-              </span>
+              <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white leading-none">
+                PRISM
+              </h1>
+              <p className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono tracking-wider uppercase leading-none mt-1">
+                DSA Learning Environment
+              </p>
             </div>
           </Link>
         </div>
@@ -536,14 +536,7 @@ export default function StudentDashboardClient() {
         )}
 
         {/* 6. Settings & Reset Progress Action */}
-        <section className="pt-6 border-t border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-slate-600 dark:text-slate-400">
-          <div>
-            <p className="font-medium text-slate-800 dark:text-slate-300">Student Progress Persistence</p>
-            <p className="text-slate-500 dark:text-slate-400">
-              Stored securely in your local browser storage (<code className="text-cyan-700 dark:text-cyan-400">prism_progress</code>).
-            </p>
-          </div>
-
+        <section className="pt-6 border-t border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-end gap-4 text-xs text-slate-600 dark:text-slate-400">
           <button
             onClick={() => setShowResetModal(true)}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950/30 dark:hover:bg-rose-950/60 dark:text-rose-400 dark:border-rose-500/30 transition-colors self-start sm:self-auto cursor-pointer"
