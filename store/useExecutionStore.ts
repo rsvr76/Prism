@@ -75,9 +75,16 @@ interface ExecutionStore {
   // Phase 8A: Algorithm Library Integration
   loadedAlgorithmTitle: string | null;
 
+  // Phase 8B: Guided Learning Paths Integration
+  loadedLessonContext: { pathSlug: string; lessonSlug: string; lessonTitle: string } | null;
+
   // Actions
   setCode: (code: string) => void;
-  loadAlgorithmCode: (title: string, code: string) => void;
+  loadAlgorithmCode: (
+    title: string,
+    code: string,
+    lessonContext?: { pathSlug: string; lessonSlug: string; lessonTitle: string } | null
+  ) => void;
   runCode: () => Promise<void>;
   setStep: (step: number) => void;
   nextStep: () => void;
@@ -138,16 +145,22 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
 
   // Phase 8A: Algorithm Library initial state
   loadedAlgorithmTitle: null,
+  loadedLessonContext: null,
 
   setCode: (code: string) => set({ code }),
 
-  loadAlgorithmCode: (title: string, code: string) => {
+  loadAlgorithmCode: (
+    title: string,
+    code: string,
+    lessonContext?: { pathSlug: string; lessonSlug: string; lessonTitle: string } | null
+  ) => {
     traceRunner.cancelExecution();
     ++activeExecutionEpoch;
     branchCounter = 0;
     set({
       code,
       loadedAlgorithmTitle: title,
+      loadedLessonContext: lessonContext || null,
       trace: null,
       currentStep: 0,
       isPlaying: false,
@@ -280,6 +293,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
       isAnalyzingComplexity: false,
       complexityError: null,
       loadedAlgorithmTitle: null,
+      loadedLessonContext: null,
     });
   },
 

@@ -9,19 +9,35 @@ import TimelineScrubber from "@/components/debug/TimelineScrubber";
 import VisualizerCanvas from "@/components/visualization/VisualizerCanvas";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { getAlgorithmBySlug } from "@/lib/content/algorithms";
+import { getLessonBySlug } from "@/lib/content/learningPaths";
 
 function AlgorithmLoader() {
   const searchParams = useSearchParams();
   const loadAlgorithmCode = useExecutionStore((state) => state.loadAlgorithmCode);
-  const lastLoadedSlug = useRef<string | null>(null);
+  const lastLoadedKey = useRef<string | null>(null);
 
   useEffect(() => {
-    const slug = searchParams.get("algo") || searchParams.get("example");
-    if (slug && slug !== lastLoadedSlug.current) {
-      const algo = getAlgorithmBySlug(slug);
+    const algoSlug = searchParams.get("algo") || searchParams.get("example");
+    const lessonSlug = searchParams.get("lesson");
+    const pathSlug = searchParams.get("path") || "dsa-foundations";
+    const cacheKey = `${algoSlug || ""}:${lessonSlug || ""}`;
+
+    if (algoSlug && cacheKey !== lastLoadedKey.current) {
+      const algo = getAlgorithmBySlug(algoSlug);
       if (algo) {
-        lastLoadedSlug.current = slug;
-        loadAlgorithmCode(algo.name, algo.pythonCode);
+        lastLoadedKey.current = cacheKey;
+        let lessonContext: { pathSlug: string; lessonSlug: string; lessonTitle: string } | null = null;
+        if (lessonSlug) {
+          const lookup = getLessonBySlug(pathSlug, lessonSlug);
+          if (lookup) {
+            lessonContext = {
+              pathSlug: lookup.path.slug,
+              lessonSlug: lookup.lesson.slug,
+              lessonTitle: lookup.lesson.title,
+            };
+          }
+        }
+        loadAlgorithmCode(algo.name, algo.pythonCode, lessonContext);
       }
     }
   }, [searchParams, loadAlgorithmCode]);

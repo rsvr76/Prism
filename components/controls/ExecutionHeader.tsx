@@ -15,6 +15,9 @@ import {
   GitBranch,
   BookOpen,
   Code2,
+  Compass,
+  Target,
+  LayoutDashboard,
 } from "lucide-react";
 import WhatIfModal from "./WhatIfModal";
 
@@ -117,6 +120,7 @@ export default function ExecutionHeader() {
   const activeExecutionId = useExecutionStore((state) => state.activeExecutionId);
   const switchExecution = useExecutionStore((state) => state.switchExecution);
   const loadedAlgorithmTitle = useExecutionStore((state) => state.loadedAlgorithmTitle);
+  const loadedLessonContext = useExecutionStore((state) => state.loadedLessonContext);
 
   const getStatusBadge = () => {
     switch (status) {
@@ -163,10 +167,10 @@ export default function ExecutionHeader() {
 
   return (
     <>
-      <header className="flex flex-wrap items-center justify-between gap-4 px-6 py-3 bg-slate-950 border-b border-slate-800 shadow-md">
-        {/* Brand Title */}
+      <header className="h-14 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur px-4 flex items-center justify-between shrink-0 select-none z-10">
+        {/* Brand & Title */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/20">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
           <div>
@@ -195,14 +199,47 @@ export default function ExecutionHeader() {
             <BookOpen className="w-3.5 h-3.5" />
             <span>Algorithm Library</span>
           </Link>
+          <Link
+            href="/paths"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+          >
+            <Compass className="w-3.5 h-3.5" />
+            <span>Learning Paths</span>
+          </Link>
+          <Link
+            href="/practice"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+          >
+            <Target className="w-3.5 h-3.5" />
+            <span>Practice</span>
+          </Link>
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+          >
+            <LayoutDashboard className="w-3.5 h-3.5" />
+            <span>Dashboard</span>
+          </Link>
         </nav>
 
-        {loadedAlgorithmTitle && (
+        {/* Active Lesson or Algorithm Context Badges */}
+        {loadedLessonContext ? (
+          <Link
+            href={`/paths/${loadedLessonContext.pathSlug}/${loadedLessonContext.lessonSlug}`}
+            className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-950/60 border border-purple-500/40 text-purple-300 hover:text-purple-200 hover:border-purple-400 text-xs font-mono transition-colors"
+            title="Return to Guided Lesson"
+          >
+            <Compass className="w-3.5 h-3.5 text-purple-400" />
+            <span className="text-slate-400">Lesson:</span>
+            <span className="font-semibold text-purple-200">{loadedLessonContext.lessonTitle}</span>
+            <span className="text-[10px] text-purple-400 underline ml-1">Return →</span>
+          </Link>
+        ) : loadedAlgorithmTitle ? (
           <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 text-xs font-mono">
             <span className="text-slate-400">Loaded:</span>
             <span className="font-semibold text-cyan-200">{loadedAlgorithmTitle}</span>
           </div>
-        )}
+        ) : null}
 
         {/* Phase 6A: Branch Switcher Tabs */}
         {executionIds.length > 0 && (
