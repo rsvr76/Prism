@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * VisualizerCanvas
@@ -29,23 +29,32 @@ import { Layers } from "lucide-react";
 function NoStructureState({ hasTrace }: { hasTrace: boolean }) {
   if (!hasTrace) {
     return (
-      <div className="h-full flex flex-col items-center justify-center text-slate-600 gap-3">
-        <Layers className="w-10 h-10 opacity-20" />
-        <p className="text-xs font-mono text-center">
-          Run your code to visualize<br />data structures here.
-        </p>
+      <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-3.5 p-6">
+        <div className="w-12 h-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600">
+          <Layers className="w-6 h-6" />
+        </div>
+        <div className="text-center space-y-1">
+          <p className="text-sm font-semibold text-slate-300">
+            Interactive Visualizer Canvas
+          </p>
+          <p className="text-xs font-mono text-slate-500">
+            Run your code to visualize data structures here.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col items-center justify-center text-slate-600 gap-3">
-      <Layers className="w-10 h-10 opacity-20" />
-      <p className="text-xs font-mono text-center text-slate-500">
-        No supported structure detected<br />at this execution step.
+    <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-3 p-6">
+      <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600">
+        <Layers className="w-5 h-5" />
+      </div>
+      <p className="text-xs font-mono text-center text-slate-400">
+        No supported structure detected at this execution step.
       </p>
-      <p className="text-[10px] font-mono text-slate-600 text-center">
-        Supported: Linked lists, Arrays, Binary Search Trees
+      <p className="text-[11px] font-mono text-slate-600 text-center">
+        Supported structures: Singly Linked Lists, 1D Arrays, Binary Search Trees
       </p>
     </div>
   );
@@ -69,14 +78,14 @@ export default function VisualizerCanvas() {
 
   if (!frame || !primaryStructure) {
     return (
-      <div className="w-full h-full bg-slate-950/40 rounded-lg border border-slate-800/60">
+      <div className="w-full h-full bg-[#0a0f1d] rounded-xl border border-slate-800/80 overflow-hidden shadow-lg">
         <NoStructureState hasTrace={!!trace} />
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full bg-slate-950/40 rounded-lg border border-slate-800/60 overflow-hidden">
+    <div className="w-full h-full bg-[#0a0f1d] rounded-xl border border-slate-800/80 overflow-hidden shadow-lg relative">
       {primaryStructure.structureType === "singly_linked_list" && primaryStructure.rootHeapId && (
         <LinkedListVisualizer
           frame={frame}

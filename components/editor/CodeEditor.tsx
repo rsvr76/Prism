@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useRef, useEffect } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
@@ -50,16 +50,24 @@ export default function CodeEditor() {
     editorRef.current.revealLineInCenterIfOutsideViewport(line);
   }, [currentStep, trace]);
 
+  const currentFrame = trace?.frames?.[currentStep];
+
   return (
-    <div className="w-full h-full flex flex-col bg-slate-900 border border-slate-800 rounded-lg overflow-hidden shadow-xl">
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-950/80 border-b border-slate-800 text-xs text-slate-400 font-mono">
+    <div className="w-full h-full flex flex-col bg-[#0a0f1d] border border-slate-800/80 rounded-xl overflow-hidden shadow-lg">
+      <div className="flex items-center justify-between px-3.5 py-2 bg-slate-900/70 border-b border-slate-800/80 text-xs text-slate-400 font-mono">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
-          <span>Python 3.12 Editor</span>
+          <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+          <span className="font-semibold text-slate-200">Python 3.12 Editor</span>
         </div>
-        <span>Monaco Core</span>
+        <div className="flex items-center gap-2 text-[11px] text-slate-500">
+          {currentFrame?.line ? (
+            <span className="text-cyan-400 font-medium">Executing Line {currentFrame.line}</span>
+          ) : (
+            <span>Ready</span>
+          )}
+        </div>
       </div>
-      <div className="flex-1 w-full min-h-[400px]">
+      <div className="flex-1 w-full min-h-[300px]">
         <Editor
           height="100%"
           language="python"
@@ -69,13 +77,19 @@ export default function CodeEditor() {
           onMount={handleEditorDidMount}
           options={{
             minimap: { enabled: false },
-            fontSize: 14,
+            fontSize: 13.5,
+            lineHeight: 22,
             lineNumbers: "on",
             glyphMargin: true,
             scrollBeyondLastLine: false,
             automaticLayout: true,
             tabSize: 4,
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            cursorBlinking: "smooth",
+            cursorSmoothCaretAnimation: "on",
+            smoothScrolling: true,
+            padding: { top: 12, bottom: 12 },
+            fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
+            renderLineHighlight: "all",
           }}
         />
       </div>

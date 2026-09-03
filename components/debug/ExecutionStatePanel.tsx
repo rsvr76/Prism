@@ -22,7 +22,7 @@ export default function ExecutionStatePanel() {
   const tutorMessages = useExecutionStore((state) => state.tutorMessages);
   const complexityAnalyses = useExecutionStore((state) => state.complexityAnalyses);
 
-  const [activeTab, setActiveTab] = useState<"scope" | "ai" | "tutor" | "complexity" | "stack" | "heap" | "stdout">("scope");
+  const [activeTab, setActiveTab] = useState<"scope" | "ai" | "tutor" | "complexity" | "stack" | "heap" | "stdout">("ai");
 
   const currentFrame = trace?.frames?.[currentStep] || null;
   const cacheKey = activeExecutionId ? `${activeExecutionId}_step_${currentStep}` : `step_${currentStep}`;
@@ -32,33 +32,17 @@ export default function ExecutionStatePanel() {
   const hasComplexity = !!(activeExecutionId && complexityAnalyses[activeExecutionId]);
 
   return (
-    <div className="w-full h-full flex flex-col bg-slate-900 border border-slate-800 rounded-lg overflow-hidden shadow-xl">
-      {/* Tab Navigation */}
-      <div className="flex items-center justify-between px-3 py-2 bg-slate-950/80 border-b border-slate-800 text-xs font-mono">
-        <div className="flex items-center gap-1 flex-wrap">
-          <button
-            onClick={() => setActiveTab("scope")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
-              activeTab === "scope"
-                ? "bg-slate-800 text-cyan-400 font-semibold"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <Variable className="w-3.5 h-3.5" />
-            <span>Variables</span>
-            {currentFrame && (
-              <span className="text-[10px] px-1 bg-slate-900 rounded text-slate-400">
-                {Object.keys(currentFrame.scope).length}
-              </span>
-            )}
-          </button>
-
+    <div className="w-full h-full flex flex-col bg-[#0a0f1d] border border-slate-800/80 rounded-xl overflow-hidden shadow-lg">
+      {/* Tab Navigation: Divided into Primary Learning and Diagnostics */}
+      <div className="px-3 py-2 bg-slate-900/80 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+        {/* Primary Learning Tools */}
+        <div className="flex items-center gap-1">
           <button
             onClick={() => setActiveTab("ai")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all cursor-pointer ${
               activeTab === "ai"
-                ? "bg-slate-800 text-cyan-400 font-semibold"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-cyan-950/90 text-cyan-300 font-bold border border-cyan-500/50 shadow-xs"
+                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
@@ -70,16 +54,16 @@ export default function ExecutionStatePanel() {
 
           <button
             onClick={() => setActiveTab("tutor")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all cursor-pointer ${
               activeTab === "tutor"
-                ? "bg-slate-800 text-purple-400 font-semibold"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-purple-950/90 text-purple-300 font-bold border border-purple-500/50 shadow-xs"
+                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
             }`}
           >
             <MessageSquareQuote className="w-3.5 h-3.5 text-purple-400" />
             <span>AI Tutor</span>
             {hasTutorMessages && (
-              <span className="text-[10px] px-1 bg-purple-950 text-purple-300 rounded font-bold">
+              <span className="text-[10px] px-1 bg-purple-900 text-purple-200 rounded font-bold">
                 {activeTutorMsgs.length}
               </span>
             )}
@@ -87,10 +71,10 @@ export default function ExecutionStatePanel() {
 
           <button
             onClick={() => setActiveTab("complexity")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all cursor-pointer ${
               activeTab === "complexity"
-                ? "bg-slate-800 text-amber-400 font-semibold"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-amber-950/90 text-amber-300 font-bold border border-amber-500/50 shadow-xs"
+                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
             }`}
           >
             <Activity className="w-3.5 h-3.5 text-amber-400" />
@@ -99,19 +83,39 @@ export default function ExecutionStatePanel() {
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
             )}
           </button>
+        </div>
 
+        {/* Secondary Diagnostics (Scope, Stack, Heap, Console) */}
+        <div className="flex items-center gap-1 bg-slate-950/60 p-0.5 rounded-md border border-slate-800/60">
           <button
-            onClick={() => setActiveTab("stack")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
-              activeTab === "stack"
-                ? "bg-slate-800 text-cyan-400 font-semibold"
+            onClick={() => setActiveTab("scope")}
+            className={`flex items-center gap-1 px-2 py-0.5 rounded transition-colors cursor-pointer text-[11px] ${
+              activeTab === "scope"
+                ? "bg-slate-800 text-cyan-300 font-semibold shadow-xs"
                 : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            <Layers className="w-3.5 h-3.5" />
+            <Variable className="w-3 h-3" />
+            <span>Variables</span>
+            {currentFrame && (
+              <span className="text-[9px] px-1 bg-slate-900 rounded text-slate-400">
+                {Object.keys(currentFrame.scope).length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab("stack")}
+            className={`flex items-center gap-1 px-2 py-0.5 rounded transition-colors cursor-pointer text-[11px] ${
+              activeTab === "stack"
+                ? "bg-slate-800 text-cyan-300 font-semibold shadow-xs"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <Layers className="w-3 h-3" />
             <span>Call Stack</span>
             {currentFrame && (
-              <span className="text-[10px] px-1 bg-slate-900 rounded text-slate-400">
+              <span className="text-[9px] px-1 bg-slate-900 rounded text-slate-400">
                 {currentFrame.callStack.length}
               </span>
             )}
@@ -119,39 +123,30 @@ export default function ExecutionStatePanel() {
 
           <button
             onClick={() => setActiveTab("heap")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
+            className={`flex items-center gap-1 px-2 py-0.5 rounded transition-colors cursor-pointer text-[11px] ${
               activeTab === "heap"
-                ? "bg-slate-800 text-cyan-400 font-semibold"
+                ? "bg-slate-800 text-cyan-300 font-semibold shadow-xs"
                 : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            <Database className="w-3.5 h-3.5" />
+            <Database className="w-3 h-3" />
             <span>Heap Objects</span>
-            {currentFrame && (
-              <span className="text-[10px] px-1 bg-slate-900 rounded text-slate-400">
-                {Object.keys(currentFrame.heap).length}
-              </span>
-            )}
           </button>
 
           <button
             onClick={() => setActiveTab("stdout")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
+            className={`flex items-center gap-1 px-2 py-0.5 rounded transition-colors cursor-pointer text-[11px] ${
               activeTab === "stdout"
-                ? "bg-slate-800 text-cyan-400 font-semibold"
+                ? "bg-slate-800 text-cyan-300 font-semibold shadow-xs"
                 : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            <Terminal className="w-3.5 h-3.5" />
+            <Terminal className="w-3 h-3" />
             <span>Console</span>
             {currentFrame && currentFrame.stdout.length > 0 && (
-              <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
             )}
           </button>
-        </div>
-
-        <div className="text-[11px] text-slate-400 hidden xl:block">
-          {currentFrame?.description || "Awaiting Execution"}
         </div>
       </div>
 

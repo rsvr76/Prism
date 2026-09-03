@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * BSTVisualizer
@@ -57,8 +57,8 @@ function BSTNodeComponent({ data }: NodeProps<Node<BSTNodeData>>) {
       <Handle
         type="target"
         position={Position.Top}
-        className="!w-2 !h-2 !bg-slate-500 !border-slate-400"
-        style={{ top: -4 }}
+        className="!w-2.5 !h-2.5 !bg-slate-500 !border-slate-300"
+        style={{ top: -5 }}
       />
 
       {/* Floating Pointer Badges (Above Node) */}
@@ -67,7 +67,7 @@ function BSTNodeComponent({ data }: NodeProps<Node<BSTNodeData>>) {
           {pointerLabels.map((lbl) => (
             <span
               key={lbl}
-              className="px-1.5 py-0.2 text-[9px] font-mono font-bold rounded bg-cyan-500/25 border border-cyan-400/60 text-cyan-300 shadow-md shadow-cyan-500/20"
+              className="px-2 py-0.5 text-[10px] font-mono font-bold rounded-md bg-cyan-950/90 border border-cyan-400/60 text-cyan-300 shadow-xs"
             >
               {lbl}
             </span>
@@ -77,18 +77,18 @@ function BSTNodeComponent({ data }: NodeProps<Node<BSTNodeData>>) {
 
       {/* Circular / Rounded Tree Node Box */}
       <div
-        className={`w-14 h-14 rounded-full flex flex-col items-center justify-center border-2 transition-all duration-200 shadow-lg ${
+        className={`w-16 h-16 rounded-full flex flex-col items-center justify-center border-2 transition-all duration-200 shadow-lg ${
           isActive
-            ? "border-cyan-400 bg-cyan-950/80 shadow-cyan-500/40 ring-2 ring-cyan-400/50 scale-105"
-            : "border-slate-600 bg-slate-900/90 hover:border-slate-500"
+            ? "border-cyan-400 bg-[#0a1628] shadow-cyan-500/30 ring-2 ring-cyan-400/50 scale-105"
+            : "border-slate-600/90 bg-slate-900/90 hover:border-slate-500 shadow-md"
         }`}
       >
-        <span className="text-[8px] font-mono text-slate-500 uppercase leading-none">
+        <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider font-semibold leading-none mb-0.5">
           {className}
         </span>
         <span
-          className={`font-mono font-bold text-sm leading-tight truncate max-w-[48px] px-1 text-center ${
-            isActive ? "text-cyan-200" : "text-slate-100"
+          className={`font-mono font-bold text-sm leading-tight truncate max-w-[54px] px-1 text-center ${
+            isActive ? "text-cyan-200" : "text-white"
           }`}
         >
           {displayValue}
@@ -99,8 +99,8 @@ function BSTNodeComponent({ data }: NodeProps<Node<BSTNodeData>>) {
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!w-2 !h-2 !bg-slate-500 !border-slate-400"
-        style={{ bottom: -4 }}
+        className="!w-2.5 !h-2.5 !bg-purple-400 !border-purple-200"
+        style={{ bottom: -5 }}
       />
     </div>
   );
@@ -157,7 +157,7 @@ function buildTreeGraph(
         labelBgPadding: [2, 2],
         labelBgBorderRadius: 2,
         animated: leftActive,
-        style: { stroke: leftActive ? "#22d3ee" : "#64748b", strokeWidth: 1.5 },
+        style: { stroke: leftActive ? "#22d3ee" : "#64748b", strokeWidth: leftActive ? 2.5 : 2 },
         markerEnd: { type: "arrowclosed" as const, color: leftActive ? "#22d3ee" : "#64748b" },
       });
     }
@@ -177,7 +177,7 @@ function buildTreeGraph(
         labelBgPadding: [2, 2],
         labelBgBorderRadius: 2,
         animated: rightActive,
-        style: { stroke: rightActive ? "#22d3ee" : "#64748b", strokeWidth: 1.5 },
+        style: { stroke: rightActive ? "#22d3ee" : "#64748b", strokeWidth: rightActive ? 2.5 : 2 },
         markerEnd: { type: "arrowclosed" as const, color: rightActive ? "#22d3ee" : "#64748b" },
       });
     }
@@ -217,7 +217,7 @@ export default function BSTVisualizer({
     <div className="w-full h-full relative">
       {/* Structure Header Tag */}
       <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-        <span className="px-2 py-0.5 text-[11px] font-mono rounded bg-slate-900 border border-slate-700 text-purple-400 font-bold">
+        <span className="px-2.5 py-0.5 text-[11px] font-mono rounded-md bg-slate-900/90 border border-slate-700/80 text-purple-400 font-bold shadow-xs">
           Binary Search Tree
         </span>
         <span className="text-[11px] font-mono text-slate-400">
@@ -232,7 +232,7 @@ export default function BSTVisualizer({
         edges={edges}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.25 }}
+        fitViewOptions={{ padding: 0.15 }}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
@@ -243,9 +243,9 @@ export default function BSTVisualizer({
       >
         <Background
           variant={BackgroundVariant.Dots}
-          gap={24}
-          size={1}
-          color="#1e293b"
+          gap={22}
+          size={1.2}
+          color="#334155"
         />
         <Controls
           showZoom

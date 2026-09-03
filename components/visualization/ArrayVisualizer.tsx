@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * ArrayVisualizer
@@ -154,7 +154,7 @@ export default function ArrayVisualizer({
 
       {/* ── Main Dual Array View (Bars + Cards) ── */}
       <div className="flex-1 flex flex-col justify-center my-4 overflow-x-auto min-h-0">
-        <div className="flex items-end justify-center gap-2 min-w-fit px-4 py-2">
+        <div className="flex items-end justify-center gap-2.5 min-w-fit px-4 py-2">
           {elements.map((el) => {
             const style = getStateStyle(el.state);
             const inBoundary = boundaries.some(
@@ -164,17 +164,17 @@ export default function ArrayVisualizer({
             return (
               <div
                 key={el.index}
-                className={`flex flex-col items-center gap-1.5 transition-all duration-150 ${
+                className={`flex flex-col items-center gap-1.5 transition-all duration-200 ${
                   inBoundary ? "opacity-100" : boundaries.length > 0 ? "opacity-40" : "opacity-100"
                 }`}
-                style={{ width: Math.max(36, Math.min(64, Math.floor(500 / elements.length))) }}
+                style={{ width: Math.max(40, Math.min(68, Math.floor(520 / elements.length))) }}
               >
                 {/* Pointer Label Badges (Above Cell) */}
                 <div className="h-6 flex items-center justify-center gap-1 flex-wrap">
                   {el.pointerLabels.map((lbl) => (
                     <span
                       key={lbl}
-                      className="px-1.5 py-0.2 text-[9px] font-mono font-bold rounded bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 leading-tight"
+                      className="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded-md bg-cyan-950/90 border border-cyan-400/60 text-cyan-300 shadow-xs leading-none"
                     >
                       {lbl}
                     </span>
@@ -183,17 +183,17 @@ export default function ArrayVisualizer({
 
                 {/* Vertical Bar (Height visual for numbers) */}
                 {hasNumericValues && (
-                  <div className="w-full h-24 flex items-end justify-center bg-slate-900/40 rounded-t border-b border-slate-800 p-0.5">
+                  <div className="w-full h-28 flex items-end justify-center bg-slate-900/40 rounded-t-lg border-b border-slate-800 p-0.5">
                     <div
-                      className={`w-full rounded-t transition-all duration-200 ${style.bar}`}
-                      style={{ height: `${el.heightPercent}%`, minHeight: "4px" }}
+                      className={`w-full rounded-t-md transition-all duration-200 ${style.bar}`}
+                      style={{ height: `${el.heightPercent}%`, minHeight: "6px" }}
                     />
                   </div>
                 )}
 
                 {/* Value Box Card */}
                 <div
-                  className={`w-full h-11 flex items-center justify-center rounded border-2 transition-all duration-200 font-mono font-bold text-xs ${style.border} ${style.glow}`}
+                  className={`w-full h-12 flex items-center justify-center rounded-lg border-2 transition-all duration-200 font-mono font-bold text-sm ${style.border} ${style.glow}`}
                 >
                   <span className="truncate px-1">
                     {el.value === null ? "None" : String(el.value)}
@@ -201,7 +201,7 @@ export default function ArrayVisualizer({
                 </div>
 
                 {/* Index Subscript */}
-                <span className="text-[10px] font-mono text-slate-500 font-medium">
+                <span className="text-[11px] font-mono text-slate-400 font-medium">
                   [{el.index}]
                 </span>
               </div>

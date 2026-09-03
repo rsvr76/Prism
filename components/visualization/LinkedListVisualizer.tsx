@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * LinkedListVisualizer
@@ -36,9 +36,9 @@ import {
 
 // ─── Node Layout Constants ────────────────────────────────────────────────────
 
-const NODE_WIDTH = 120;
-const NODE_HEIGHT = 60;
-const NODE_SPACING_X = 180;
+const NODE_WIDTH = 132;
+const NODE_HEIGHT = 64;
+const NODE_SPACING_X = 195;
 const INITIAL_X = 60;
 const INITIAL_Y = 120;
 const NULL_NODE_ID = "__prism_null__";
@@ -56,39 +56,54 @@ interface LinkedListNodeData {
 
 function LinkedListNodeComponent({ data }: NodeProps<Node<LinkedListNodeData>>) {
   const { displayValue, pointerLabels, isActive, className } = data;
+  const isHead = pointerLabels.some((l) => l.toLowerCase() === "head");
 
   return (
     <div className="relative">
-      {/* Pointer labels above the node */}
+      {/* Pointer labels & Head Indicator above the node */}
       {pointerLabels.length > 0 && (
-        <div className="absolute -top-8 left-0 right-0 flex justify-center gap-1 flex-wrap">
-          {pointerLabels.map((label) => (
-            <span
-              key={label}
-              className="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded bg-cyan-500/20 border border-cyan-400/50 text-cyan-300"
-            >
-              {label}
-            </span>
-          ))}
+        <div className="absolute -top-8 left-0 right-0 flex justify-center gap-1.5 flex-wrap z-10">
+          {pointerLabels.map((label) => {
+            const isThisHead = label.toLowerCase() === "head";
+            const isCurr = label.toLowerCase() === "curr" || label.toLowerCase() === "current";
+
+            return (
+              <span
+                key={label}
+                className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded-md shadow-xs flex items-center gap-1 ${
+                  isThisHead
+                    ? "bg-emerald-950/90 border border-emerald-500/60 text-emerald-300 ring-1 ring-emerald-500/30"
+                    : isCurr
+                    ? "bg-cyan-950/90 border border-cyan-400/60 text-cyan-300 ring-1 ring-cyan-400/30"
+                    : "bg-slate-900/90 border border-slate-700 text-slate-300"
+                }`}
+              >
+                {isThisHead && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>}
+                {label}
+              </span>
+            );
+          })}
         </div>
       )}
 
       {/* Node box: val | next */}
       <div
-        className={`flex items-stretch h-[${NODE_HEIGHT}px] rounded-md border-2 overflow-hidden shadow-lg transition-all ${
+        className={`flex items-stretch rounded-lg border-2 overflow-hidden shadow-lg transition-all duration-200 ${
           isActive
-            ? "border-cyan-400 shadow-cyan-500/30 bg-cyan-950/60"
-            : "border-slate-600 bg-slate-800/80"
+            ? "border-cyan-400 shadow-cyan-500/25 bg-[#0a1628] ring-2 ring-cyan-400/40"
+            : isHead
+            ? "border-slate-600 bg-slate-900/95 hover:border-slate-500"
+            : "border-slate-700/80 bg-slate-900/90 hover:border-slate-600"
         }`}
         style={{ width: NODE_WIDTH, height: NODE_HEIGHT }}
       >
         {/* Value compartment */}
-        <div className="flex-1 flex flex-col items-center justify-center border-r border-slate-600/60 px-2">
-          <span className="text-[9px] font-mono text-slate-500 uppercase leading-none mb-1">
+        <div className="flex-1 flex flex-col items-center justify-center border-r border-slate-700/80 px-2.5 bg-slate-950/30">
+          <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider font-semibold leading-none mb-1">
             {className}
           </span>
           <span
-            className={`font-mono font-bold text-sm leading-none ${
+            className={`font-mono font-bold text-base leading-none tracking-tight ${
               isActive ? "text-cyan-200" : "text-slate-100"
             }`}
           >
@@ -96,9 +111,10 @@ function LinkedListNodeComponent({ data }: NodeProps<Node<LinkedListNodeData>>) 
           </span>
         </div>
 
-        {/* Next pointer compartment */}
-        <div className="w-8 flex items-center justify-center bg-slate-900/40">
-          <span className="text-[9px] font-mono text-slate-500">→</span>
+        {/* Next pointer socket */}
+        <div className="w-9 flex flex-col items-center justify-center bg-slate-950/60 text-slate-400">
+          <span className="text-[8px] font-mono text-slate-500 uppercase leading-none mb-0.5">next</span>
+          <span className="text-xs font-mono text-cyan-400 leading-none">●</span>
         </div>
       </div>
 
@@ -106,14 +122,14 @@ function LinkedListNodeComponent({ data }: NodeProps<Node<LinkedListNodeData>>) 
       <Handle
         type="target"
         position={Position.Left}
-        className="!w-2 !h-2 !bg-slate-500 !border-slate-400"
-        style={{ left: -4 }}
+        className="!w-2.5 !h-2.5 !bg-slate-500 !border-slate-300"
+        style={{ left: -5 }}
       />
       <Handle
         type="source"
         position={Position.Right}
-        className="!w-2 !h-2 !bg-slate-500 !border-slate-400"
-        style={{ right: -4 }}
+        className="!w-2.5 !h-2.5 !bg-cyan-400 !border-cyan-200"
+        style={{ right: -5 }}
       />
     </div>
   );
@@ -124,16 +140,16 @@ function LinkedListNodeComponent({ data }: NodeProps<Node<LinkedListNodeData>>) 
 function NullNodeComponent(_props: NodeProps) {
   return (
     <div
-      className="flex items-center justify-center rounded border-2 border-dashed border-slate-600 bg-slate-900/40"
-      style={{ width: 64, height: NODE_HEIGHT }}
+      className="flex items-center justify-center rounded-lg border-2 border-dashed border-slate-700 bg-slate-950/50 shadow-sm"
+      style={{ width: 72, height: NODE_HEIGHT }}
     >
       <Handle
         type="target"
         position={Position.Left}
-        className="!w-2 !h-2 !bg-slate-600 !border-slate-500"
-        style={{ left: -4 }}
+        className="!w-2.5 !h-2.5 !bg-slate-600 !border-slate-400"
+        style={{ left: -5 }}
       />
-      <span className="text-slate-500 font-mono text-xs font-bold">⏚ NULL</span>
+      <span className="text-slate-500 font-mono text-xs font-bold tracking-wider">⏚ NULL</span>
     </div>
   );
 }
@@ -196,8 +212,8 @@ function buildGraphFromFrame(
         target: nextHeapId,
         type: "smoothstep",
         animated: isActive,
-        style: { stroke: isActive ? "#22d3ee" : "#475569", strokeWidth: 1.5 },
-        markerEnd: { type: "arrowclosed" as const, color: isActive ? "#22d3ee" : "#475569" },
+        style: { stroke: isActive ? "#22d3ee" : "#64748b", strokeWidth: isActive ? 2.5 : 2 },
+        markerEnd: { type: "arrowclosed" as const, color: isActive ? "#22d3ee" : "#64748b" },
       });
     } else if (nextHeapId && isCircular) {
       // Circular back edge — skip for simplicity in Phase 3A layout
@@ -219,8 +235,8 @@ function buildGraphFromFrame(
         source: heapId,
         target: nullNodeId,
         type: "smoothstep",
-        style: { stroke: "#334155", strokeWidth: 1.5, strokeDasharray: "4 2" },
-        markerEnd: { type: "arrowclosed" as const, color: "#475569" },
+        style: { stroke: "#475569", strokeWidth: 1.8, strokeDasharray: "4 3" },
+        markerEnd: { type: "arrowclosed" as const, color: "#64748b" },
       });
     }
   });
@@ -232,7 +248,7 @@ function buildGraphFromFrame(
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-2">
+    <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-2 p-6">
       <svg className="w-12 h-12 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <circle cx="6" cy="12" r="3" strokeWidth="1.5" />
         <circle cx="18" cy="12" r="3" strokeWidth="1.5" />
@@ -269,11 +285,11 @@ export default function LinkedListVisualizer({
     <div className="w-full h-full relative">
       {/* Structure label */}
       <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-        <span className="px-2 py-0.5 text-[11px] font-mono rounded bg-slate-900 border border-slate-700 text-slate-400">
-          Linked List
+        <span className="px-2.5 py-0.5 text-[11px] font-mono rounded-md bg-slate-900/90 border border-slate-700/80 text-cyan-400 font-bold shadow-xs">
+          Singly Linked List
         </span>
-        <span className="text-[11px] font-mono text-slate-500">
-          <strong className="text-cyan-400">{structureName}</strong>
+        <span className="text-[11px] font-mono text-slate-400">
+          <strong className="text-white">{structureName}</strong>
           {" · "}
           {nodes.filter((n) => n.type === "linkedListNode").length} node(s)
         </span>
@@ -284,7 +300,7 @@ export default function LinkedListVisualizer({
         edges={edges}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.3 }}
+        fitViewOptions={{ padding: 0.15 }}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
@@ -295,9 +311,9 @@ export default function LinkedListVisualizer({
       >
         <Background
           variant={BackgroundVariant.Dots}
-          gap={24}
-          size={1}
-          color="#1e293b"
+          gap={22}
+          size={1.2}
+          color="#334155"
         />
         <Controls
           showZoom
@@ -310,3 +326,4 @@ export default function LinkedListVisualizer({
     </div>
   );
 }
+

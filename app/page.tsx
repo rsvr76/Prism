@@ -48,7 +48,7 @@ function AlgorithmLoader() {
 
 export default function PrismWorkbench() {
   return (
-    <main className="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 text-slate-100">
+    <main className="flex flex-col min-h-screen lg:h-screen w-screen overflow-y-auto lg:overflow-hidden bg-[#070a13] text-slate-100">
       {/* Parameter-based Algorithm loader */}
       <Suspense fallback={null}>
         <AlgorithmLoader />
@@ -61,25 +61,27 @@ export default function PrismWorkbench() {
       <WelcomeHeroBanner />
 
       {/* Main 3-Panel Workbench */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_1.2fr_1fr] gap-3 p-3 overflow-hidden min-h-0">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_1.6fr_1.1fr] xl:grid-cols-[0.95fr_1.7fr_1.1fr] gap-3 p-2.5 md:p-3 lg:overflow-hidden min-h-0">
         {/* Left Column: Monaco Code Editor */}
-        <div className="h-full overflow-hidden min-h-0">
+        <div className="h-[360px] lg:h-full lg:overflow-hidden min-h-0 flex flex-col">
           <CodeEditor />
         </div>
 
-        {/* Center Column: Linked List / Structure Visualizer */}
-        <div className="h-full overflow-hidden min-h-0">
+        {/* Center Column: Linked List / Structure Visualizer (HERO) */}
+        <div className="h-[400px] lg:h-full lg:overflow-hidden min-h-0 flex flex-col">
           <VisualizerCanvas />
         </div>
 
-        {/* Right Column: Execution State & Memory Inspector */}
-        <div className="h-full overflow-hidden min-h-0">
+        {/* Right Column: Execution State & Grounded AI Pedagogy */}
+        <div className="h-[380px] lg:h-full lg:overflow-hidden min-h-0 flex flex-col">
           <ExecutionStatePanel />
         </div>
       </div>
 
       {/* Bottom Dock: Timeline Playback & Scrubber */}
-      <TimelineScrubber />
+      <div className="sticky bottom-0 z-30">
+        <TimelineScrubber />
+      </div>
     </main>
   );
 }
