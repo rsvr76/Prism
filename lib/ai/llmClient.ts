@@ -377,35 +377,33 @@ export async function generateStepExplanation(
   const userPrompt = formatUserPrompt(context, sourceCode);
   let rawJsonText: string;
 
-  if (provider === "gemini") {
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is not configured on the server.");
+  if (provider === "gemini" && !apiKey) {
+    throw new Error("GEMINI_API_KEY is not configured on the server.");
+  }
+  if (provider === "openai" && !apiKey) {
+    throw new Error("OPENAI_API_KEY is not configured on the server.");
+  }
+
+  try {
+    if (provider === "gemini") {
+      rawJsonText = await callGemini(GROUNDING_SYSTEM_PROMPT, userPrompt, model, apiKey);
+    } else if (provider === "openai") {
+      rawJsonText = await callOpenAI(GROUNDING_SYSTEM_PROMPT, userPrompt, model, apiKey);
+    } else {
+      return generateMockExplanation(context);
     }
-    rawJsonText = await callGemini(GROUNDING_SYSTEM_PROMPT, userPrompt, model, apiKey);
-  } else if (provider === "openai") {
-    if (!apiKey) {
-      throw new Error("OPENAI_API_KEY is not configured on the server.");
+
+    const cleanJson = extractJSONString(rawJsonText);
+    const parsed = JSON.parse(cleanJson);
+    const validationResult = StepExplanationSchema.safeParse(parsed);
+    if (!validationResult.success) {
+      throw new Error("Validation failed");
     }
-    rawJsonText = await callOpenAI(GROUNDING_SYSTEM_PROMPT, userPrompt, model, apiKey);
-  } else {
+    return validationResult.data;
+  } catch (err) {
+    console.warn("[StepExplainer] Live LLM call failed or unavailable, providing deterministic fallback:", (err as Error).message);
     return generateMockExplanation(context);
   }
-
-  const cleanJson = extractJSONString(rawJsonText);
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(cleanJson);
-  } catch (err) {
-    throw new Error(`Invalid JSON returned by LLM: ${(err as Error).message}`);
-  }
-
-  const validationResult = StepExplanationSchema.safeParse(parsed);
-  if (!validationResult.success) {
-    const errors = validationResult.error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join("; ");
-    throw new Error(`LLM output failed Zod schema validation: ${errors}`);
-  }
-
-  return validationResult.data;
 }
 
 /**
@@ -441,35 +439,33 @@ export async function generateTutorResponse(
   const userPrompt = formatTutorUserPrompt(context, sourceCode, history, question);
   let rawJsonText: string;
 
-  if (provider === "gemini") {
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is not configured on the server.");
+  if (provider === "gemini" && !apiKey) {
+    throw new Error("GEMINI_API_KEY is not configured on the server.");
+  }
+  if (provider === "openai" && !apiKey) {
+    throw new Error("OPENAI_API_KEY is not configured on the server.");
+  }
+
+  try {
+    if (provider === "gemini") {
+      rawJsonText = await callGemini(TUTOR_SYSTEM_PROMPT, userPrompt, model, apiKey);
+    } else if (provider === "openai") {
+      rawJsonText = await callOpenAI(TUTOR_SYSTEM_PROMPT, userPrompt, model, apiKey);
+    } else {
+      return generateMockTutorResponse(context, question);
     }
-    rawJsonText = await callGemini(TUTOR_SYSTEM_PROMPT, userPrompt, model, apiKey);
-  } else if (provider === "openai") {
-    if (!apiKey) {
-      throw new Error("OPENAI_API_KEY is not configured on the server.");
+
+    const cleanJson = extractJSONString(rawJsonText);
+    const parsed = JSON.parse(cleanJson);
+    const validationResult = TutorResponseSchema.safeParse(parsed);
+    if (!validationResult.success) {
+      throw new Error("Validation failed");
     }
-    rawJsonText = await callOpenAI(TUTOR_SYSTEM_PROMPT, userPrompt, model, apiKey);
-  } else {
+    return validationResult.data;
+  } catch (err) {
+    console.warn("[Tutor] Live LLM call failed or unavailable, providing deterministic fallback:", (err as Error).message);
     return generateMockTutorResponse(context, question);
   }
-
-  const cleanJson = extractJSONString(rawJsonText);
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(cleanJson);
-  } catch (err) {
-    throw new Error(`Invalid JSON returned by LLM: ${(err as Error).message}`);
-  }
-
-  const validationResult = TutorResponseSchema.safeParse(parsed);
-  if (!validationResult.success) {
-    const errors = validationResult.error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join("; ");
-    throw new Error(`LLM Tutor output failed Zod schema validation: ${errors}`);
-  }
-
-  return validationResult.data;
 }
 
 /**
@@ -505,40 +501,37 @@ export async function generateComplexityAnalysis(
   const userPrompt = formatComplexityUserPrompt(request);
   let rawJsonText: string;
 
-  if (provider === "gemini") {
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is not configured on the server.");
+  if (provider === "gemini" && !apiKey) {
+    throw new Error("GEMINI_API_KEY is not configured on the server.");
+  }
+  if (provider === "openai" && !apiKey) {
+    throw new Error("OPENAI_API_KEY is not configured on the server.");
+  }
+
+  try {
+    if (provider === "gemini") {
+      rawJsonText = await callGemini(COMPLEXITY_SYSTEM_PROMPT, userPrompt, model, apiKey);
+    } else if (provider === "openai") {
+      rawJsonText = await callOpenAI(COMPLEXITY_SYSTEM_PROMPT, userPrompt, model, apiKey);
+    } else {
+      return generateMockComplexityAnalysis(request);
     }
-    rawJsonText = await callGemini(COMPLEXITY_SYSTEM_PROMPT, userPrompt, model, apiKey);
-  } else if (provider === "openai") {
-    if (!apiKey) {
-      throw new Error("OPENAI_API_KEY is not configured on the server.");
+
+    const cleanJson = extractJSONString(rawJsonText);
+    const parsed = JSON.parse(cleanJson);
+    const validationResult = ComplexityResponseSchema.safeParse(parsed);
+    if (!validationResult.success) {
+      throw new Error("Validation failed");
     }
-    rawJsonText = await callOpenAI(COMPLEXITY_SYSTEM_PROMPT, userPrompt, model, apiKey);
-  } else {
+
+    // Authoritative invariant: The deterministic analyzer has final authority over complexity class.
+    return {
+      ...validationResult.data,
+      timeComplexity: request.metrics.observedTimeHeuristic,
+      spaceComplexity: request.metrics.observedSpaceHeuristic,
+    };
+  } catch (err) {
+    console.warn("[ComplexityAnalysis] Live LLM call failed or unavailable, providing deterministic fallback:", (err as Error).message);
     return generateMockComplexityAnalysis(request);
   }
-
-  const cleanJson = extractJSONString(rawJsonText);
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(cleanJson);
-  } catch (err) {
-    throw new Error(`Invalid JSON returned by LLM: ${(err as Error).message}`);
-  }
-
-  const validationResult = ComplexityResponseSchema.safeParse(parsed);
-  if (!validationResult.success) {
-    const errors = validationResult.error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join("; ");
-    throw new Error(`LLM Complexity output failed Zod schema validation: ${errors}`);
-  }
-
-  // Authoritative invariant: The deterministic analyzer has final authority over complexity class.
-  const finalResult = {
-    ...validationResult.data,
-    timeComplexity: request.metrics.observedTimeHeuristic,
-    spaceComplexity: request.metrics.observedSpaceHeuristic,
-  };
-
-  return finalResult;
 }
