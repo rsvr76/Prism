@@ -21,7 +21,7 @@ DETERMINISTIC VISUALS       GROUNDED AI (Tutor & Explainer)
        STUDENT UNDERSTANDING
 ```
 
----
+
 
 ## Why Prism?
 
@@ -32,7 +32,7 @@ Prism bridges this divide:
 - **Trace-Grounded Explanations**: The AI Tutor reads the physical memory diff between steps—it cannot guess or hallucinate variable states.
 - **Hypothesis Testing**: With What-If branching, students can fork execution at any step, modify the code, and immediately compare the two execution trajectories side by side.
 
----
+
 
 ## How It Works
 
@@ -43,7 +43,7 @@ Prism bridges this divide:
 5. **Interactive Visualization & Stepping**: Monaco Editor highlights the active source line in real time as students scrub the playback timeline.
 6. **Grounded AI Assistance**: Students can inspect step explanations or chat with the AI Tutor, with all prompts referencing verified trace data.
 
----
+
 
 ## Learning Experience
 
@@ -53,7 +53,7 @@ Prism structures algorithmic discovery into progressive tiers:
 - **Guided Learning Paths (`/paths`)**: Curated curriculums such as **DSA Foundations** (6 sequential stages, 10 lessons) with explicit prerequisites, mental models, and linear navigation.
 - **Student Dashboard (`/dashboard`)**: A unified overview providing deterministic progress tracking, "Continue Learning" pointers, "Practice Next" recommendations, and bounded activity logging.
 
----
+
 
 ## Practice & Challenges
 
@@ -65,7 +65,7 @@ The **Practice System (`/practice`)** tests genuine algorithmic problem-solving 
 
 All submissions are evaluated against real Python test execution. The AI may provide contextual hints and feedback, but deterministic evaluation remains the sole authority.
 
----
+
 
 ## AI Tutor & Explainer
 
@@ -74,7 +74,7 @@ All submissions are evaluated against real Python test execution. The AI may pro
 - **Clear Distinction**: The UI explicitly labels deterministic observations ("Observed in Execution") separately from AI explanations ("Prism Explains").
 - **Injection Resistant**: User code is quarantined inside isolated data blocks, preventing prompt injection attacks from altering tutor behavior.
 
----
+
 
 ## Security & Isolation
 
@@ -83,13 +83,13 @@ All submissions are evaluated against real Python test execution. The AI may pro
 - **Watchdog Protection**: Strict execution limits enforce a maximum of 1,000 trace frames, 50 call stack frames, and a 3,000 ms runtime ceiling.
 - **Zero Leaked Secrets**: AI provider keys are restricted to server-side API routes and are never packaged into client bundles or stored in browser storage.
 
----
+
 
 ## Architecture
 
 ```
 app/
-├── (workbench)/page.tsx        # Main 3-panel interactive workbench
+├── (workbench)/page.tsx       # Main 3-panel interactive workbench
 ├── library/                   # Algorithm Library catalog and detail views
 ├── paths/                     # Guided Learning Paths and focused lessons
 ├── practice/                  # Practice challenges and interactive tests
@@ -111,7 +111,7 @@ lib/
 └── progress/                  # Unified student progress aggregation and activity logs
 ```
 
----
+
 
 ## Tech Stack
 
@@ -124,7 +124,7 @@ lib/
 - **AI Integration**: Google Gemini 2.5 Flash / REST Fallback with Zod validation
 - **Testing**: Vitest (Unit & Integration) + Playwright (Real Browser E2E)
 
----
+
 
 ## Getting Started
 
