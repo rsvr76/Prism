@@ -5,12 +5,12 @@
 Prism is an execution-grounded learning environment for Data Structures and Algorithms (DSA). Students write and execute genuine Python 3 in an in-browser WebAssembly sandbox, inspect physical memory mutations step by step through interactive visualizers, and receive contextual pedagogical explanations strictly grounded in the execution trace.
 
 ```
-REAL PYTHON CODE
-       ↓
+        REAL PYTHON CODE
+                ↓
 REAL SANDBOXED EXECUTION (Pyodide Web Worker)
-       ↓
+                ↓
 IMMUTABLE PRISM TRACE (sys.settrace frames)
-       ↓
+                ↓
 ┌───────────────┴───────────────┐
 ↓                               ↓
 DETERMINISTIC VISUALS       GROUNDED AI (Tutor & Explainer)
