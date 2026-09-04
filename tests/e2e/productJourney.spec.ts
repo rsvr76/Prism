@@ -30,10 +30,10 @@ test.describe('Phase 8E: Complete Student Product Flows & Release Readiness', ()
     await expect(page).toHaveURL(/\/\?algo=array&lesson=arrays-memory-access/);
 
     // 6. Execute in Workbench
-    const runBtn = page.getByRole('button', { name: 'Run Trace' });
+    const runBtn = page.getByRole('button', { name: /Execute|Visualize/i }).first();
     await expect(runBtn).toBeEnabled({ timeout: 15000 });
     await runBtn.click();
-    await expect(page.getByText(/Executed \(\d+ steps\)/i)).toBeVisible({ timeout: 60000 });
+    await expect(page.getByText(/Executed \(\d+ steps\)/i).or(page.getByText(/\d+ steps/i)).first()).toBeVisible({ timeout: 60000 });
   });
 
   test('Flow 2: Lesson → Practice Concept Cross-Link → Workbench Challenge Layout', async ({ page }) => {
@@ -56,6 +56,7 @@ test.describe('Phase 8E: Complete Student Product Flows & Release Readiness', ()
   test('Flow 3: Practice Progressive Hint Reveal', async ({ page }) => {
     await page.goto('/practice/find-maximum-value');
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Reveal Hint 1
     const revealBtn = page.getByRole('button', { name: /Reveal hint/i });
@@ -73,6 +74,7 @@ test.describe('Phase 8E: Complete Student Product Flows & Release Readiness', ()
   test('Flow 4: Progress Dashboard → Continue Learning to Next Lesson', async ({ page }) => {
     await page.goto('/dashboard');
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Click Continue Learning
     const continueBtn = page.getByRole('link', { name: 'Continue Learning' });

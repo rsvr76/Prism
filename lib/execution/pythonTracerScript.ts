@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Embedded Python Tracer Script
  * Executed inside Pyodide via sys.settrace to capture ground-truth execution snapshots.
  * Hardened with safe __import__ sandbox hooks, exception-safe attribute traversal,
@@ -203,6 +203,16 @@ def __run_prism_trace__(code_str, max_frames=1000, max_ops=5000, max_stack_depth
         return original_import(name, *args, **kwargs)
     
     safe_builtins['__import__'] = safe_import
+
+    def disallowed_builtin(name):
+        def _disallowed(*args, **kwargs):
+            raise PermissionError(f"Function '{name}()' is disallowed in the Prism sandbox.")
+        return _disallowed
+
+    safe_builtins['open'] = disallowed_builtin('open')
+    safe_builtins['eval'] = disallowed_builtin('eval')
+    safe_builtins['exec'] = disallowed_builtin('exec')
+
     user_globals = {'__builtins__': safe_builtins, '__name__': '__main__'}
     
     try:

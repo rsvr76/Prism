@@ -43,11 +43,15 @@ export interface HeapObject {
 }
 
 export interface StackFrame {
-  frameId: string;
+  frameId?: string;
   functionName: string;
   line: number;
-  localVariables: Record<string, SerializedValue>;
+  localVariables?: Record<string, SerializedValue>;
+  locals?: Record<string, SerializedValue>;
+  fileName?: string;
 }
+
+export type FrameCallStackItem = StackFrame;
 
 export interface PointerMarker {
   name: string;              // e.g. 'head', 'curr', 'prev', 'slow', 'fast'

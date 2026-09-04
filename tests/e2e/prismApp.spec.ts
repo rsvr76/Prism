@@ -12,8 +12,9 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
     await expect(page.locator('h1')).toHaveText('PRISM');
 
     // Controls
-    await expect(page.getByRole('button', { name: 'Run Trace' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Reset All Executions' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Execute' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Visualize' })).toBeVisible();
+    await expect(page.getByTitle('Reset Code & Execution')).toBeVisible();
 
     // Editor container
     await expect(page.getByText('Python 3.12 Editor')).toBeVisible();
@@ -22,11 +23,11 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
     await expect(page.getByText(/Timeline ready/i)).toBeVisible();
 
     // Visualizer Canvas empty state
-    await expect(page.getByText(/Run your code to visualize/i)).toBeVisible();
+    await expect(page.getByText(/Interactive Visualizer Canvas|run and inspect|visualize/i).first()).toBeVisible();
   });
 
   test('2. Standard Python Execution, Timeline Scrubbing & Monaco Line Sync', async ({ page }) => {
-    const runBtn = page.getByRole('button', { name: 'Run Trace' });
+    const runBtn = page.getByRole('button', { name: 'Visualize' });
     await expect(runBtn).toBeEnabled({ timeout: 15000 });
     await runBtn.click();
 
@@ -48,7 +49,7 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
   });
 
   test('3. Execution State Panel & Grounded Step Explainer', async ({ page }) => {
-    const runBtn = page.getByRole('button', { name: 'Run Trace' });
+    const runBtn = page.getByRole('button', { name: 'Visualize' });
     await expect(runBtn).toBeEnabled({ timeout: 15000 });
     await runBtn.click();
     await expect(page.getByText(/Executed \(\d+ steps\)/i)).toBeVisible({ timeout: 60000 });
@@ -58,6 +59,9 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
     for (let i = 0; i < 5; i++) {
       await stepForwardBtn.click();
     }
+
+    // Open AI and Diagnostics panel
+    await page.getByRole('button', { name: /Toggle AI and Diagnostics panel/i }).click();
 
     // 1. Variables Tab
     const variablesTab = page.getByRole('button', { name: /Variables/i });
@@ -79,10 +83,13 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
   });
 
   test('4. Interactive AI Learning (Tutor & Big-O Complexity Insights)', async ({ page }) => {
-    const runBtn = page.getByRole('button', { name: 'Run Trace' });
+    const runBtn = page.getByRole('button', { name: 'Visualize' });
     await expect(runBtn).toBeEnabled({ timeout: 15000 });
     await runBtn.click();
     await expect(page.getByText(/Executed \(\d+ steps\)/i)).toBeVisible({ timeout: 60000 });
+
+    // Open AI and Diagnostics panel
+    await page.getByRole('button', { name: /Toggle AI and Diagnostics panel/i }).click();
 
     // 1. AI Tutor Tab
     const tutorTab = page.getByRole('button', { name: 'AI Tutor' });
@@ -111,7 +118,7 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
     const presetSelect = page.locator('select');
     await presetSelect.selectOption('Linked List Traversal');
 
-    const runBtn = page.getByRole('button', { name: 'Run Trace' });
+    const runBtn = page.getByRole('button', { name: 'Visualize' });
     await expect(runBtn).toBeEnabled({ timeout: 15000 });
     await runBtn.click();
     await expect(page.getByText(/Executed \(\d+ steps\)/i)).toBeVisible({ timeout: 60000 });
@@ -130,7 +137,7 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
     const presetSelect = page.locator('select');
     await presetSelect.selectOption('Bubble Sort');
 
-    const runBtn = page.getByRole('button', { name: 'Run Trace' });
+    const runBtn = page.getByRole('button', { name: 'Visualize' });
     await expect(runBtn).toBeEnabled({ timeout: 15000 });
     await runBtn.click();
     await expect(page.getByText(/Executed \(\d+ steps\)/i)).toBeVisible({ timeout: 60000 });
@@ -146,7 +153,7 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
   });
 
   test('7. What-If Branching Workflow & Tab Switching', async ({ page }) => {
-    const runBtn = page.getByRole('button', { name: 'Run Trace' });
+    const runBtn = page.getByRole('button', { name: 'Visualize' });
     await expect(runBtn).toBeEnabled({ timeout: 15000 });
     await runBtn.click();
     await expect(page.getByText(/Executed \(\d+ steps\)/i)).toBeVisible({ timeout: 60000 });
@@ -184,7 +191,7 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
 
-    const runBtn = page.getByRole('button', { name: 'Run Trace' });
+    const runBtn = page.getByRole('button', { name: 'Visualize' });
     await expect(runBtn).toBeEnabled({ timeout: 15000 });
     await runBtn.click();
     await expect(page.getByText(/Executed \(\d+ steps\)/i)).toBeVisible({ timeout: 60000 });
@@ -205,7 +212,7 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
     await page.goto('/');
 
     await expect(page.locator('h1')).toHaveText('PRISM');
-    await expect(page.getByRole('button', { name: 'Run Trace' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Execute' })).toBeVisible();
     await expect(page.getByText('Python 3.12 Editor')).toBeVisible();
   });
 });

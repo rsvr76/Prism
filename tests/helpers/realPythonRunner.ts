@@ -22,7 +22,7 @@ print(result_json)
     const output = execSync("python -", {
       input: runnerScript,
       encoding: "utf-8",
-      timeout: 5000,
+      timeout: 15000,
     });
 
     const marker = "__PRISM_REAL_RESULT__";

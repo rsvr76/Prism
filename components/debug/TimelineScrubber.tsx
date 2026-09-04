@@ -2,10 +2,11 @@
 
 import React, { useEffect } from "react";
 import { useExecutionStore } from "@/store/useExecutionStore";
-import { Play, Pause, SkipBack, SkipForward, FastForward, GitBranch } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, FastForward, GitBranch, AlertTriangle } from "lucide-react";
 
 export default function TimelineScrubber() {
   const trace = useExecutionStore((state) => state.trace);
+  const isVisualizing = useExecutionStore((state) => state.isVisualizing);
   const currentStep = useExecutionStore((state) => state.currentStep);
   const isPlaying = useExecutionStore((state) => state.isPlaying);
   const playbackSpeed = useExecutionStore((state) => state.playbackSpeed);
@@ -20,7 +21,7 @@ export default function TimelineScrubber() {
 
   // Handle Playback Interval
   useEffect(() => {
-    if (!isPlaying || totalFrames === 0) return;
+    if (!isPlaying || !isVisualizing || totalFrames === 0) return;
 
     const intervalTime = Math.round(500 / playbackSpeed);
     const timer = setInterval(() => {
@@ -32,12 +33,12 @@ export default function TimelineScrubber() {
     }, intervalTime);
 
     return () => clearInterval(timer);
-  }, [isPlaying, currentStep, totalFrames, playbackSpeed, nextStep, togglePlay]);
+  }, [isPlaying, isVisualizing, currentStep, totalFrames, playbackSpeed, nextStep, togglePlay]);
 
-  if (!trace || totalFrames === 0) {
+  if (!isVisualizing || !trace || totalFrames === 0) {
     return (
       <div className="h-14 flex items-center justify-between px-6 bg-white/95 dark:bg-[#0a0f1d]/90 backdrop-blur border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 font-mono select-none">
-        <span>Timeline ready. Click &quot;Run Trace&quot; to begin stepping.</span>
+        <span>Timeline ready. Click &quot;Visualize&quot; below the editor to step through execution.</span>
         <span className="text-slate-400 dark:text-slate-600">0 / 0 steps</span>
       </div>
     );
@@ -100,16 +101,42 @@ export default function TimelineScrubber() {
       <div className="flex-1 max-w-xl flex items-center gap-3">
         <input
           type="range"
+          role="slider"
+          aria-label="Execution step timeline scrubber"
+          aria-valuemin={0}
+          aria-valuemax={totalFrames - 1}
+          aria-valuenow={currentStep}
+          aria-valuetext={`Step ${currentStep + 1} of ${totalFrames}`}
           min="0"
           max={totalFrames - 1}
           value={currentStep}
           onChange={(e) => setStep(parseInt(e.target.value, 10))}
-          className="w-full h-1.5 bg-slate-200 dark:bg-slate-800/90 rounded-lg appearance-none cursor-pointer accent-cyan-500 dark:accent-cyan-400"
+          onKeyDown={(e) => {
+            if (e.key === "ArrowLeft") {
+              e.preventDefault();
+              prevStep();
+            } else if (e.key === "ArrowRight") {
+              e.preventDefault();
+              nextStep();
+            }
+          }}
+          className="w-full h-1.5 bg-slate-200 dark:bg-slate-800/90 rounded-lg appearance-none cursor-pointer accent-cyan-500 dark:accent-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-500"
         />
       </div>
 
-      {/* Step Counter, Line Indicator, and What-If Button */}
+      {/* Step Counter, Line Indicator, Truncation Warning, and What-If Button */}
       <div className="flex items-center gap-2.5 text-xs font-mono shrink-0">
+        {trace.status === "TRACE_LIMIT" && (
+          <span
+            className="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/90 border border-amber-300 dark:border-amber-700/70 text-amber-800 dark:text-amber-300 text-[10px] font-semibold flex items-center gap-1 shadow-2xs"
+            title="Execution trace was capped at 1,000 frames to maintain browser responsiveness."
+          >
+            <AlertTriangle className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span className="hidden sm:inline">Capped at 1,000 steps</span>
+            <span className="sm:hidden">1k cap</span>
+          </span>
+        )}
+
         <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
           Step <strong className="text-cyan-700 dark:text-cyan-300">{currentStep + 1}</strong> / {totalFrames}
         </span>

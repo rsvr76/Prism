@@ -4,6 +4,7 @@ import React from "react";
 import { useOutputTabStore } from "@/store/useOutputTabStore";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { Terminal, X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { traceRunner } from "@/lib/execution/traceRunner";
 
 export default function ExecutionOutputTab() {
   const isOpen = useOutputTabStore((state) => state.isOpen);
@@ -40,7 +41,7 @@ export default function ExecutionOutputTab() {
           {isRunning ? (
             <span className="flex items-center gap-1 text-[10px] text-cyan-400 font-mono">
               <Loader2 className="w-3 h-3 animate-spin" />
-              <span>Running...</span>
+              <span>{traceRunner.isWorkerReady() ? "Running..." : "Initializing Python..."}</span>
             </span>
           ) : status === "SUCCESS" ? (
             <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-mono">
@@ -70,7 +71,11 @@ export default function ExecutionOutputTab() {
         {isRunning ? (
           <div className="flex items-center gap-2 text-slate-400 italic py-2">
             <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
-            <span>Executing Python code in Pyodide...</span>
+            <span>
+              {traceRunner.isWorkerReady()
+                ? "Executing Python code..."
+                : "Initializing Python environment..."}
+            </span>
           </div>
         ) : status !== "SUCCESS" && status !== "IDLE" && errorMessage ? (
           <div className="p-2.5 rounded-lg bg-rose-950/50 border border-rose-800/60 text-rose-300 space-y-1">

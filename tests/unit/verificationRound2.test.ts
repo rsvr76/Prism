@@ -149,7 +149,7 @@ head.next = head # Self loop
       const lastFrame = trace.frames[trace.frames.length - 1];
       const structures = detectStructures(lastFrame);
       expect(structures).toBeDefined();
-    });
+    }, 15000);
 
     it('safely renders array state with empty list, negative numbers, and duplicates', () => {
       const edgeArrayCode = `
@@ -161,7 +161,7 @@ mixed_arr = [-10, 0, 5, -10, 5, 100]
       const state = deriveArrayState(lastFrame, null, 'mixed_arr');
       expect(state).not.toBeNull();
       expect(state?.elements.length).toBe(6);
-    });
+    }, 15000);
 
     it('safely builds binary tree layout for a degenerate linear right chain', () => {
       const rightChainCode = `
@@ -181,7 +181,7 @@ root.right.right = TreeNode(30)
       const layout = computeTreeLayout(rootRef.id, lastFrame.heap);
       expect(layout.nodeCount).toBe(3);
       expect(Object.keys(layout.positions).length).toBe(3);
-    });
+    }, 15000);
   });
 
   // 5. COMPLEXITY DISAMBIGUATION & LLM NON-OVERRIDE

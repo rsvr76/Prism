@@ -210,12 +210,13 @@ export default function PracticeDashboard() {
           </div>
 
           {/* Topic */}
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+          <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-400">
+            <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span className="font-semibold">Topic:</span>
             <select
               value={topic}
               onChange={(e) => setTopic(e.target.value as ChallengeTopic | "all")}
-              className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500/60 cursor-pointer font-mono"
+              className="bg-transparent text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer font-mono font-semibold text-xs"
               aria-label="Filter by topic"
             >
               {(Object.keys(TOPIC_LABELS) as (ChallengeTopic | "all")[]).map((t) => (
@@ -225,28 +226,34 @@ export default function PracticeDashboard() {
           </div>
 
           {/* Difficulty */}
-          <select
-            value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value as ChallengeDifficulty | "all")}
-            className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500/60 cursor-pointer font-mono"
-            aria-label="Filter by difficulty"
-          >
-            {(Object.keys(DIFFICULTY_LABELS) as (ChallengeDifficulty | "all")[]).map((d) => (
-              <option key={d} value={d} className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">{DIFFICULTY_LABELS[d]}</option>
-            ))}
-          </select>
+          <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-400">
+            <span className="font-semibold">Difficulty:</span>
+            <select
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value as ChallengeDifficulty | "all")}
+              className="bg-transparent text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer font-mono font-semibold text-xs"
+              aria-label="Filter by difficulty"
+            >
+              {(Object.keys(DIFFICULTY_LABELS) as (ChallengeDifficulty | "all")[]).map((d) => (
+                <option key={d} value={d} className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">{DIFFICULTY_LABELS[d]}</option>
+              ))}
+            </select>
+          </div>
 
           {/* Type */}
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as ChallengeType | "all")}
-            className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500/60 cursor-pointer font-mono"
-            aria-label="Filter by challenge type"
-          >
-            {(Object.keys(TYPE_LABELS) as (ChallengeType | "all")[]).map((t) => (
-              <option key={t} value={t} className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">{TYPE_LABELS[t]}</option>
-            ))}
-          </select>
+          <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-400">
+            <span className="font-semibold">Type:</span>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value as ChallengeType | "all")}
+              className="bg-transparent text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer font-mono font-semibold text-xs"
+              aria-label="Filter by challenge type"
+            >
+              {(Object.keys(TYPE_LABELS) as (ChallengeType | "all")[]).map((t) => (
+                <option key={t} value={t} className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">{TYPE_LABELS[t]}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </section>
 

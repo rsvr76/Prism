@@ -42,6 +42,7 @@ interface ExecutionStore {
   // Active Code & Trace (bound to activeExecutionId)
   code: string;
   trace: PrismTrace | null;
+  isVisualizing: boolean; // Distinguishes between Code Execution (Output only) vs DSA Visualization
   currentStep: number;
   isPlaying: boolean;
   playbackSpeed: number; // 0.5x, 1x, 2x, 5x
@@ -85,7 +86,10 @@ interface ExecutionStore {
     code: string,
     lessonContext?: { pathSlug: string; lessonSlug: string; lessonTitle: string } | null
   ) => void;
-  runCode: () => Promise<void>;
+  runCode: (visualize?: boolean) => Promise<void>;
+  executeCode: () => Promise<void>;
+  visualizeCode: () => Promise<void>;
+  setIsVisualizing: (isVisualizing: boolean) => void;
   setStep: (step: number) => void;
   nextStep: () => void;
   prevStep: () => void;
@@ -115,6 +119,7 @@ let branchCounter = 0;
 export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   code: DEFAULT_PYTHON_CODE,
   trace: null,
+  isVisualizing: false,
   currentStep: 0,
   isPlaying: false,
   playbackSpeed: 1,
@@ -147,7 +152,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   loadedAlgorithmTitle: null,
   loadedLessonContext: null,
 
-  setCode: (code: string) => set({ code }),
+  setCode: (code: string) => set({ code, isVisualizing: false }),
 
   loadAlgorithmCode: (
     title: string,
@@ -162,6 +167,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
       loadedAlgorithmTitle: title,
       loadedLessonContext: lessonContext || null,
       trace: null,
+      isVisualizing: false,
       currentStep: 0,
       isPlaying: false,
       isRunning: false,
@@ -183,7 +189,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
     });
   },
 
-  runCode: async () => {
+  runCode: async (visualize: boolean = true) => {
     // If already running, cancel previous execution and restart cleanly
     traceRunner.cancelExecution();
 
@@ -227,6 +233,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
         trace,
         currentStep: 0,
         isRunning: false,
+        isVisualizing: visualize,
         status: trace.status,
         errorMessage: trace.errorMessage || null,
       }));
@@ -235,11 +242,29 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
 
       set({
         isRunning: false,
+        isVisualizing: false,
         status: "RUNTIME_ERROR",
         errorMessage: err?.message || "Execution failed",
       });
     }
   },
+
+  executeCode: async () => {
+    return get().runCode(false);
+  },
+
+  visualizeCode: async () => {
+    const { trace, code } = get();
+    // If a completed trace matching the exact current code already exists in memory, activate visualization immediately
+    if (trace && trace.code === code && trace.frames && trace.frames.length > 0) {
+      set({ isVisualizing: true, currentStep: 0, isRunning: false });
+      return;
+    }
+    // Otherwise, run execution with visualization enabled
+    return get().runCode(true);
+  },
+
+  setIsVisualizing: (isVisualizing: boolean) => set({ isVisualizing }),
 
   setStep: (step: number) => {
     const { trace } = get();
@@ -274,6 +299,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
     set({
       code: DEFAULT_PYTHON_CODE,
       trace: null,
+      isVisualizing: false,
       currentStep: 0,
       isPlaying: false,
       isRunning: false,

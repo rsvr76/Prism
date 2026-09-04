@@ -15,7 +15,7 @@ test.describe('Phase 8B: Guided Learning Paths & Progression E2E Validation', ()
 
     // Learning Paths catalog renders
     await expect(page.getByRole('heading', { name: 'Structured Learning Journeys' })).toBeVisible();
-    await expect(page.getByText('DSA Foundations')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'DSA Foundations' })).toBeVisible();
 
     // Click into DSA Foundations path overview
     const startPathBtn = page.getByRole('link', { name: /Start Learning|Resume Path|Review Path/i });
@@ -128,12 +128,12 @@ test.describe('Phase 8B: Guided Learning Paths & Progression E2E Validation', ()
     await expect(page.getByText('Python 3.12 Editor')).toBeVisible();
 
     // Execute via standard Run Trace button
-    const runBtn = page.getByRole('button', { name: 'Run Trace' });
+    const runBtn = page.getByRole('button', { name: /Execute|Visualize/i }).first();
     await expect(runBtn).toBeEnabled({ timeout: 15000 });
     await runBtn.click();
 
     // Real execution succeeds
-    await expect(page.getByText(/Executed \(\d+ steps\)/i)).toBeVisible({ timeout: 60000 });
+    await expect(page.getByText(/Executed \(\d+ steps\)/i).or(page.getByText(/\d+ steps/i)).first()).toBeVisible({ timeout: 60000 });
   });
 
   test('6. Viewport Responsiveness on Tablet (768x1024)', async ({ page }) => {

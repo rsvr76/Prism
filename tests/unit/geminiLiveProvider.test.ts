@@ -147,7 +147,7 @@ describe("Phase 6D: Gemini Provider Integration & AI Hardening", () => {
         expect(result).toBeDefined();
         expect(result.answer.length).toBeGreaterThan(5);
         expect(result.evidence.length).toBeGreaterThanOrEqual(1);
-        expect(result.learningPoint.length).toBeGreaterThan(5);
+        expect(result.learningPoint?.length).toBeGreaterThan(5);
         expect(TutorResponseSchema.safeParse(result).success).toBe(true);
       } catch (err: any) {
         console.warn("Live Gemini API call skipped due to network/timeout error:", err?.message);

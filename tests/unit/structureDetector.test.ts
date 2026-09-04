@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Test Suite: Structure Detector
  * 10 test cases for Phase 3A acceptance criteria.
  */
@@ -281,5 +281,63 @@ describe("getNodeDisplayValue", () => {
   it("falls back to className when no value field found", () => {
     const obj: HeapObject = { id: "x", className: "Edge", fields: {}, references: {} };
     expect(getNodeDisplayValue(obj)).toBe("Edge");
+  });
+});
+
+describe("Call Stack Merged Scope & Function Traversal Resilience", () => {
+  it("detects linked list when head is in caller stack frame and execution is inside __init__", () => {
+    const frame = makeFrame({
+      line: 3,
+      scope: { self: { __type__: "object_ref", id: "obj_2", className: "Node", repr: "" }, val: 20 },
+      callStack: [
+        {
+          functionName: "<module>",
+          fileName: "script.py",
+          line: 8,
+          localVariables: {
+            head: { __type__: "object_ref", id: "obj_1", className: "Node", repr: "" },
+          },
+        },
+        {
+          functionName: "__init__",
+          fileName: "script.py",
+          line: 3,
+          localVariables: {
+            self: { __type__: "object_ref", id: "obj_2", className: "Node", repr: "" },
+            val: 20,
+          },
+        },
+      ],
+      heap: {
+        obj_1: makeNode("obj_1", 10, null),
+        obj_2: { id: "obj_2", className: "Node", fields: { val: 20 }, references: {} },
+      },
+    });
+
+    const structures = detectStructures(frame);
+    expect(structures.length).toBeGreaterThanOrEqual(1);
+    expect(structures[0].structureType).toBe("singly_linked_list");
+    expect(structures[0].rootHeapId).toBe("obj_1");
+  });
+
+  it("detects array when array is in caller stack frame and execution is inside a helper function", () => {
+    const frame = makeFrame({
+      line: 4,
+      scope: { x: 5 },
+      callStack: [
+        {
+          functionName: "<module>",
+          fileName: "script.py",
+          line: 12,
+          localVariables: {
+            arr: [1, 2, 3, 4, 5],
+          },
+        },
+      ],
+      heap: {},
+    });
+
+    const structures = detectStructures(frame);
+    expect(structures.some((s) => s.structureType === "1d_array" && s.variableName === "arr")).toBe(true);
   });
 });

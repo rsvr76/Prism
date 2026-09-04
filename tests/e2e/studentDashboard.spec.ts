@@ -38,6 +38,7 @@ test.describe('Phase 8D: Unified Student Progress & Dashboard E2E Validation', (
     // 1. Open Lesson 1 and mark complete
     await page.goto('/paths/dsa-foundations/arrays-memory-access');
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     const markBtn = page.getByRole('button', { name: /Mark as Complete|Completed/i });
     await expect(markBtn).toBeVisible();

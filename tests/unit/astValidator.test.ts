@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Test Suite: AST Validator (Preflight Validation)
  * 10 acceptance-criteria test cases for Phase 2.
  */
@@ -101,6 +101,22 @@ describe('TC-09: Disallowed module import rejected at preflight', () => {
     const result = validateCodePreflight(code, DEFAULT_EXECUTION_LIMITS);
     expect(result.isValid).toBe(false);
     expect(result.status).toBe('UNSUPPORTED');
+  });
+
+  it('blocks dangerous builtins (eval, exec, open)', () => {
+    const dangerousCalls = [
+      'eval("2 + 2")',
+      'exec("print(1)")',
+      'open("/tmp/secret.txt", "w")',
+      'f = open("data.txt")',
+    ];
+
+    for (const code of dangerousCalls) {
+      const result = validateCodePreflight(code, DEFAULT_EXECUTION_LIMITS);
+      expect(result.isValid).toBe(false);
+      expect(result.status).toBe('UNSUPPORTED');
+      expect(result.errorMessage).toContain('disallowed');
+    }
   });
 });
 

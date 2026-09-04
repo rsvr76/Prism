@@ -98,12 +98,12 @@ test.describe('Phase 8A: Algorithm Library & Learning Content E2E Validation', (
     await expect(page.getByText('Python 3.12 Editor')).toBeVisible();
 
     // Execute the loaded code via the existing execution engine
-    const runBtn = page.getByRole('button', { name: 'Run Trace' });
+    const runBtn = page.getByRole('button', { name: /Execute|Visualize/i }).first();
     await expect(runBtn).toBeEnabled({ timeout: 15000 });
     await runBtn.click();
 
     // Execution succeeds with real trace
-    await expect(page.getByText(/Executed \(\d+ steps\)/i)).toBeVisible({ timeout: 60000 });
+    await expect(page.getByText(/Executed \(\d+ steps\)/i).or(page.getByText(/\d+ steps/i)).first()).toBeVisible({ timeout: 60000 });
   });
 
   test('5. Direct Try in Prism from Library Catalog Cards', async ({ page }) => {

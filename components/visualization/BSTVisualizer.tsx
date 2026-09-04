@@ -17,7 +17,6 @@ import React, { useMemo } from "react";
 import {
   ReactFlow,
   Background,
-  Controls,
   BackgroundVariant,
   type Node,
   type Edge,
@@ -243,6 +242,7 @@ export default function BSTVisualizer({
         panOnScroll={false}
         zoomOnScroll={false}
         preventScrolling={false}
+        proOptions={{ hideAttribution: true }}
         className="bg-transparent"
       >
         <Background
@@ -250,13 +250,6 @@ export default function BSTVisualizer({
           gap={22}
           size={1.2}
           color={isDark ? "#334155" : "#cbd5e1"}
-        />
-        <Controls
-          showZoom
-          showFitView
-          showInteractive={false}
-          position="bottom-right"
-          className="!bg-white dark:!bg-slate-900 !border-slate-300 dark:!border-slate-800 !text-slate-700 dark:!text-slate-300 shadow-sm"
         />
       </ReactFlow>
     </div>

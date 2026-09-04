@@ -200,8 +200,8 @@ arr.append(100)
           [`${branchId}_step_1`]: { summary: "Branch step 1", why: "Why branch", changes: [], learningPoint: "Branch LP" },
         },
         complexityAnalyses: {
-          [origId]: { timeComplexity: "O(1)", spaceComplexity: "O(1)", confidence: "high", summary: "Orig O(1)", why: "Const", evidenceExplanation: [], educationalTakeaway: "Orig take", limitations: [] },
-          [branchId]: { timeComplexity: "O(1)", spaceComplexity: "O(1)", confidence: "high", summary: "Branch O(1)", why: "Const", evidenceExplanation: [], educationalTakeaway: "Branch take", limitations: [] },
+          [origId]: { timeComplexity: "O(1)", spaceComplexity: "O(1)", confidence: "high", summary: "Orig O(1)", why: "Const", evidenceExplanation: [], educationalTakeaway: "Orig take", limitations: [], evidenceItems: [], metrics: {} as any },
+          [branchId]: { timeComplexity: "O(1)", spaceComplexity: "O(1)", confidence: "high", summary: "Branch O(1)", why: "Const", evidenceExplanation: [], educationalTakeaway: "Branch take", limitations: [], evidenceItems: [], metrics: {} as any },
         },
       });
 

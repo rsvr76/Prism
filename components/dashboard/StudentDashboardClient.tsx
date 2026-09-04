@@ -32,15 +32,58 @@ import { useNavDrawerStore } from "@/store/useNavDrawerStore";
 import { UnifiedStudentProgress } from "@/types/progress";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
+const FALLBACK_PROGRESS: UnifiedStudentProgress = {
+  learning: {
+    completedCount: 0,
+    totalCount: 10,
+    percentage: 0,
+    currentLesson: null,
+    nextLesson: null,
+    stageBreakdown: [],
+    isCurriculumComplete: false,
+  },
+  practice: {
+    attemptedCount: 0,
+    passedCount: 0,
+    totalCount: 12,
+    remainingCount: 12,
+    percentage: 0,
+    accuracyPercentage: 0,
+    topicBreakdown: {
+      arrays: { passed: 0, total: 2 },
+      'linked-lists': { passed: 0, total: 2 },
+      searching: { passed: 0, total: 2 },
+      sorting: { passed: 0, total: 2 },
+      trees: { passed: 0, total: 2 },
+      complexity: { passed: 0, total: 2 },
+    },
+    nextChallenge: null,
+  },
+  overallPercentage: 0,
+  recentActivity: [],
+  recentExecutions: [],
+  lastActiveTimestamp: 0,
+};
+
 export default function StudentDashboardClient() {
-  const [progress, setProgress] = useState<UnifiedStudentProgress | null>(null);
+  const [progress, setProgress] = useState<UnifiedStudentProgress>(() => {
+    try {
+      return getUnifiedStudentProgress();
+    } catch {
+      return FALLBACK_PROGRESS;
+    }
+  });
   const [showResetModal, setShowResetModal] = useState<boolean>(false);
   const [resetSuccess, setResetSuccess] = useState<boolean>(false);
   const toggleDrawer = useNavDrawerStore((state) => state.toggleDrawer);
 
   const refreshProgress = () => {
-    const data = getUnifiedStudentProgress();
-    setProgress(data);
+    try {
+      const data = getUnifiedStudentProgress();
+      if (data) setProgress(data);
+    } catch (err) {
+      console.error("Failed to load progress:", err);
+    }
   };
 
   useEffect(() => {
@@ -54,17 +97,6 @@ export default function StudentDashboardClient() {
     setResetSuccess(true);
     setTimeout(() => setResetSuccess(false), 4000);
   };
-
-  if (!progress) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex items-center justify-center font-sans">
-        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm font-mono">
-          <div className="w-4 h-4 rounded-full border-2 border-cyan-500 border-t-transparent animate-spin" />
-          <span>Loading student progress…</span>
-        </div>
-      </div>
-    );
-  }
 
   const { learning, practice, overallPercentage, recentActivity, recentExecutions } = progress;
   const isNewStudent = learning.completedCount === 0 && practice.attemptedCount === 0;

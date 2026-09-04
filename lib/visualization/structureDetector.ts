@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Prism Structure Detector
  *
  * Deterministic, heuristic-based detector that inspects a PrismFrame's heap
@@ -39,6 +39,25 @@ function isObjectRef(val: SerializedValue): val is ObjectReference {
   );
 }
 
+/**
+ * Merges variables from all frames across the call stack and current scope.
+ * Ensures data structures defined in caller or module frames (e.g. head, arr, root)
+ * remain visible while execution steps into helper functions or constructors (__init__).
+ */
+export function getMergedScope(frame: PrismFrame): Record<string, SerializedValue> {
+  const merged: Record<string, SerializedValue> = {};
+  if (frame.callStack && frame.callStack.length > 0) {
+    for (const stackFrame of frame.callStack) {
+      const vars = stackFrame.localVariables || stackFrame.locals;
+      if (vars) {
+        Object.assign(merged, vars);
+      }
+    }
+  }
+  Object.assign(merged, frame.scope);
+  return merged;
+}
+
 // ─── Binary Tree Candidate Detection ──────────────────────────────────────────
 
 /**
@@ -71,9 +90,12 @@ function isLinkedListNodeCandidate(obj: HeapObject): boolean {
 
   const hasNextRef =
     NEXT_ATTRS.some((attr) => attr in obj.references) ||
-    NEXT_ATTRS.some((attr) => attr in obj.fields && obj.fields[attr] === null);
+    NEXT_ATTRS.some((attr) => attr in obj.fields);
+  const isNamedNode = Boolean(
+    obj.className && /node|listnode/i.test(obj.className) && !/tree|bst/i.test(obj.className)
+  );
   const hasValueField = VALUE_ATTRS.some((attr) => attr in obj.fields);
-  return hasNextRef && hasValueField;
+  return (hasNextRef || isNamedNode) && hasValueField;
 }
 
 // ─── Linked List Helpers ──────────────────────────────────────────────────────
@@ -116,8 +138,9 @@ function findLinkedListRoot(
   frame: PrismFrame,
   candidateIds: Set<string>
 ): string | undefined {
-  for (const headVar of [...LIST_HEAD_VARS, "root"]) {
-    const scopeVal = frame.scope[headVar];
+  const scope = getMergedScope(frame);
+  for (const headVar of [...LIST_HEAD_VARS, "root", "node", "curr"]) {
+    const scopeVal = scope[headVar];
     if (isObjectRef(scopeVal) && candidateIds.has(scopeVal.id)) {
       return scopeVal.id;
     }
@@ -168,12 +191,13 @@ function detectLinkedLists(frame: PrismFrame): DetectedStructure[] {
     }
   }
 
+  const scope = getMergedScope(frame);
   const results: DetectedStructure[] = [];
   for (const { rootId, chainIds, isCircular } of chains) {
     if (chainIds.length === 0) continue;
     let confidence = chainIds.length >= 2 ? 0.95 : 0.90;
     for (const headVar of LIST_HEAD_VARS) {
-      const scopeVal = frame.scope[headVar];
+      const scopeVal = scope[headVar];
       if (isObjectRef(scopeVal) && scopeVal.id === rootId) {
         confidence = Math.min(1.0, confidence + 0.05);
         break;
@@ -182,7 +206,7 @@ function detectLinkedLists(frame: PrismFrame): DetectedStructure[] {
     if (confidence < MIN_CONFIDENCE) continue;
 
     let variableName = "linkedList";
-    for (const [varName, val] of Object.entries(frame.scope)) {
+    for (const [varName, val] of Object.entries(scope)) {
       if (isObjectRef(val) && val.id === rootId) {
         variableName = varName;
         break;
@@ -205,19 +229,12 @@ function findTreeRoot(
   frame: PrismFrame,
   candidateIds: Set<string>
 ): string | undefined {
+  const scope = getMergedScope(frame);
   // Priority 1: Scope variables explicitly named root, tree, bst
   for (const rootVar of TREE_ROOT_VARS) {
-    const scopeVal = frame.scope[rootVar];
+    const scopeVal = scope[rootVar];
     if (isObjectRef(scopeVal) && candidateIds.has(scopeVal.id)) {
       return scopeVal.id;
-    }
-    // Also check top stack frame
-    if (frame.callStack && frame.callStack.length > 0) {
-      const topStack = frame.callStack[frame.callStack.length - 1];
-      const localVal = topStack.localVariables?.[rootVar];
-      if (isObjectRef(localVal) && candidateIds.has(localVal.id)) {
-        return localVal.id;
-      }
     }
   }
 
@@ -285,9 +302,10 @@ function detectBinaryTrees(frame: PrismFrame): DetectedStructure[] {
   const treeNodeIds = traverseTreeNodes(rootId, heap);
   if (treeNodeIds.size === 0) return [];
 
+  const scope = getMergedScope(frame);
   let confidence = treeNodeIds.size >= 2 ? 0.95 : 0.90;
   for (const rootVar of TREE_ROOT_VARS) {
-    const scopeVal = frame.scope[rootVar];
+    const scopeVal = scope[rootVar];
     if (isObjectRef(scopeVal) && scopeVal.id === rootId) {
       confidence = Math.min(1.0, confidence + 0.04);
       break;
@@ -295,7 +313,7 @@ function detectBinaryTrees(frame: PrismFrame): DetectedStructure[] {
   }
 
   let variableName = "root";
-  for (const [varName, val] of Object.entries(frame.scope)) {
+  for (const [varName, val] of Object.entries(scope)) {
     if (isObjectRef(val) && val.id === rootId) {
       variableName = varName;
       break;
@@ -316,13 +334,7 @@ function detectBinaryTrees(frame: PrismFrame): DetectedStructure[] {
 
 function detectArrays(frame: PrismFrame): DetectedStructure[] {
   const results: DetectedStructure[] = [];
-  const activeScope = { ...frame.scope };
-  if (frame.callStack && frame.callStack.length > 0) {
-    const topStack = frame.callStack[frame.callStack.length - 1];
-    if (topStack.localVariables) {
-      Object.assign(activeScope, topStack.localVariables);
-    }
-  }
+  const activeScope = getMergedScope(frame);
 
   for (const [varName, val] of Object.entries(activeScope)) {
     if (!Array.isArray(val)) continue;
@@ -379,18 +391,10 @@ export function detectStructures(frame: PrismFrame): DetectedStructure[] {
 
 export function getScopePointersToHeapId(frame: PrismFrame, heapId: string): string[] {
   const names: string[] = [];
-  for (const [varName, val] of Object.entries(frame.scope)) {
-    if (isObjectRef(val) && val.id === heapId) names.push(varName);
-  }
-  // Check top stack frame
-  if (frame.callStack && frame.callStack.length > 0) {
-    const topStack = frame.callStack[frame.callStack.length - 1];
-    if (topStack.localVariables) {
-      for (const [varName, val] of Object.entries(topStack.localVariables)) {
-        if (isObjectRef(val) && val.id === heapId && !names.includes(varName)) {
-          names.push(varName);
-        }
-      }
+  const scope = getMergedScope(frame);
+  for (const [varName, val] of Object.entries(scope)) {
+    if (isObjectRef(val) && val.id === heapId) {
+      if (!names.includes(varName)) names.push(varName);
     }
   }
   return names;

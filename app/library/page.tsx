@@ -109,7 +109,7 @@ export default function AlgorithmLibraryPage() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono text-purple-700 dark:text-purple-400 uppercase tracking-wider font-semibold">Guided Curriculum</span>
-                <span className="px-2 py-0.2 rounded-full text-[10px] font-mono bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30">Phase 8B</span>
+                <span className="px-2 py-0.2 rounded-full text-[10px] font-mono bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30">Interactive</span>
               </div>
               <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-200">
                 Prefer a structured, step-by-step roadmap?
@@ -133,7 +133,7 @@ export default function AlgorithmLibraryPage() {
           <div className="relative z-10 max-w-3xl space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 dark:bg-cyan-950/80 border border-cyan-300 dark:border-cyan-500/30 text-cyan-800 dark:text-cyan-300 text-xs font-mono">
               <Sparkles className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-              <span>Phase 8A: Structured DSA Learning</span>
+              <span>Interactive DSA Catalog</span>
             </div>
             <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Algorithm & Data Structure Library
@@ -164,7 +164,7 @@ export default function AlgorithmLibraryPage() {
           {/* Category & Difficulty Filters */}
           <div className="flex flex-wrap items-center gap-2">
             {/* Category Tabs */}
-            <div className="flex items-center bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-1 rounded-lg text-xs font-medium">
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-1 rounded-lg text-xs font-medium">
               <button
                 onClick={() => setSelectedCategory("all")}
                 className={`px-3 py-1.5 rounded-md transition-all ${

@@ -157,14 +157,14 @@ export default function AlgorithmDetailClient({ algorithm }: AlgorithmDetailClie
             {algorithm.description}
           </p>
 
-          {/* Quick Tags */}
-          <div className="flex flex-wrap items-center gap-1.5 pt-2">
+          {/* Taxonomy Tags */}
+          <div className="flex flex-wrap items-center gap-2 pt-2">
             {algorithm.tags.map((tag) => (
               <span
                 key={tag}
-                className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800/80 text-slate-400 border border-slate-700/50"
+                className="text-xs font-mono px-2.5 py-0.5 rounded-md bg-slate-800/80 text-slate-300 border border-slate-700/60 shadow-2xs"
               >
-                #{tag}
+                {tag}
               </span>
             ))}
           </div>
@@ -191,7 +191,7 @@ export default function AlgorithmDetailClient({ algorithm }: AlgorithmDetailClie
                 <CheckCircle2 className="w-4 h-4" />
                 <span>How It Works</span>
               </div>
-              <ol className="space-y-2.5 text-sm text-slate-300">
+              <ol className="list-none space-y-2.5 text-sm text-slate-300 p-0 m-0">
                 {algorithm.howItWorks.map((step, idx) => (
                   <li key={idx} className="flex items-start gap-3">
                     <span className="flex items-center justify-center w-5 h-5 rounded-full bg-cyan-950 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-bold shrink-0 mt-0.5">
@@ -335,7 +335,7 @@ export default function AlgorithmDetailClient({ algorithm }: AlgorithmDetailClie
 
               <div className="p-4 bg-slate-950/90 overflow-x-auto max-h-[500px]">
                 <pre className="text-xs font-mono text-slate-200 leading-relaxed whitespace-pre">
-                  <code>{algorithm.pythonCode}</code>
+                  <code className="language-python block">{algorithm.pythonCode}</code>
                 </pre>
               </div>
 

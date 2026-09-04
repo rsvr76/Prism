@@ -232,13 +232,14 @@ describe("5. Array state derivation", () => {
     });
 
     const state = deriveArrayState(currFrame, prevFrame, "arr");
-    expect(state.elements).toHaveLength(4);
-    expect(state.elements[0].value).toBe(2);
-    expect(state.elements[1].value).toBe(5);
+    expect(state).not.toBeNull();
+    expect(state!.elements).toHaveLength(4);
+    expect(state!.elements[0].value).toBe(2);
+    expect(state!.elements[1].value).toBe(5);
 
     // Pointer tags: i -> [0], j -> [1]
-    expect(state.elements[0].pointerLabels).toContain("i");
-    expect(state.elements[1].pointerLabels).toContain("j");
+    expect(state!.elements[0].pointerLabels).toContain("i");
+    expect(state!.elements[1].pointerLabels).toContain("j");
   });
 });
 
@@ -410,6 +411,6 @@ describe("7. Real DSA Algorithm Execution State Snapshots", () => {
     expect(f0.callStack.length).toBe(1);
     expect(f1.callStack.length).toBe(2);
     expect(f2.callStack.length).toBe(3);
-    expect(f2.callStack[2].localVariables.n).toBe(1);
+    expect(f2.callStack[2].localVariables?.n).toBe(1);
   });
 });

@@ -225,7 +225,9 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
 
           {/* Instructions */}
           <div className="prose prose-invert prose-sm max-w-none mb-5">
-            <div className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{challenge.instructions}</div>
+            <div className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
+              {challenge.instructions.replace(/^#+\s+[^\n]+\n*/, "").trim()}
+            </div>
           </div>
 
           {/* Trace-prediction or complexity answer input */}
@@ -270,7 +272,7 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
               </p>
               <p className="text-sm text-slate-300 mb-3">{challenge.complexityQuestion}</p>
               <div className="flex flex-wrap gap-2">
-                {["O(1)", "O(log n)", "O(n)", "O(n log n)", "O(n^2)", "O(n^3)", "O(n)"].map((cls) => (
+                {["O(1)", "O(log n)", "O(n)", "O(n log n)", "O(n^2)", "O(n^3)", "O(2^n)"].map((cls) => (
                   <button
                     key={cls}
                     onClick={() => setStudentAnswer(cls)}

@@ -143,9 +143,9 @@ export default function NavigationDrawer() {
   return (
     <div
       className={`fixed inset-0 z-50 font-sans pointer-events-none`}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Navigation Drawer"
+      role={isOpen ? "dialog" : undefined}
+      aria-modal={isOpen ? "true" : undefined}
+      aria-label={isOpen ? "Navigation Drawer" : undefined}
       aria-hidden={!isOpen}
     >
       {/* Transparent Click-Outside Dismissal Area (Preserves original screen 100%, does not darken or blank out) */}
@@ -185,9 +185,9 @@ export default function NavigationDrawer() {
                 <Sparkles className="w-3.5 h-3.5 text-white" />
               </div>
               <div>
-                <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white leading-none">
+                <span className="block text-sm font-bold tracking-tight text-slate-900 dark:text-white leading-none">
                   PRISM
-                </h1>
+                </span>
                 <p className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono tracking-wider uppercase leading-none mt-1">
                   DSA Learning Environment
                 </p>
@@ -204,12 +204,8 @@ export default function NavigationDrawer() {
           </button>
         </div>
 
-        {/* Navigation Destination List (Main Navigation) */}
+        {/* Navigation Links (Main Navigation) */}
         <nav aria-label="Main Navigation" className="flex-1 overflow-y-auto px-3 py-4 space-y-1 custom-scrollbar">
-          <div className="px-3 pb-2 text-[11px] font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500 font-semibold">
-            Destinations
-          </div>
-
           {NAV_ITEMS.map((item) => {
             const isActive =
               item.href === "/"

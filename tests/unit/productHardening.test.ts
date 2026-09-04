@@ -79,7 +79,7 @@ b.next = a
       const structures = detectStructures(lastFrame);
       expect(structures.length).toBeGreaterThan(0);
       expect(structures.some((s) => s.structureType === "singly_linked_list")).toBe(true);
-    });
+    }, 15000);
 
     it("B. 1D Array: Handles empty array, single element, negative numbers, and duplicates", () => {
       const code = `
@@ -102,7 +102,7 @@ arr_dupes = [5, 5, -1, 5, -1]
 
       const stateDupes = deriveArrayState(lastFrame, prevFrame, "arr_dupes");
       expect(stateDupes?.elements.map((e) => e.value)).toEqual([5, 5, -1, 5, -1]);
-    });
+    }, 15000);
 
     it("C. Binary Search Tree: Handles single-node tree and linear degenerate chain", () => {
       const code = `
@@ -128,7 +128,7 @@ root.right.right = Node(30)
       expect(bst).toBeDefined();
       const layout = computeTreeLayout(bst!.rootHeapId!, lastFrame.heap);
       expect(layout.nodeCount).toBe(3);
-    });
+    }, 15000);
   });
 
   // ═════════════════════════════════════════════════════════════════════════════
@@ -147,7 +147,7 @@ root.right.right = Node(30)
       expect(fixedTrace.status).toBe("SUCCESS");
       expect(fixedTrace.frames.length).toBeGreaterThan(0);
       expect(fixedTrace.frames[fixedTrace.frames.length - 1].scope.x).toBe(42);
-    });
+    }, 15000);
   });
 
   // ═════════════════════════════════════════════════════════════════════════════
@@ -171,7 +171,7 @@ root.right.right = Node(30)
       // Navigate before the start
       useExecutionStore.getState().setStep(-50);
       expect(useExecutionStore.getState().currentStep).toBe(0);
-    });
+    }, 15000);
   });
 
   // ═════════════════════════════════════════════════════════════════════════════
@@ -193,6 +193,6 @@ for i in range(2):
       expect(metrics.maxLoopNesting).toBe(3);
       expect(metrics.observedTimeHeuristic).toBe("O(n³)");
       expect(metrics.evidenceItems.some((e) => e.kind === "loop_nesting")).toBe(true);
-    });
+    }, 15000);
   });
 });

@@ -210,10 +210,33 @@ export default function ExecutionHeader() {
               })}
             </div>
           )}
+          {/* Quick Presets Dropdown */}
+          <div className="hidden md:flex items-center gap-1.5 shrink-0">
+            <select
+              aria-label="Code Presets"
+              defaultValue=""
+              onChange={(e) => {
+                const preset = PRESETS.find((p) => p.name === e.target.value);
+                if (preset) {
+                  setCode(preset.code);
+                  reset();
+                }
+              }}
+              className="px-2 py-1 rounded-md text-xs font-mono bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-cyan-500 cursor-pointer"
+            >
+              <option value="" disabled>Presets...</option>
+              {PRESETS.map((p) => (
+                <option key={p.name} value={p.name}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* Right Side: Theme Toggle */}
+        {/* Right Side: Status Badge & Theme Toggle */}
         <div className="flex items-center gap-2.5 shrink-0">
+          {getStatusBadge()}
           <ThemeToggle />
         </div>
       </header>

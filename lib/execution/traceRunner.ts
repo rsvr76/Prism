@@ -233,6 +233,10 @@ class TraceRunnerService {
       this.workerReady = false;
     }
   }
+
+  public isWorkerReady(): boolean {
+    return this.workerReady;
+  }
 }
 
 export const traceRunner = new TraceRunnerService();

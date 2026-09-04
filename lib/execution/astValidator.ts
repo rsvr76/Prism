@@ -1,4 +1,4 @@
-﻿import { ExecutionLimits, ExecutionStatus } from '@/types/trace';
+import { ExecutionLimits, ExecutionStatus } from '@/types/trace';
 
 export interface PreflightResult {
   isValid: boolean;
@@ -54,6 +54,17 @@ export function validateCodePreflight(code: string, limits: ExecutionLimits): Pr
       isValid: false,
       status: 'UNSUPPORTED',
       errorMessage: "Dynamic '__import__' is disallowed in the Prism sandbox.",
+    };
+  }
+
+  // Reject dangerous builtins (eval, exec, open)
+  const dangerousBuiltinsMatch = code.match(/\b(eval|exec|open)\s*\(/);
+  if (dangerousBuiltinsMatch) {
+    const fn = dangerousBuiltinsMatch[1];
+    return {
+      isValid: false,
+      status: 'UNSUPPORTED',
+      errorMessage: `Function '${fn}()' is disallowed in the Prism sandbox. Prism provides a pure algorithmic learning environment.`,
     };
   }
 

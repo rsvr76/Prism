@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { useTheme } from "@/components/theme/ThemeProvider";
@@ -14,13 +14,16 @@ import {
   Eye,
 } from "lucide-react";
 import { useOutputTabStore } from "@/store/useOutputTabStore";
+import { traceRunner } from "@/lib/execution/traceRunner";
 
 export default function CodeEditor() {
   const code = useExecutionStore((state) => state.code);
   const setCode = useExecutionStore((state) => state.setCode);
   const currentStep = useExecutionStore((state) => state.currentStep);
   const trace = useExecutionStore((state) => state.trace);
-  const runCode = useExecutionStore((state) => state.runCode);
+  const isVisualizing = useExecutionStore((state) => state.isVisualizing);
+  const executeCode = useExecutionStore((state) => state.executeCode);
+  const visualizeCode = useExecutionStore((state) => state.visualizeCode);
   const reset = useExecutionStore((state) => state.reset);
   const isRunning = useExecutionStore((state) => state.isRunning);
   const status = useExecutionStore((state) => state.status);
@@ -39,9 +42,9 @@ export default function CodeEditor() {
     editorRef.current = editor;
   };
 
-  // Sync active line highlighting with currentStep
+  // Sync active line highlighting with currentStep ONLY during visualization
   useEffect(() => {
-    if (!editorRef.current || !trace || !trace.frames || trace.frames.length === 0) {
+    if (!editorRef.current || !isVisualizing || !trace || !trace.frames || trace.frames.length === 0) {
       if (editorRef.current && decorationsRef.current.length > 0) {
         decorationsRef.current = editorRef.current.deltaDecorations(decorationsRef.current, []);
       }
@@ -70,18 +73,29 @@ export default function CodeEditor() {
     ]);
 
     editorRef.current.revealLineInCenterIfOutsideViewport(line);
-  }, [currentStep, trace]);
+  }, [currentStep, trace, isVisualizing]);
 
   const currentFrame = trace?.frames?.[currentStep];
 
+  const [activeAction, setActiveAction] = useState<"execute" | "visualize" | null>(null);
+
   const handleExecute = async () => {
+    setActiveAction("execute");
     openOutput();
-    await runCode();
+    try {
+      await executeCode();
+    } finally {
+      setActiveAction(null);
+    }
   };
 
   const handleVisualize = async () => {
-    if (!trace) {
-      await runCode();
+    setActiveAction("visualize");
+    closeOutput();
+    try {
+      await visualizeCode();
+    } finally {
+      setActiveAction(null);
     }
   };
 
@@ -97,7 +111,7 @@ export default function CodeEditor() {
           <span className="font-semibold text-slate-800 dark:text-slate-200">Python 3.12 Editor</span>
         </div>
         <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
-          {currentFrame?.line ? (
+          {isVisualizing && currentFrame?.line ? (
             <span className="text-cyan-700 dark:text-cyan-400 font-medium">Executing Line {currentFrame.line}</span>
           ) : (
             <span>Ready</span>
@@ -108,31 +122,31 @@ export default function CodeEditor() {
         <Editor
           height="100%"
           language="python"
-          theme={isDark ? "vs-dark" : "vs"}
+          theme={isDark ? "vs-dark" : "light"}
           value={code}
           onChange={(value) => setCode(value || "")}
           onMount={handleEditorDidMount}
           options={{
             minimap: { enabled: false },
-            fontSize: 13.5,
-            lineHeight: 22,
+            fontSize: 13,
             lineNumbers: "on",
             glyphMargin: true,
+            folding: false,
+            lineDecorationsWidth: 12,
+            lineNumbersMinChars: 3,
             scrollBeyondLastLine: false,
             automaticLayout: true,
             tabSize: 4,
+            wordWrap: "on",
+            renderLineHighlight: "line",
             cursorBlinking: "smooth",
-            cursorSmoothCaretAnimation: "on",
-            smoothScrolling: true,
-            padding: { top: 12, bottom: 12 },
-            fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
-            renderLineHighlight: "all",
+            fontFamily: "var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
           }}
         />
       </div>
 
       {/* Code Editor Bottom Action Bar: 1. Execute | 2. Visualize */}
-      <div className="flex items-center justify-between px-3 py-2 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-[#0a0f1d] shrink-0 gap-2">
+      <div className="flex flex-wrap items-center justify-between px-3 py-2 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-[#0a0f1d] shrink-0 gap-2">
         {/* Action Buttons: 1st Execute, 2nd Visualize */}
         <div className="flex items-center gap-2">
           {/* Button 1: Execute (runs code and displays output in center tab) */}
@@ -142,12 +156,12 @@ export default function CodeEditor() {
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-sm hover:shadow-emerald-500/25 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
             title="Execute Python code to display output"
           >
-            {isRunning ? (
+            {activeAction === "execute" ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : (
               <Play className="w-3.5 h-3.5 fill-white" />
             )}
-            <span>{isRunning ? "Executing..." : "Execute"}</span>
+            <span>{activeAction === "execute" ? "Executing..." : "Execute"}</span>
           </button>
 
           {/* Button 2: Visualize (runs code and renders DSA structures) */}
@@ -157,8 +171,12 @@ export default function CodeEditor() {
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-xs shadow-sm hover:shadow-cyan-500/25 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
             title="Visualize data structures and execution trace"
           >
-            <Eye className="w-3.5 h-3.5" />
-            <span>Visualize</span>
+            {activeAction === "visualize" ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Eye className="w-3.5 h-3.5" />
+            )}
+            <span>{activeAction === "visualize" ? "Visualizing..." : "Visualize"}</span>
           </button>
 
           {/* Reset Button */}
@@ -194,12 +212,14 @@ export default function CodeEditor() {
         {/* Execution Status / Step Indicator */}
         <div className="flex items-center gap-2 text-xs font-mono">
           {status === "RUNNING" && (
-            <span className="text-cyan-600 dark:text-cyan-400 animate-pulse">Running Python...</span>
+            <span className="text-cyan-600 dark:text-cyan-400 animate-pulse">
+              {traceRunner.isWorkerReady() ? "Running Python..." : "Initializing Python..."}
+            </span>
           )}
           {status === "SUCCESS" && trace && (
             <span className="text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>{trace.totalSteps} steps</span>
+              <span>{isVisualizing ? `${trace.totalSteps} steps` : "Executed"}</span>
             </span>
           )}
           {status !== "SUCCESS" && status !== "RUNNING" && status !== "IDLE" && (
