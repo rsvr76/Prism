@@ -4,7 +4,6 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Sparkles,
   BookOpen,
   Code2,
   Search,
@@ -24,13 +23,15 @@ import { ALGORITHM_REGISTRY, searchAlgorithms } from "@/lib/content/algorithms";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { useNavDrawerStore } from "@/store/useNavDrawerStore";
 import { AlgorithmDefinition } from "@/types/content";
-import ThemeToggle from "@/components/theme/ThemeToggle";
+import { PrismLogoCompact } from "@/components/branding/PrismLogo";
+import HamburgerButton from "@/components/navigation/HamburgerButton";
 
 export default function AlgorithmLibraryPage() {
   const router = useRouter();
   const loadAlgorithmCode = useExecutionStore((state) => state.loadAlgorithmCode);
   const loadedAlgorithmTitle = useExecutionStore((state) => state.loadedAlgorithmTitle);
   const toggleDrawer = useNavDrawerStore((state) => state.toggleDrawer);
+  const isDrawerOpen = useNavDrawerStore((state) => state.isOpen);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -62,27 +63,19 @@ export default function AlgorithmLibraryPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans">
       {/* Top Header */}
       <header className="h-14 flex items-center justify-between gap-3 px-4 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 sticky top-0 z-20 shadow-xs select-none">
-        <div className="flex items-center gap-3 shrink-0">
-          <button
+        <div
+          className={`flex items-center gap-3 shrink-0 transition-opacity duration-200 ${
+            isDrawerOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+        >
+          <HamburgerButton
+            isOpen={isDrawerOpen}
             onClick={toggleDrawer}
-            aria-label="Navigation menu"
-            className="p-2 -ml-1 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            ariaLabel="Navigation menu"
             title="Navigation Menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 shadow-sm group-hover:scale-105 transition-transform">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white leading-none">
-                PRISM
-              </h1>
-              <p className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono tracking-wider uppercase leading-none mt-1">
-                DSA Learning Environment
-              </p>
-            </div>
+          />
+          <Link href="/" className="flex items-center group">
+            <PrismLogoCompact size="sm" asHeading />
           </Link>
         </div>
 
@@ -94,7 +87,13 @@ export default function AlgorithmLibraryPage() {
             </div>
           )}
 
-          <ThemeToggle />
+          <Link
+            href="/workbench"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/20 transition-colors"
+          >
+            <Code2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Workbench</span>
+          </Link>
         </div>
       </header>
 
@@ -132,7 +131,7 @@ export default function AlgorithmLibraryPage() {
         <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-slate-50 to-cyan-50/40 dark:from-slate-900 dark:via-slate-900/90 dark:to-cyan-950/40 border border-slate-200 dark:border-slate-800 p-6 md:p-10 shadow-xs dark:shadow-2xl">
           <div className="relative z-10 max-w-3xl space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 dark:bg-cyan-950/80 border border-cyan-300 dark:border-cyan-500/30 text-cyan-800 dark:text-cyan-300 text-xs font-mono">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+              <BookOpen className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
               <span>Interactive DSA Catalog</span>
             </div>
             <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">

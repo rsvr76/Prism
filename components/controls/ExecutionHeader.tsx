@@ -6,7 +6,6 @@ import { useExecutionStore } from "@/store/useExecutionStore";
 import {
   Play,
   RotateCcw,
-  Sparkles,
   GitBranch,
   Loader2,
   CheckCircle2,
@@ -15,8 +14,9 @@ import {
   Compass,
 } from "lucide-react";
 import WhatIfModal from "@/components/controls/WhatIfModal";
-import ThemeToggle from "@/components/theme/ThemeToggle";
+import { PrismLogoCompact } from "@/components/branding/PrismLogo";
 import { useNavDrawerStore } from "@/store/useNavDrawerStore";
+import HamburgerButton from "@/components/navigation/HamburgerButton";
 
 // Quick Starter Python Code Presets for common DSA concepts
 export const PRESETS = [
@@ -94,6 +94,7 @@ export default function ExecutionHeader() {
   const loadedAlgorithmTitle = useExecutionStore((state) => state.loadedAlgorithmTitle);
   const loadedLessonContext = useExecutionStore((state) => state.loadedLessonContext);
   const toggleDrawer = useNavDrawerStore((state) => state.toggleDrawer);
+  const isDrawerOpen = useNavDrawerStore((state) => state.isOpen);
 
   const getStatusBadge = () => {
     switch (status) {
@@ -126,8 +127,8 @@ export default function ExecutionHeader() {
         );
       default:
         return (
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 text-xs font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-xs font-mono">
+            <div className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500" />
             <span>Ready</span>
           </div>
         );
@@ -138,28 +139,20 @@ export default function ExecutionHeader() {
     <>
       <header className="h-14 flex items-center justify-between gap-3 px-4 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 shadow-xs z-20 select-none">
         {/* Left Side: Hamburger & Brand Logo */}
-        <div className="flex items-center gap-3 shrink-0">
-          <button
+        <div
+          className={`flex items-center gap-3 shrink-0 transition-opacity duration-200 ${
+            isDrawerOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+        >
+          <HamburgerButton
+            isOpen={isDrawerOpen}
             onClick={toggleDrawer}
-            aria-label="Navigation menu"
-            className="p-2 -ml-1 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            ariaLabel="Navigation menu"
             title="Navigation Menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+          />
 
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 shadow-sm group-hover:scale-105 transition-transform">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white leading-none">
-                PRISM
-              </h1>
-              <p className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono tracking-wider uppercase leading-none mt-1">
-                DSA Learning Environment
-              </p>
-            </div>
+          <Link href="/" className="flex items-center">
+            <PrismLogoCompact size="sm" asHeading />
           </Link>
 
           {/* Active Lesson or Algorithm Context Badges */}
@@ -234,10 +227,9 @@ export default function ExecutionHeader() {
           </div>
         </div>
 
-        {/* Right Side: Status Badge & Theme Toggle */}
+        {/* Right Side: Status Badge (ThemeToggle removed completely from header) */}
         <div className="flex items-center gap-2.5 shrink-0">
           {getStatusBadge()}
-          <ThemeToggle />
         </div>
       </header>
 

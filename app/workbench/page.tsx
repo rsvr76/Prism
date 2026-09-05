@@ -3,11 +3,8 @@
 import React, { Suspense, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import ExecutionHeader from "@/components/controls/ExecutionHeader";
-import CodeEditor from "@/components/editor/CodeEditor";
-import AutoRevealRightPanel from "@/components/debug/AutoRevealRightPanel";
-import ExecutionOutputTab from "@/components/debug/ExecutionOutputTab";
+import ResizableWorkbenchSplit from "@/components/workbench/ResizableWorkbenchSplit";
 import TimelineScrubber from "@/components/debug/TimelineScrubber";
-import VisualizerCanvas from "@/components/visualization/VisualizerCanvas";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { getAlgorithmBySlug } from "@/lib/content/algorithms";
 import { getLessonBySlug } from "@/lib/content/learningPaths";
@@ -57,24 +54,8 @@ export default function PrismWorkbench() {
       {/* Top Navigation & Controls */}
       <ExecutionHeader />
 
-      {/* Main 2-Screen Workbench: Left = Code, Right = Visualizer */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 p-2.5 md:p-3 lg:overflow-hidden min-h-0 relative">
-        {/* Left Screen: Monaco Code Editor with Execute & Output Action Bar */}
-        <div className="h-[460px] lg:h-full lg:overflow-hidden min-h-0 flex flex-col">
-          <CodeEditor />
-        </div>
-
-        {/* Right Screen: Linked List / Structure Visualizer (HERO) */}
-        <div className="h-[460px] lg:h-full lg:overflow-hidden min-h-0 flex flex-col">
-          <VisualizerCanvas />
-        </div>
-
-        {/* Small/Dynamic Output Tab between Code and Visualizer (Does not affect code or visualizer size) */}
-        <ExecutionOutputTab />
-
-        {/* Auto-Revealing Right Tab Drawer: AI Explainer, Tutor & Diagnostics */}
-        <AutoRevealRightPanel />
-      </div>
+      {/* Main Resizable 2-Screen Workbench: Left = Code, Right = Visualizer */}
+      <ResizableWorkbenchSplit />
 
       {/* Bottom Dock: Timeline Playback & Scrubber */}
       <div className="sticky bottom-0 z-30">

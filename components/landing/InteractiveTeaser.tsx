@@ -100,13 +100,15 @@ export function InteractiveTeaser() {
   const codeLine = Math.min(step + 1, current.code.length - 1);
 
   return (
-    <section id="teaser" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-16 md:py-20">
-      <h2 className="text-section reveal font-bold text-slate-900 dark:text-white">Try It Now.</h2>
-      <p className="reveal mt-3 max-w-xl text-slate-600 dark:text-slate-400">
-        A preview of execution step navigation. The full Pyodide execution engine, AST validator, and interactive memory canvas load in the Workbench.
+    <section id="teaser" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-12 md:py-16">
+      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white reveal">
+        Interactive Algorithm Teaser
+      </h2>
+      <p className="reveal mt-3 max-w-xl text-sm sm:text-base text-slate-600 dark:text-slate-400">
+        Step through execution states in real-time. In the full Workbench, Prism runs real Python 3 code with interactive memory visualizers.
       </p>
 
-      <div className="reveal glass-card mt-8 overflow-hidden p-0">
+      <div className="reveal glass-card mt-6 overflow-hidden p-0">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 px-4 py-3">
           <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
             Select an algorithm:

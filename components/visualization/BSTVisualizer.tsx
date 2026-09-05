@@ -116,7 +116,8 @@ const nodeTypes = {
 
 function buildTreeGraph(
   frame: PrismFrame,
-  rootHeapId: string
+  rootHeapId: string,
+  isDark: boolean = true
 ): { nodes: Node[]; edges: Edge[] } {
   const heap = frame.heap;
   const layout = computeTreeLayout(rootHeapId, heap);
@@ -130,37 +131,40 @@ function buildTreeGraph(
 
     const pointerLabels = getScopePointersToHeapId(frame, nodeId);
     const isActive = pointerLabels.length > 0;
+    const displayValue = getNodeDisplayValue(obj);
 
     nodes.push({
       id: nodeId,
       type: "bstNode",
       position: { x: pos.x, y: pos.y },
       data: {
-        displayValue: getNodeDisplayValue(obj),
-        className: obj.className || "Node",
+        displayValue,
+        className: obj.className || "TreeNode",
         pointerLabels,
         isActive,
       },
-      draggable: false,
     });
 
     // Left child edge
     const leftChildId = getTreeChildId(obj, LEFT_ATTRS);
     if (leftChildId && layout.positions[leftChildId]) {
       const leftActive = getScopePointersToHeapId(frame, leftChildId).length > 0;
+      const strokeColor = leftActive
+        ? isDark ? "#22d3ee" : "#0891b2"
+        : isDark ? "#64748b" : "#475569";
       edges.push({
         id: `e-${nodeId}-L-${leftChildId}`,
         source: nodeId,
         target: leftChildId,
         type: "smoothstep",
         label: "L",
-        labelStyle: { fill: "#94a3b8", fontSize: 10, fontFamily: "monospace" },
-        labelBgStyle: { fill: "#0f172a", fillOpacity: 0.8 },
+        labelStyle: { fill: isDark ? "#94a3b8" : "#334155", fontSize: 10, fontFamily: "monospace" },
+        labelBgStyle: { fill: isDark ? "#0f172a" : "#f8fafc", fillOpacity: 0.95 },
         labelBgPadding: [2, 2],
         labelBgBorderRadius: 2,
         animated: leftActive,
-        style: { stroke: leftActive ? "#22d3ee" : "#64748b", strokeWidth: leftActive ? 2.5 : 2 },
-        markerEnd: { type: "arrowclosed" as const, color: leftActive ? "#22d3ee" : "#64748b" },
+        style: { stroke: strokeColor, strokeWidth: leftActive ? 2.5 : 2 },
+        markerEnd: { type: "arrowclosed" as const, color: strokeColor },
       });
     }
 
@@ -168,19 +172,22 @@ function buildTreeGraph(
     const rightChildId = getTreeChildId(obj, RIGHT_ATTRS);
     if (rightChildId && layout.positions[rightChildId]) {
       const rightActive = getScopePointersToHeapId(frame, rightChildId).length > 0;
+      const strokeColor = rightActive
+        ? isDark ? "#22d3ee" : "#0891b2"
+        : isDark ? "#64748b" : "#475569";
       edges.push({
         id: `e-${nodeId}-R-${rightChildId}`,
         source: nodeId,
         target: rightChildId,
         type: "smoothstep",
         label: "R",
-        labelStyle: { fill: "#94a3b8", fontSize: 10, fontFamily: "monospace" },
-        labelBgStyle: { fill: "#0f172a", fillOpacity: 0.8 },
+        labelStyle: { fill: isDark ? "#94a3b8" : "#334155", fontSize: 10, fontFamily: "monospace" },
+        labelBgStyle: { fill: isDark ? "#0f172a" : "#f8fafc", fillOpacity: 0.95 },
         labelBgPadding: [2, 2],
         labelBgBorderRadius: 2,
         animated: rightActive,
-        style: { stroke: rightActive ? "#22d3ee" : "#64748b", strokeWidth: rightActive ? 2.5 : 2 },
-        markerEnd: { type: "arrowclosed" as const, color: rightActive ? "#22d3ee" : "#64748b" },
+        style: { stroke: strokeColor, strokeWidth: rightActive ? 2.5 : 2 },
+        markerEnd: { type: "arrowclosed" as const, color: strokeColor },
       });
     }
   }
@@ -203,8 +210,8 @@ export default function BSTVisualizer({
 }: BSTVisualizerProps) {
   const { isDark } = useTheme();
   const { nodes, edges } = useMemo(
-    () => buildTreeGraph(frame, rootHeapId),
-    [frame, rootHeapId]
+    () => buildTreeGraph(frame, rootHeapId, isDark),
+    [frame, rootHeapId, isDark]
   );
 
   if (nodes.length === 0) {
@@ -249,7 +256,7 @@ export default function BSTVisualizer({
           variant={BackgroundVariant.Dots}
           gap={22}
           size={1.2}
-          color={isDark ? "#334155" : "#cbd5e1"}
+          color={isDark ? "#334155" : "#94a3b8"}
         />
       </ReactFlow>
     </div>

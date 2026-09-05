@@ -33,13 +33,15 @@ const PATHS = [
 
 export function PathsPreview() {
   return (
-    <section className="mx-auto max-w-6xl px-5 py-16 md:py-20">
-      <h2 className="text-section reveal font-bold text-slate-900 dark:text-white">Guided Learning Paths</h2>
-      <p className="reveal mt-3 max-w-xl text-slate-600 dark:text-slate-400">
+    <section className="mx-auto max-w-6xl px-5 py-12 md:py-16">
+      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white reveal">
+        Guided Learning Paths
+      </h2>
+      <p className="reveal mt-3 max-w-xl text-sm sm:text-base text-slate-600 dark:text-slate-400">
         Structured curriculum sequences that build intuitions from memory array indexing to recursive tree traversal.
       </p>
 
-      <div className="reveal-stagger mt-10 flex snap-x gap-5 overflow-x-auto pb-4 md:grid md:grid-cols-3 md:overflow-visible">
+      <div className="reveal-stagger mt-8 flex snap-x gap-5 overflow-x-auto pb-4 md:grid md:grid-cols-3 md:overflow-visible">
         {PATHS.map((p, i) => (
           <article
             key={p.id}

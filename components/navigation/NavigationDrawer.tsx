@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import {
   Menu,
   X,
-  Sparkles,
   Code2,
   BookOpen,
   Compass,
@@ -15,7 +14,9 @@ import {
   Home,
 } from "lucide-react";
 import { useNavDrawerStore } from "@/store/useNavDrawerStore";
+import { PrismLogoCompact } from "@/components/branding/PrismLogo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+import HamburgerButton from "@/components/navigation/HamburgerButton";
 
 interface NavItem {
   label: string;
@@ -149,56 +150,49 @@ export default function NavigationDrawer() {
 
   return (
     <div
-      className={`fixed inset-0 z-50 font-sans pointer-events-none`}
+      className={`fixed inset-0 z-[60] font-sans ${isOpen ? "pointer-events-auto" : "pointer-events-none"}`}
       role={isOpen ? "dialog" : undefined}
       aria-modal={isOpen ? "true" : undefined}
       aria-label={isOpen ? "Navigation Drawer" : undefined}
       aria-hidden={!isOpen}
     >
-      {/* Transparent Click-Outside Dismissal Area (Preserves original screen 100%, does not darken or blank out) */}
+      {/* Butter-Smooth Backdrop Scrim */}
       <div
-        className={`fixed inset-0 cursor-pointer ${
-          isOpen ? "pointer-events-auto" : "pointer-events-none"
+        className={`fixed inset-0 bg-slate-950/40 dark:bg-black/60 backdrop-blur-sm cursor-pointer will-change-[opacity,backdrop-filter] ${
+          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
+        style={{
+          transition: "opacity 380ms cubic-bezier(0.22, 1, 0.36, 1), backdrop-filter 380ms cubic-bezier(0.22, 1, 0.36, 1)",
+        }}
         onClick={closeDrawer}
         aria-hidden="true"
       />
 
-      {/* Drawer Panel (YouTube Style Slide-Out / Pull Screen) */}
+      {/* Butter-Smooth Drawer Panel Slide-Out */}
       <aside
         onTouchStart={handlePanelTouchStart}
         onTouchMove={handlePanelTouchMove}
         onTouchEnd={handlePanelTouchEnd}
-        className={`fixed inset-y-0 left-0 w-72 sm:w-80 bg-white dark:bg-[#0b101e] border-r border-slate-200 dark:border-slate-800/90 shadow-2xl z-50 flex flex-col will-change-transform ${
-          isOpen ? "translate-x-0 pointer-events-auto" : "-translate-x-full pointer-events-none"
+        className={`fixed inset-y-0 left-0 w-72 sm:w-80 bg-white/98 dark:bg-[#0b101e]/98 backdrop-blur-xl border-r border-slate-200/80 dark:border-slate-800/80 shadow-[0_0_50px_-5px_rgba(0,0,0,0.15),0_25px_50px_-12px_rgba(0,0,0,0.25)] dark:shadow-[0_0_60px_-5px_rgba(0,0,0,0.7),0_25px_50px_-12px_rgba(0,0,0,0.9)] z-[60] flex flex-col will-change-transform ${
+          isOpen ? "pointer-events-auto" : "pointer-events-none"
         }`}
         style={{
-          transition: "transform 320ms cubic-bezier(0.16, 1, 0.3, 1)",
+          transform: isOpen ? "translate3d(0, 0, 0)" : "translate3d(-100%, 0, 0)",
+          transition: "transform 380ms cubic-bezier(0.22, 1, 0.36, 1)",
         }}
       >
-        {/* Drawer Header (Hamburger + PRISM Logo) */}
-        <div className="h-14 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800/80 shrink-0">
+        {/* Drawer Header (Hamburger + PRISM Logo — EXACT same positioning as homepage & all headers) */}
+        <div className="h-14 flex items-center justify-between px-4 border-b border-slate-200/80 dark:border-slate-800/80 shrink-0">
           <div className="flex items-center gap-3">
-            <button
+            <HamburgerButton
+              isOpen={isOpen}
               onClick={closeDrawer}
-              aria-label="Close navigation menu"
-              className="p-2 -ml-1 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
+              ariaLabel="Close navigation menu"
+              title="Close navigation menu"
+            />
 
-            <Link href="/" onClick={closeDrawer} className="flex items-center gap-2.5 group">
-              <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 shadow-sm group-hover:scale-105 transition-transform">
-                <Sparkles className="w-3.5 h-3.5 text-white" />
-              </div>
-              <div>
-                <span className="block text-sm font-bold tracking-tight text-slate-900 dark:text-white leading-none">
-                  PRISM
-                </span>
-                <p className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono tracking-wider uppercase leading-none mt-1">
-                  DSA Learning Environment
-                </p>
-              </div>
+            <Link href="/" onClick={closeDrawer} className="flex items-center group">
+              <PrismLogoCompact size="sm" asHeading={false} />
             </Link>
           </div>
 
@@ -226,17 +220,17 @@ export default function NavigationDrawer() {
                 key={item.href}
                 href={item.href}
                 onClick={closeDrawer}
-                className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group cursor-pointer ${
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors group cursor-pointer ${
                   isActive
-                    ? "bg-cyan-50 dark:bg-cyan-950/60 text-cyan-800 dark:text-cyan-300 font-semibold border border-cyan-200 dark:border-cyan-500/40 shadow-xs"
-                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-100/90 dark:hover:bg-slate-800/60 hover:text-slate-950 dark:hover:text-white"
+                    ? "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 font-semibold"
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-100"
                 }`}
               >
                 <div
-                  className={`p-1.5 rounded-lg transition-colors ${
+                  className={`p-1 rounded-md transition-colors ${
                     isActive
-                      ? "bg-cyan-100 dark:bg-cyan-900/60 text-cyan-700 dark:text-cyan-300"
-                      : "text-slate-500 dark:text-slate-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-400"
+                      ? "text-cyan-600 dark:text-cyan-400"
+                      : "text-slate-400 dark:text-slate-500 group-hover:text-cyan-600 dark:group-hover:text-cyan-400"
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -245,7 +239,7 @@ export default function NavigationDrawer() {
                   <span className="block truncate">{item.label}</span>
                 </div>
                 {isActive && (
-                  <span className="w-1.5 h-4 rounded-full bg-cyan-600 dark:bg-cyan-400 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shrink-0 ml-auto" />
                 )}
               </Link>
             );
@@ -281,10 +275,7 @@ export default function NavigationDrawer() {
 
         {/* Drawer Footer (Theme Toggle & Brand Tagline) */}
         <div className="p-3.5 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between shrink-0 text-xs">
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <span className="text-slate-600 dark:text-slate-400 font-medium">Toggle Theme</span>
-          </div>
+          <ThemeToggle showLabel />
           <span className="text-[10px] text-slate-400 font-mono">v1.0.0</span>
         </div>
       </aside>

@@ -45,7 +45,7 @@ export default function TimelineScrubber() {
   }
 
   return (
-    <div className="h-14 flex flex-wrap items-center justify-between gap-3 px-4 md:px-6 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-xs dark:shadow-md select-none z-20">
+    <div className="h-14 flex flex-wrap items-center justify-between gap-3 px-4 md:px-6 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md border-t border-slate-300 dark:border-slate-800 shadow-xs dark:shadow-md select-none z-20">
       {/* Playback Controls & Speed */}
       <div className="flex items-center gap-2 shrink-0">
         <button
@@ -79,7 +79,7 @@ export default function TimelineScrubber() {
         </button>
 
         {/* Secondary Speed Selector */}
-        <div className="hidden sm:flex items-center gap-0.5 ml-2 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-md text-[10px] font-mono">
+        <div className="hidden sm:flex items-center gap-0.5 ml-2 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-800 rounded-md text-[10px] font-mono">
           <FastForward className="w-3 h-3 text-cyan-600 dark:text-cyan-400/80 mr-0.5" />
           {[0.5, 1, 2, 5].map((speed) => (
             <button
@@ -120,7 +120,7 @@ export default function TimelineScrubber() {
               nextStep();
             }
           }}
-          className="w-full h-1.5 bg-slate-200 dark:bg-slate-800/90 rounded-lg appearance-none cursor-pointer accent-cyan-500 dark:accent-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+          className="w-full h-1.5 bg-slate-300 dark:bg-slate-800/90 rounded-lg appearance-none cursor-pointer accent-cyan-500 dark:accent-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-500"
         />
       </div>
 
@@ -137,11 +137,11 @@ export default function TimelineScrubber() {
           </span>
         )}
 
-        <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
+        <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-300 font-medium">
           Step <strong className="text-cyan-700 dark:text-cyan-300">{currentStep + 1}</strong> / {totalFrames}
         </span>
-        <span className="hidden md:inline px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
-          Line <strong className="text-amber-600 dark:text-amber-400">{trace.frames[currentStep]?.line || "-"}</strong>
+        <span className="hidden md:inline px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-400 font-medium">
+          Line <strong className="text-amber-700 dark:text-amber-400">{trace.frames[currentStep]?.line || "-"}</strong>
         </span>
 
         {/* Phase 6A: What-If Branch Button */}

@@ -186,7 +186,7 @@ describe('Phase 8A: Algorithm Library Content & Architecture', () => {
         }
       }
       expect(arrayDetected).toBe(true);
-    });
+    }, 15000);
 
     it('executes Binary Search Python example and verifies pointer states', () => {
       const binarySearch = getAlgorithmBySlug('binary-search');

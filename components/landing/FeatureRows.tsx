@@ -113,14 +113,17 @@ function TutorMock() {
       <div className="self-end max-w-[85%] rounded-2xl rounded-br-sm border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/80 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-200">
         Why did head.next change at step 12?
       </div>
-      <div className="max-w-[95%] rounded-2xl rounded-bl-sm border border-purple-500/25 bg-purple-500/10 dark:bg-purple-900/20 px-4 py-3 text-sm leading-relaxed text-slate-800 dark:text-slate-200">
-        <p className="mb-1 font-mono text-[11px] text-purple-600 dark:text-cyan-400 font-bold">Prism AI Tutor</p>
-        At step 12, <span className="font-mono font-semibold text-purple-700 dark:text-cyan-300">insert(7)</span> ran line 14:{" "}
-        <span className="font-mono text-purple-700 dark:text-cyan-300">curr.next = Node(7)</span>. The heap allocated a new
-        node at this address and re-wired the pointer from node(3).
-        <div className="mt-2.5">
-          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-            <Check className="size-3" /> Ground-Truth Observed
+      <div className="max-w-[95%] rounded-2xl rounded-bl-sm border border-purple-500/30 bg-purple-500/10 dark:bg-purple-950/30 px-4 py-3 text-sm leading-relaxed text-slate-800 dark:text-slate-200">
+        <p className="mb-1.5 font-mono text-[11px] text-purple-600 dark:text-purple-400 font-bold flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+          AI EXPLANATION
+        </p>
+        At step 12, <span className="font-mono font-semibold text-purple-700 dark:text-purple-300">insert(7)</span> executed line 14:{" "}
+        <span className="font-mono text-purple-700 dark:text-purple-300">curr.next = Node(7)</span>. The heap allocated a new
+        node at <span className="font-mono text-cyan-600 dark:text-cyan-400">@0x7f2a</span> and updated the pointer from node(3).
+        <div className="mt-2.5 flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-0.5 font-mono text-[10px] text-cyan-700 dark:text-cyan-300 font-semibold">
+            <Check className="size-3 text-cyan-500" /> OBSERVED GROUND TRUTH
           </span>
         </div>
       </div>

@@ -96,10 +96,10 @@ export default function ArrayVisualizer({
   if (elements.length === 0) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-2 p-6">
-        <span className="px-3 py-1.5 text-xs font-mono rounded bg-slate-900 border border-slate-800 text-slate-400">
+        <span className="px-3 py-1.5 text-xs font-mono rounded bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-300">
           {variableName} = [ ] (Empty List)
         </span>
-        <p className="text-[11px] font-mono text-slate-600">
+        <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
           No elements in array at this step.
         </p>
       </div>
@@ -201,7 +201,7 @@ export default function ArrayVisualizer({
                 </div>
 
                 {/* Index Subscript */}
-                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 font-medium">
+                <span className="text-[11px] font-mono text-slate-600 dark:text-slate-400 font-semibold">
                   [{el.index}]
                 </span>
               </div>

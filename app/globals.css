@@ -8,18 +8,18 @@
   --surface: #ffffff;
   --surface-hover: #f1f5f9;
   --surface-card: #f8fafc;
-  --surface-border: #e2e8f0;
+  --surface-border: #cbd5e1;
   --border-subtle: #e2e8f0;
-  --border-active: #cbd5e1;
-  --text-muted: #64748b;
+  --border-active: #94a3b8;
+  --text-muted: #475569;
   --prism-cyan: #0891b2;
   --prism-cyan-glow: rgba(8, 145, 178, 0.12);
   --prism-purple: #9333ea;
   --prism-emerald: #059669;
   --prism-amber: #d97706;
   --scrollbar-track: rgba(241, 245, 249, 0.8);
-  --scrollbar-thumb: rgba(148, 163, 184, 0.5);
-  --scrollbar-thumb-hover: rgba(100, 116, 139, 0.7);
+  --scrollbar-thumb: rgba(148, 163, 184, 0.65);
+  --scrollbar-thumb-hover: rgba(100, 116, 139, 0.85);
 
   /* Landing Page Design Tokens (Light Mode) */
   --primary: #7c3aed;
@@ -219,7 +219,7 @@ body {
 /* Surfaces */
 @utility glass-card {
   background: #ffffff;
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  border: 1px solid #cbd5e1;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -456,6 +456,79 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+/* ==========================================================================
+   Hamburger Menu Morphing Animation (McButton)
+   - Closed: 3 horizontal bars
+   - To Open: bars collapse to center line (180ms) -> rotate 135deg / 90deg to X with spring curve (550ms)
+   - To Close: rotate back to 0deg (450ms) -> unroll back to 3 bars (180ms)
+   ========================================================================== */
+.mc-button {
+  width: 20px;
+  height: 15px;
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  transform: rotate(0deg);
+  transition: transform 450ms cubic-bezier(0.25, 1, 0.5, 1) 0ms;
+  will-change: transform;
+}
+
+.mc-button b {
+  position: absolute;
+  left: 0;
+  width: 20px;
+  height: 2px;
+  border-radius: 9999px;
+  background-color: currentColor;
+  will-change: transform, top, opacity;
+  transform-origin: center center;
+}
+
+/* Default / Closed State */
+.mc-button .mc-bar-1 {
+  top: 0%;
+  margin-top: 0;
+  transition: top 180ms cubic-bezier(0.4, 0, 0.2, 1) 400ms;
+}
+
+.mc-button .mc-bar-2 {
+  top: 50%;
+  margin-top: -1px;
+  opacity: 1;
+  transition: opacity 150ms ease 380ms;
+}
+
+.mc-button .mc-bar-3 {
+  top: 100%;
+  margin-top: -2px;
+  transform: rotate(0deg);
+  transition: transform 450ms cubic-bezier(0.25, 1, 0.5, 1) 0ms, top 180ms cubic-bezier(0.4, 0, 0.2, 1) 400ms;
+}
+
+/* Active / Open State (Morphed to X) */
+.mc-button.active {
+  transform: rotate(135deg);
+  transition: transform 550ms cubic-bezier(0.34, 1.56, 0.64, 1) 180ms;
+}
+
+.mc-button.active .mc-bar-1 {
+  top: 50%;
+  margin-top: -1px;
+  transition: top 180ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+
+.mc-button.active .mc-bar-2 {
+  top: 50%;
+  margin-top: -1px;
+  opacity: 0;
+  transition: opacity 120ms ease 180ms;
+}
+
+.mc-button.active .mc-bar-3 {
+  top: 50%;
+  margin-top: -1px;
+  transform: rotate(90deg);
+  transition: top 180ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, transform 550ms cubic-bezier(0.34, 1.56, 0.64, 1) 180ms;
 }
 
 @media (prefers-reduced-motion: reduce) {

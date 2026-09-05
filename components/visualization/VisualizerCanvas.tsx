@@ -21,11 +21,17 @@
 import React, { useMemo } from "react";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { detectStructures, getMergedScope } from "@/lib/visualization/structureDetector";
-import { DetectedStructure } from "@/types/trace";
+import { DetectedStructure, PrismFrame } from "@/types/trace";
 import LinkedListVisualizer from "@/components/visualization/LinkedListVisualizer";
 import ArrayVisualizer from "@/components/visualization/ArrayVisualizer";
 import BSTVisualizer from "@/components/visualization/BSTVisualizer";
 import { Layers, AlertTriangle, Code2, FastForward, Sparkles } from "lucide-react";
+import {
+  classifySemanticEvent,
+  resolveEffectiveStructuralState,
+  SemanticExecutionEvent,
+} from "@/lib/execution/semanticEventClassifier";
+import ExecutionEventBanner from "@/components/debug/ExecutionEventBanner";
 
 interface NoStructureStateProps {
   hasTrace: boolean;
@@ -124,51 +130,41 @@ export default function VisualizerCanvas() {
   const frame = isVisualizing && trace?.frames?.[currentStep] ? trace.frames[currentStep] : null;
   const prevFrame = isVisualizing && currentStep > 0 && trace?.frames ? trace.frames[currentStep - 1] : null;
 
-  // 1. Current frame detection
-  const detectedStructures = useMemo(() => {
-    if (!frame) return [];
-    return detectStructures(frame);
-  }, [frame]);
-
-  // 2. Persistent Structure Resolution:
-  // If current frame has a detected structure, use it.
-  // Otherwise, scan backwards through past frames (currentStep - 1 down to 0).
-  // If a past frame had a detected structure whose root/variable is still alive in the current frame, retain it!
-  const activeStructure = useMemo<DetectedStructure | null>(() => {
+  // 1. Classify current execution event (deterministic, conservative)
+  const semanticEvent = useMemo<SemanticExecutionEvent | null>(() => {
     if (!frame) return null;
-    if (detectedStructures.length > 0) {
-      return detectedStructures[0];
-    }
-    if (!trace?.frames) return null;
+    return classifySemanticEvent(frame, prevFrame, trace?.code);
+  }, [frame, prevFrame, trace?.code]);
 
-    for (let i = currentStep - 1; i >= 0; i--) {
-      const pastFrame = trace.frames[i];
-      if (!pastFrame) continue;
-      const pastDetected = detectStructures(pastFrame);
-      if (pastDetected.length === 0) continue;
+  // 2. Resolve Effective Structural State:
+  // Persistent Structural State Guarantee:
+  // For any step, scan backwards to retain the latest valid structural snapshot.
+  // Visualizer NEVER blanks or unmounts during non-structural steps.
+  const effectiveState = useMemo(() => {
+    if (!isVisualizing || !trace) return null;
+    return resolveEffectiveStructuralState(trace, currentStep);
+  }, [isVisualizing, trace, currentStep]);
 
-      const candidate = pastDetected[0];
-      if (
-        candidate.structureType === "singly_linked_list" ||
-        candidate.structureType === "binary_tree"
-      ) {
-        if (candidate.rootHeapId && frame.heap && frame.heap[candidate.rootHeapId]) {
-          return candidate;
-        }
-      } else if (candidate.structureType === "1d_array") {
-        const mergedScope = getMergedScope(frame);
-        if (Array.isArray(mergedScope[candidate.variableName])) {
-          return candidate;
-        }
-      }
-    }
+  // 3. Construct effective frame merging structural snapshot with current step scope/pointers
+  const effectiveFrame = useMemo<PrismFrame | null>(() => {
+    if (!frame) return null;
+    if (!effectiveState) return frame;
+    if (effectiveState.isDirectMatch) return frame;
 
-    return null;
-  }, [frame, detectedStructures, trace, currentStep]);
+    return {
+      ...effectiveState.structuralFrame,
+      activePointers: frame.activePointers && frame.activePointers.length > 0 ? frame.activePointers : effectiveState.structuralFrame.activePointers,
+      scope: { ...effectiveState.structuralFrame.scope, ...frame.scope },
+      line: frame.line,
+      stepIndex: frame.stepIndex,
+      stdout: frame.stdout,
+      exception: frame.exception,
+    };
+  }, [frame, effectiveState]);
 
-  // 3. Scan forward for upcoming structure if before first instantiation
+  // 4. Scan forward for upcoming structure if before first instantiation
   const upcomingStructure = useMemo(() => {
-    if (activeStructure || !trace?.frames) return null;
+    if (effectiveState || !trace?.frames) return null;
     for (let i = currentStep + 1; i < trace.frames.length; i++) {
       const futureFrame = trace.frames[i];
       if (!futureFrame) continue;
@@ -181,11 +177,16 @@ export default function VisualizerCanvas() {
       }
     }
     return null;
-  }, [activeStructure, trace, currentStep]);
+  }, [effectiveState, trace, currentStep]);
 
-  if (!isVisualizing || !frame || !activeStructure) {
+  if (!isVisualizing || !frame || !effectiveState) {
     return (
-      <div className="w-full h-full bg-white dark:bg-[#0a0f1d] rounded-xl border border-slate-200 dark:border-slate-800/80 overflow-hidden shadow-xs dark:shadow-lg">
+      <div className="w-full h-full bg-white dark:bg-[#0a0f1d] rounded-xl border border-slate-200 dark:border-slate-800/80 overflow-hidden shadow-xs dark:shadow-lg relative">
+        {semanticEvent && (
+          <div className="absolute top-2.5 left-2.5 right-2.5 z-20">
+            <ExecutionEventBanner event={semanticEvent} />
+          </div>
+        )}
         <NoStructureState
           hasTrace={isVisualizing && !!trace}
           isDefiningCode={Boolean(upcomingStructure)}
@@ -197,10 +198,20 @@ export default function VisualizerCanvas() {
     );
   }
 
+  const activeStructure = effectiveState.structure;
+  const renderFrame = effectiveFrame || frame;
+
   return (
     <div className="w-full h-full bg-white dark:bg-[#0a0f1d] rounded-xl border border-slate-200 dark:border-slate-800/80 overflow-hidden shadow-xs dark:shadow-lg relative">
+      {/* Top Banner: Compact Semantic Execution Event */}
+      {semanticEvent && (
+        <div className="absolute top-2.5 left-2.5 right-2.5 z-20">
+          <ExecutionEventBanner event={semanticEvent} />
+        </div>
+      )}
+
       {trace?.status === "TRACE_LIMIT" && (
-        <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 dark:bg-amber-950/90 border border-amber-300 dark:border-amber-700/80 text-[11px] font-mono text-amber-800 dark:text-amber-300 shadow-xs">
+        <div className="absolute top-12 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 dark:bg-amber-950/90 border border-amber-300 dark:border-amber-700/80 text-[11px] font-mono text-amber-800 dark:text-amber-300 shadow-xs">
           <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
           <span>Execution capped at 1,000 steps</span>
         </div>
@@ -208,7 +219,7 @@ export default function VisualizerCanvas() {
 
       {activeStructure.structureType === "singly_linked_list" && activeStructure.rootHeapId && (
         <LinkedListVisualizer
-          frame={frame}
+          frame={renderFrame}
           rootHeapId={activeStructure.rootHeapId}
           structureName={activeStructure.variableName}
         />
@@ -216,7 +227,7 @@ export default function VisualizerCanvas() {
 
       {activeStructure.structureType === "1d_array" && (
         <ArrayVisualizer
-          frame={frame}
+          frame={renderFrame}
           prevFrame={prevFrame}
           variableName={activeStructure.variableName}
         />
@@ -224,7 +235,7 @@ export default function VisualizerCanvas() {
 
       {activeStructure.structureType === "binary_tree" && activeStructure.rootHeapId && (
         <BSTVisualizer
-          frame={frame}
+          frame={renderFrame}
           rootHeapId={activeStructure.rootHeapId}
           structureName={activeStructure.variableName}
         />

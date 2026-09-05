@@ -1,14 +1,15 @@
 import React from "react";
 import Link from "next/link";
-import { Sparkles, Home, BookOpen, Compass, Target } from "lucide-react";
+import { Home, Code2, BookOpen, Compass, Target } from "lucide-react";
+import { PrismLogoMark } from "@/components/branding/PrismLogo";
 
 export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50 dark:bg-[#070a13] text-slate-900 dark:text-slate-100 font-sans">
       <div className="max-w-md w-full bg-white dark:bg-[#0d1322] border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl text-center space-y-6">
         {/* Prism Brand Icon */}
-        <div className="mx-auto w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/20">
-          <Sparkles className="w-6 h-6" />
+        <div className="mx-auto flex justify-center">
+          <PrismLogoMark className="w-12 h-12" />
         </div>
 
         <div className="space-y-2">
@@ -26,10 +27,10 @@ export default function NotFound() {
         {/* Destination Cards */}
         <div className="grid grid-cols-2 gap-2 text-left text-xs font-mono">
           <Link
-            href="/"
+            href="/workbench"
             className="flex items-center gap-2 p-3 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/50 hover:bg-cyan-50/50 dark:hover:bg-slate-800/80 transition-all text-slate-800 dark:text-slate-200"
           >
-            <Home className="w-4 h-4 text-cyan-500 shrink-0" />
+            <Code2 className="w-4 h-4 text-cyan-500 shrink-0" />
             <span>Workbench</span>
           </Link>
 

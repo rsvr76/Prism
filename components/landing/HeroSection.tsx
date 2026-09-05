@@ -9,18 +9,18 @@ const PHRASES = [
   "Write Real Python.",
   "See Exactly What Happened.",
   "Understand Why It Happened.",
-  "DSA Learning, Reimagined.",
+  "Trace Every Memory Mutation.",
 ];
 
 function useTypewriter() {
-  const [text, setText] = useState("");
+  const [text, setText] = useState(PHRASES[0]);
   const [phrase, setPhrase] = useState(0);
   const [erasing, setErasing] = useState(false);
 
   useEffect(() => {
     const full = PHRASES[phrase]!;
     if (!erasing && text === full) {
-      const t = setTimeout(() => setErasing(true), 1800);
+      const t = setTimeout(() => setErasing(true), 2000);
       return () => clearTimeout(t);
     }
     if (erasing && text === "") {
@@ -51,12 +51,18 @@ export function HeroSection() {
             <span className="shimmer-text font-semibold">Execution-Grounded DSA Learning</span>
           </span>
 
-          <h1 className="text-hero mt-6 min-h-[2.4em] font-bold">
-            <span aria-live="polite" className="gradient-text">
-              {typed}
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mt-6 leading-tight">
+            DSA Learning,{" "}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 dark:from-cyan-400 dark:via-blue-400 dark:to-purple-400">
+              Reimagined.
             </span>
-            <span className="typewriter-cursor" aria-hidden="true" />
           </h1>
+
+          <div className="mt-4 min-h-[2rem] flex items-center gap-2 font-mono text-base sm:text-lg text-cyan-700 dark:text-cyan-300 font-semibold">
+            <span className="text-slate-400 dark:text-slate-500 font-normal select-none">&gt;</span>
+            <span aria-live="polite">{typed}</span>
+            <span className="typewriter-cursor inline-block w-2 h-5 bg-cyan-500 animate-pulse" aria-hidden="true" />
+          </div>
 
           <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg">
             Prism runs your code in a real Python 3 sandbox, records every memory mutation step by

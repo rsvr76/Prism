@@ -22,13 +22,14 @@ import { Challenge, ChallengeEvaluationResult, ChallengeHint } from "@/types/cha
 import { evaluateChallenge } from "@/lib/practice/challengeEvaluator";
 import { recordAttempt, getChallengeAttempt } from "@/lib/practice/challengeProgressManager";
 import { logActivity } from "@/lib/progress/studentProgress";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
 const DIFFICULTY_COLORS: Record<string, string> = {
-  Beginner: "text-emerald-400 border-emerald-500/30 bg-emerald-950/40",
-  Intermediate: "text-amber-400 border-amber-500/30 bg-amber-950/40",
-  Advanced: "text-rose-400 border-rose-500/30 bg-rose-950/40",
+  Beginner: "text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40",
+  Intermediate: "text-amber-800 dark:text-amber-400 border-amber-300 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/40",
+  Advanced: "text-rose-700 dark:text-rose-400 border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/40",
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -43,6 +44,7 @@ interface ChallengeWorkbenchClientProps {
 }
 
 export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkbenchClientProps) {
+  const { isDark } = useTheme();
   const [code, setCode] = useState(challenge.starterCode);
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<ChallengeEvaluationResult | null>(null);
@@ -176,12 +178,12 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
   const sortedHints: ChallengeHint[] = [...challenge.hints].sort((a, b) => a.level - b.level);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-cyan-500/30">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-cyan-500/30">
       {/* Header */}
-      <header className="h-14 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur sticky top-0 px-4 flex items-center gap-4 z-20 shrink-0">
+      <header className="h-14 border-b border-slate-300 dark:border-slate-800/80 bg-white/90 dark:bg-slate-950/80 backdrop-blur sticky top-0 px-4 flex items-center gap-4 z-20 shrink-0">
         <Link
           href="/practice"
-          className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors"
+          className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 text-sm transition-colors"
           aria-label="Back to Practice"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -189,20 +191,20 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
         </Link>
 
         <div className="flex-1 flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-md shadow-cyan-500/20">
             <Sparkles className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="text-sm font-semibold text-slate-200 truncate">{challenge.title}</span>
-          <span className={`hidden sm:inline-flex items-center px-2 py-0.5 rounded-full border text-xs font-medium ${DIFFICULTY_COLORS[challenge.difficulty] || "text-slate-400"}`}>
+          <span className="text-sm font-semibold text-slate-900 dark:text-slate-200 truncate">{challenge.title}</span>
+          <span className={`hidden sm:inline-flex items-center px-2 py-0.5 rounded-full border text-xs font-medium ${DIFFICULTY_COLORS[challenge.difficulty] || "text-slate-600 dark:text-slate-400"}`}>
             {challenge.difficulty}
           </span>
-          <span className="hidden sm:inline text-xs text-slate-500">{TYPE_LABELS[challenge.type]}</span>
+          <span className="hidden sm:inline text-xs text-slate-500 dark:text-slate-400">{TYPE_LABELS[challenge.type]}</span>
         </div>
 
         {challenge.lessonId && (
           <Link
             href={`/paths/${challenge.learningPathId}/${challenge.lessonId}`}
-            className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+            className="hidden sm:flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
           >
             <BookOpen className="w-3.5 h-3.5" />
             <span>Back to Lesson</span>
@@ -210,7 +212,7 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
         )}
 
         {isPassed && (
-          <span className="flex items-center gap-1 text-xs text-emerald-400 font-medium">
+          <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
             <CheckCircle2 className="w-4 h-4" />
             Passed
           </span>
@@ -220,23 +222,23 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
       {/* Main layout */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Left: Instructions panel */}
-        <aside className="lg:w-96 lg:shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800 overflow-y-auto bg-slate-950 p-6">
-          <h2 className="text-base font-semibold text-white mb-3">{challenge.title}</h2>
+        <aside className="lg:w-96 lg:shrink-0 border-b lg:border-b-0 lg:border-r border-slate-300 dark:border-slate-800 overflow-y-auto bg-white dark:bg-slate-950 p-6">
+          <h2 className="text-base font-semibold text-slate-900 dark:text-white mb-3">{challenge.title}</h2>
 
           {/* Instructions */}
-          <div className="prose prose-invert prose-sm max-w-none mb-5">
-            <div className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
+          <div className="prose dark:prose-invert prose-sm max-w-none mb-5">
+            <div className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
               {challenge.instructions.replace(/^#+\s+[^\n]+\n*/, "").trim()}
             </div>
           </div>
 
           {/* Trace-prediction or complexity answer input */}
           {challenge.type === "trace-prediction" && challenge.traceQuestion && (
-            <div className="mb-5 p-4 rounded-lg border border-violet-500/30 bg-violet-950/30">
-              <p className="text-xs font-semibold text-violet-300 mb-2 flex items-center gap-1.5">
+            <div className="mb-5 p-4 rounded-lg border border-violet-300 dark:border-violet-500/30 bg-violet-50/70 dark:bg-violet-950/30">
+              <p className="text-xs font-semibold text-violet-800 dark:text-violet-300 mb-2 flex items-center gap-1.5">
                 <Target className="w-3.5 h-3.5" /> Your Prediction
               </p>
-              <p className="text-sm text-slate-300 mb-3">{challenge.traceQuestion}</p>
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-300 mb-3">{challenge.traceQuestion}</p>
               {challenge.traceAnswerOptions ? (
                 <div className="flex flex-wrap gap-2">
                   {challenge.traceAnswerOptions.map((opt) => (
@@ -245,8 +247,8 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
                       onClick={() => setStudentAnswer(opt)}
                       className={`px-3 py-1.5 rounded-lg border text-sm font-mono transition-all ${
                         studentAnswer === opt
-                          ? "bg-violet-600 border-violet-400 text-white"
-                          : "bg-slate-900 border-slate-700 text-slate-300 hover:border-violet-500/50"
+                          ? "bg-violet-600 border-violet-500 text-white"
+                          : "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-300 hover:border-violet-400 dark:hover:border-violet-500/50"
                       }`}
                     >
                       {opt}
@@ -259,18 +261,18 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
                   value={studentAnswer}
                   onChange={(e) => setStudentAnswer(e.target.value)}
                   placeholder="Your answer…"
-                  className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-violet-500/60"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-violet-500"
                 />
               )}
             </div>
           )}
 
           {challenge.type === "complexity" && challenge.complexityQuestion && (
-            <div className="mb-5 p-4 rounded-lg border border-amber-500/30 bg-amber-950/30">
-              <p className="text-xs font-semibold text-amber-300 mb-2 flex items-center gap-1.5">
+            <div className="mb-5 p-4 rounded-lg border border-amber-300 dark:border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/30">
+              <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 mb-2 flex items-center gap-1.5">
                 <BarChart3 className="w-3.5 h-3.5" /> Complexity Question
               </p>
-              <p className="text-sm text-slate-300 mb-3">{challenge.complexityQuestion}</p>
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-300 mb-3">{challenge.complexityQuestion}</p>
               <div className="flex flex-wrap gap-2">
                 {["O(1)", "O(log n)", "O(n)", "O(n log n)", "O(n^2)", "O(n^3)", "O(2^n)"].map((cls) => (
                   <button
@@ -278,8 +280,8 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
                     onClick={() => setStudentAnswer(cls)}
                     className={`px-3 py-1.5 rounded-lg border text-sm font-mono transition-all ${
                       studentAnswer === cls
-                        ? "bg-amber-600 border-amber-400 text-white"
-                        : "bg-slate-900 border-slate-700 text-slate-300 hover:border-amber-500/50"
+                        ? "bg-amber-600 border-amber-500 text-white"
+                        : "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-300 hover:border-amber-400 dark:hover:border-amber-500/50"
                     }`}
                   >
                     {cls}
@@ -293,13 +295,13 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
           {challenge.hints.length > 0 && (
             <div className="mb-5">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-                  <Lightbulb className="w-3.5 h-3.5 text-amber-400" /> Hints
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+                  <Lightbulb className="w-3.5 h-3.5 text-amber-500" /> Hints
                 </span>
                 {revealedHints < challenge.hints.length && (
                   <button
                     onClick={handleRevealHint}
-                    className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
+                    className="text-xs text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 font-medium transition-colors"
                   >
                     Reveal hint {revealedHints + 1} →
                   </button>
@@ -307,8 +309,8 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
               </div>
               <div className="space-y-2">
                 {sortedHints.slice(0, revealedHints).map((hint) => (
-                  <div key={hint.level} className="p-3 rounded-lg bg-amber-950/20 border border-amber-500/20 text-xs text-amber-200">
-                    <span className="font-semibold text-amber-400">Hint {hint.level}: </span>
+                  <div key={hint.level} className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-500/20 text-xs text-amber-900 dark:text-amber-200">
+                    <span className="font-semibold text-amber-700 dark:text-amber-400">Hint {hint.level}: </span>
                     {hint.text}
                   </div>
                 ))}
@@ -321,15 +323,15 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
 
           {/* Solution explanation (only after passing or explicit reveal) */}
           {(isPassed || showSolution) && (
-            <div className="p-4 rounded-lg bg-emerald-950/20 border border-emerald-500/20">
-              <p className="text-xs font-semibold text-emerald-400 mb-1.5">Solution Explanation</p>
-              <p className="text-xs text-slate-300">{challenge.solutionExplanation}</p>
+            <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-300 dark:border-emerald-500/20">
+              <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-400 mb-1.5">Solution Explanation</p>
+              <p className="text-xs text-slate-700 dark:text-slate-300">{challenge.solutionExplanation}</p>
             </div>
           )}
           {!isPassed && !showSolution && revealedHints === challenge.hints.length && challenge.hints.length > 0 && (
             <button
               onClick={() => setShowSolution(true)}
-              className="text-xs text-slate-500 hover:text-slate-300 underline mt-1 transition-colors"
+              className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline mt-1 transition-colors"
             >
               Show solution explanation
             </button>
@@ -337,14 +339,14 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
         </aside>
 
         {/* Right: Editor + Result */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
           {/* Code editor */}
           <div className="flex-1 min-h-0 flex flex-col">
-            <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 bg-slate-950/60 shrink-0">
-              <span className="text-xs text-slate-400 font-mono">Python 3</span>
+            <div className="flex items-center justify-between px-4 py-2 border-b border-slate-300 dark:border-slate-800 bg-slate-100/90 dark:bg-slate-950/60 shrink-0">
+              <span className="text-xs text-slate-700 dark:text-slate-400 font-mono font-medium">Python 3</span>
               <button
                 onClick={handleReset}
-                className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
                 title="Reset to starter code"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -357,7 +359,7 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
                 language="python"
                 value={code}
                 onChange={(v) => setCode(v || "")}
-                theme="vs-dark"
+                theme={isDark ? "vs-dark" : "light"}
                 options={{
                   fontSize: 13,
                   minimap: { enabled: false },
@@ -374,11 +376,11 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
           </div>
 
           {/* Submit bar */}
-          <div className="px-4 py-3 border-t border-slate-800 bg-slate-950/80 flex items-center gap-3 shrink-0">
+          <div className="px-4 py-3 border-t border-slate-300 dark:border-slate-800 bg-white/90 dark:bg-slate-950/80 flex items-center gap-3 shrink-0">
             <button
               onClick={handleSubmit}
               disabled={isRunning || (needsAnswerFirst && !studentAnswer.trim())}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-sm transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-sm transition-all shadow-md shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isRunning ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -388,45 +390,52 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
               {isRunning ? "Running…" : "Run & Submit"}
             </button>
             {needsAnswerFirst && !studentAnswer && (
-              <span className="text-xs text-amber-400">Select your answer above first.</span>
+              <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">Select your answer above first.</span>
             )}
           </div>
 
           {/* Result panel */}
           {result && (
-            <div className="border-t border-slate-800 bg-slate-950/60 p-4 max-h-72 overflow-y-auto shrink-0">
+            <div className="border-t border-slate-300 dark:border-slate-800 bg-white/95 dark:bg-slate-950/60 p-4 max-h-72 overflow-y-auto shrink-0 shadow-inner">
               {/* Status badge */}
               <div className="flex items-center gap-2 mb-3">
                 {result.passed ? (
                   <>
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                    <span className="text-sm font-semibold text-emerald-400">Challenge Passed!</span>
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">Challenge Passed!</span>
                   </>
                 ) : result.status === "error" ? (
                   <>
-                    <XCircle className="w-5 h-5 text-rose-400" />
-                    <span className="text-sm font-semibold text-rose-400">Execution Error</span>
+                    <XCircle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                    <span className="text-sm font-semibold text-rose-700 dark:text-rose-400">Execution Error</span>
                   </>
                 ) : (
                   <>
-                    <AlertTriangle className="w-5 h-5 text-amber-400" />
-                    <span className="text-sm font-semibold text-amber-400">Not Quite — Try Again</span>
+                    <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">Not Quite — Try Again</span>
                   </>
                 )}
               </div>
 
               {/* Deterministic feedback */}
-              <p className="text-sm text-slate-300 mb-3 whitespace-pre-wrap">{result.feedback}</p>
+              <p className="text-sm text-slate-800 dark:text-slate-300 mb-3 whitespace-pre-wrap">{result.feedback}</p>
 
               {/* Test results */}
               {result.testResults && result.testResults.length > 0 && (
                 <div className="mb-3 space-y-1.5">
                   {result.testResults.map((tr) => (
-                    <div key={tr.testCaseId} className={`flex items-center gap-2 text-xs px-3 py-1.5 rounded ${tr.passed ? "bg-emerald-950/40 text-emerald-300" : "bg-rose-950/40 text-rose-300"}`}>
-                      {tr.passed ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+                    <div
+                      key={tr.testCaseId}
+                      className={`flex items-center gap-2 text-xs px-3 py-1.5 rounded ${
+                        tr.passed
+                          ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-transparent"
+                          : "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-transparent"
+                      }`}
+                    >
+                      {tr.passed ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> : <XCircle className="w-3.5 h-3.5 shrink-0" />}
                       <span className="font-medium">{tr.description}</span>
                       {!tr.passed && (
-                        <span className="text-slate-400 ml-auto font-mono text-[10px]">
+                        <span className="text-slate-600 dark:text-slate-400 ml-auto font-mono text-[10px]">
                           expected: {tr.expected} | got: {tr.actual}
                         </span>
                       )}
@@ -437,25 +446,25 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
 
               {/* AI Feedback */}
               {isFetchingAI && (
-                <div className="flex items-center gap-2 text-xs text-slate-500">
+                <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   Getting AI explanation…
                 </div>
               )}
 
               {aiFeedback && (
-                <div className="mt-3 p-3 rounded-lg bg-slate-900/80 border border-slate-700/60">
-                  <p className="text-xs font-semibold text-cyan-400 mb-1.5 flex items-center gap-1.5">
+                <div className="mt-3 p-3 rounded-lg bg-slate-100 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700/60">
+                  <p className="text-xs font-semibold text-cyan-700 dark:text-cyan-400 mb-1.5 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5" /> AI Tutor Explanation
                   </p>
-                  <p className="text-xs text-slate-300 mb-2">{aiFeedback.explanation}</p>
+                  <p className="text-xs text-slate-800 dark:text-slate-300 mb-2 leading-relaxed">{aiFeedback.explanation}</p>
                   {aiFeedback.nextSteps.length > 0 && (
                     <div>
-                      <p className="text-xs text-slate-500 font-medium mb-1">Next steps:</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Next steps:</p>
                       <ul className="space-y-0.5">
                         {aiFeedback.nextSteps.map((step, i) => (
-                          <li key={i} className="text-xs text-slate-400 flex gap-1.5">
-                            <span className="text-cyan-500 shrink-0">→</span>
+                          <li key={i} className="text-xs text-slate-700 dark:text-slate-300 flex gap-1.5">
+                            <span className="text-cyan-600 dark:text-cyan-400 shrink-0">→</span>
                             {step}
                           </li>
                         ))}

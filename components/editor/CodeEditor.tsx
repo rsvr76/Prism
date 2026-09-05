@@ -198,8 +198,8 @@ export default function CodeEditor() {
               onClick={toggleOutput}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono transition-colors cursor-pointer ${
                 isOutputOpen
-                  ? "bg-slate-800 text-emerald-300 border border-slate-700 font-semibold"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/60"
+                  ? "bg-emerald-50 text-emerald-800 border border-emerald-300 font-semibold dark:bg-slate-800 dark:text-emerald-300 dark:border-slate-700"
+                  : "text-slate-700 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/60"
               }`}
               title="Toggle execution output tab"
             >

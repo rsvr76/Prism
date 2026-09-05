@@ -9,7 +9,6 @@ import {
   BarChart3,
   CheckCircle2,
   Clock,
-  Sparkles,
   BookOpen,
   Compass,
   Target,
@@ -27,7 +26,8 @@ import {
   getChallengeProgress,
 } from "@/lib/practice/challengeProgressManager";
 import { Challenge, ChallengeTopic, ChallengeDifficulty, ChallengeType, ChallengeProgressState } from "@/types/challenge";
-import ThemeToggle from "@/components/theme/ThemeToggle";
+import { PrismLogoCompact } from "@/components/branding/PrismLogo";
+import HamburgerButton from "@/components/navigation/HamburgerButton";
 
 const TOPIC_LABELS: Record<ChallengeTopic | "all", string> = {
   all: "All Topics",
@@ -133,6 +133,7 @@ export default function PracticeDashboard() {
   const [type, setType] = useState<ChallengeType | "all">("all");
   const [progress, setProgress] = useState<ChallengeProgressState>({ attempts: {}, lastUpdated: 0 });
   const toggleDrawer = useNavDrawerStore((state) => state.toggleDrawer);
+  const isDrawerOpen = useNavDrawerStore((state) => state.isOpen);
 
   useEffect(() => {
     setProgress(getChallengeProgress());
@@ -147,30 +148,29 @@ export default function PracticeDashboard() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-cyan-500/30 font-sans">
       {/* Header */}
       <header className="h-14 border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md sticky top-0 px-4 flex items-center justify-between z-20 shadow-xs select-none">
-        <div className="flex items-center gap-3 shrink-0">
-          <button
+        <div
+          className={`flex items-center gap-3 shrink-0 transition-opacity duration-200 ${
+            isDrawerOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+        >
+          <HamburgerButton
+            isOpen={isDrawerOpen}
             onClick={toggleDrawer}
-            aria-label="Navigation menu"
-            className="p-2 -ml-1 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            ariaLabel="Navigation menu"
             title="Navigation Menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white leading-none">
-                PRISM
-              </h1>
-              <p className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono tracking-wider uppercase leading-none mt-1">
-                DSA Learning Environment
-              </p>
-            </div>
+          />
+          <Link href="/" className="flex items-center group">
+            <PrismLogoCompact size="sm" />
           </Link>
         </div>
-        <ThemeToggle />
+
+        <Link
+          href="/workbench"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/20 transition-colors"
+        >
+          <Code2 className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Workbench</span>
+        </Link>
       </header>
 
       {/* Hero */}

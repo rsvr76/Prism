@@ -1,0 +1,184 @@
+{
+  "../components/ai/ComplexityPanel.tsx": [
+    "../store/useExecutionStore.ts"
+  ],
+  "../components/ai/StepExplainer.tsx": [
+    "../store/useExecutionStore.ts"
+  ],
+  "../components/ai/TutorDrawer.tsx": [
+    "../store/useExecutionStore.ts"
+  ],
+  "../components/branding/PrismLogo.tsx": [],
+  "../components/controls/ExecutionHeader.tsx": [
+    "../components/branding/PrismLogo.tsx",
+    "../components/controls/WhatIfModal.tsx",
+    "../store/useExecutionStore.ts",
+    "../store/useNavDrawerStore.ts"
+  ],
+  "../components/controls/WhatIfModal.tsx": [
+    "../components/theme/ThemeProvider.tsx",
+    "../store/useExecutionStore.ts"
+  ],
+  "../components/debug/AutoRevealRightPanel.tsx": [
+    "../components/debug/ExecutionStatePanel.tsx",
+    "../store/useExecutionStore.ts"
+  ],
+  "../components/debug/ExecutionOutputTab.tsx": [
+    "../lib/execution/traceRunner.ts",
+    "../store/useExecutionStore.ts",
+    "../store/useOutputTabStore.ts"
+  ],
+  "../components/debug/ExecutionStatePanel.tsx": [
+    "../components/ai/ComplexityPanel.tsx",
+    "../components/ai/StepExplainer.tsx",
+    "../components/ai/TutorDrawer.tsx",
+    "../store/useExecutionStore.ts",
+    "../types/trace.ts"
+  ],
+  "../components/debug/TimelineScrubber.tsx": [
+    "../store/useExecutionStore.ts"
+  ],
+  "../components/editor/CodeEditor.tsx": [
+    "../components/theme/ThemeProvider.tsx",
+    "../lib/execution/traceRunner.ts",
+    "../store/useExecutionStore.ts",
+    "../store/useOutputTabStore.ts"
+  ],
+  "../components/landing/FeatureRows.tsx": [
+    "../components/landing/animations/LinkedListAnim.tsx"
+  ],
+  "../components/landing/FinalCTA.tsx": [
+    "../components/landing/animations/FloatingGraph.tsx"
+  ],
+  "../components/landing/Footer.tsx": [
+    "../components/landing/PrismLogo.tsx"
+  ],
+  "../components/landing/HeroSection.tsx": [
+    "../components/landing/animations/SortingBars.tsx"
+  ],
+  "../components/landing/InteractiveTeaser.tsx": [],
+  "../components/landing/LandingNav.tsx": [
+    "../components/landing/PrismLogo.tsx",
+    "../store/useNavDrawerStore.ts"
+  ],
+  "../components/landing/PathsPreview.tsx": [],
+  "../components/landing/PrismLogo.tsx": [
+    "../components/branding/PrismLogo.tsx"
+  ],
+  "../components/landing/ProblemSolution.tsx": [],
+  "../components/landing/TrustBar.tsx": [],
+  "../components/landing/animations/FloatingGraph.tsx": [],
+  "../components/landing/animations/LinkedListAnim.tsx": [],
+  "../components/landing/animations/SortingBars.tsx": [],
+  "../components/theme/ThemeProvider.tsx": [],
+  "../components/visualization/ArrayVisualizer.tsx": [
+    "../lib/visualization/arrayStateDeriver.ts",
+    "../types/trace.ts"
+  ],
+  "../components/visualization/BSTVisualizer.tsx": [
+    "../components/theme/ThemeProvider.tsx",
+    "../lib/visualization/structureDetector.ts",
+    "../lib/visualization/treeLayout.ts",
+    "../types/trace.ts"
+  ],
+  "../components/visualization/LinkedListVisualizer.tsx": [
+    "../components/theme/ThemeProvider.tsx",
+    "../lib/visualization/structureDetector.ts",
+    "../types/trace.ts"
+  ],
+  "../components/visualization/VisualizerCanvas.tsx": [
+    "../components/visualization/ArrayVisualizer.tsx",
+    "../components/visualization/BSTVisualizer.tsx",
+    "../components/visualization/LinkedListVisualizer.tsx",
+    "../lib/visualization/structureDetector.ts",
+    "../store/useExecutionStore.ts",
+    "../types/trace.ts"
+  ],
+  "../hooks/useReveal.ts": [],
+  "../lib/ai/complexityAnalyzer.ts": [
+    "../types/ai.ts",
+    "../types/trace.ts"
+  ],
+  "../lib/ai/traceContextBuilder.ts": [
+    "../lib/visualization/structureDetector.ts",
+    "../types/ai.ts",
+    "../types/trace.ts"
+  ],
+  "../lib/ai/tutorContextBuilder.ts": [
+    "../lib/ai/traceContextBuilder.ts",
+    "../types/ai.ts",
+    "../types/trace.ts"
+  ],
+  "../lib/config/executionLimits.ts": [
+    "../types/trace.ts"
+  ],
+  "../lib/content/algorithms.ts": [
+    "../types/content.ts"
+  ],
+  "../lib/content/learningPaths.ts": [
+    "../types/learningPath.ts"
+  ],
+  "../lib/execution/astValidator.ts": [
+    "../types/trace.ts"
+  ],
+  "../lib/execution/pythonTracerScript.ts": [],
+  "../lib/execution/traceRunner.ts": [
+    "../lib/config/executionLimits.ts",
+    "../lib/execution/astValidator.ts",
+    "../lib/execution/pythonTracerScript.ts",
+    "../types/trace.ts",
+    "../types/worker.ts"
+  ],
+  "../lib/visualization/arrayStateDeriver.ts": [
+    "../types/trace.ts"
+  ],
+  "../lib/visualization/structureDetector.ts": [
+    "../types/trace.ts"
+  ],
+  "../lib/visualization/treeLayout.ts": [
+    "../types/trace.ts"
+  ],
+  "../store/useExecutionStore.ts": [
+    "../lib/ai/complexityAnalyzer.ts",
+    "../lib/ai/traceContextBuilder.ts",
+    "../lib/ai/tutorContextBuilder.ts",
+    "../lib/config/executionLimits.ts",
+    "../lib/execution/traceRunner.ts",
+    "../types/ai.ts",
+    "../types/trace.ts"
+  ],
+  "../store/useNavDrawerStore.ts": [],
+  "../store/useOutputTabStore.ts": [],
+  "../types/ai.ts": [],
+  "../types/content.ts": [],
+  "../types/learningPath.ts": [
+    "../types/content.ts"
+  ],
+  "../types/trace.ts": [],
+  "../types/worker.ts": [
+    "../types/trace.ts"
+  ],
+  "page.tsx": [
+    "../components/landing/FeatureRows.tsx",
+    "../components/landing/FinalCTA.tsx",
+    "../components/landing/Footer.tsx",
+    "../components/landing/HeroSection.tsx",
+    "../components/landing/InteractiveTeaser.tsx",
+    "../components/landing/LandingNav.tsx",
+    "../components/landing/PathsPreview.tsx",
+    "../components/landing/ProblemSolution.tsx",
+    "../components/landing/TrustBar.tsx",
+    "../hooks/useReveal.ts"
+  ],
+  "workbench/page.tsx": [
+    "../components/controls/ExecutionHeader.tsx",
+    "../components/debug/AutoRevealRightPanel.tsx",
+    "../components/debug/ExecutionOutputTab.tsx",
+    "../components/debug/TimelineScrubber.tsx",
+    "../components/editor/CodeEditor.tsx",
+    "../components/visualization/VisualizerCanvas.tsx",
+    "../lib/content/algorithms.ts",
+    "../lib/content/learningPaths.ts",
+    "../store/useExecutionStore.ts"
+  ]
+}

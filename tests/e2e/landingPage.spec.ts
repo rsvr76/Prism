@@ -123,6 +123,10 @@ test.describe('Landing & Opening Page E2E Validation', () => {
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
 
+    // Open navigation drawer (exclusive home of ThemeToggle)
+    const drawerBtn = page.getByRole('button', { name: 'Open navigation drawer' });
+    await drawerBtn.click();
+
     const themeBtn = page.getByRole('button', { name: 'Toggle theme' }).first();
     await expect(themeBtn).toBeVisible();
 

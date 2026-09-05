@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Skull, Microscope, Sparkles, ArrowDown, X, Check } from "lucide-react";
+import { Skull, Microscope, ArrowDown, X, Check } from "lucide-react";
+import { PrismVectorMark } from "@/components/branding/PrismLogo";
 
 const PROBLEMS = [
   {
@@ -26,19 +27,19 @@ const FIXES = [
 
 export function ProblemSolution() {
   return (
-    <section className="mx-auto max-w-6xl px-5 py-16 md:py-20">
-      <h2 className="text-section reveal max-w-2xl font-bold">
-        Why <span className="gradient-text">Prism</span>?
+    <section className="mx-auto max-w-6xl px-5 py-12 md:py-16">
+      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white reveal max-w-2xl">
+        Why <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 to-purple-600 dark:from-cyan-400 dark:to-purple-400">Prism</span>?
       </h2>
-      <p className="reveal mt-3 max-w-xl text-slate-600 dark:text-slate-400">
+      <p className="reveal mt-3 max-w-xl text-sm sm:text-base text-slate-600 dark:text-slate-400">
         Traditional ways of learning data structures fail students. Here is what breaks, and what Prism does instead.
       </p>
 
-      <p className="reveal mt-10 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-rose-500 font-bold">
+      <p className="reveal mt-8 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-rose-500 font-bold">
         <X className="size-4" aria-hidden="true" /> The Problem
       </p>
 
-      <div className="reveal-stagger mt-4 grid gap-5 md:grid-cols-2">
+      <div className="reveal-stagger mt-3 grid gap-5 md:grid-cols-2">
         {PROBLEMS.map(({ Icon, title, body, pain }, i) => (
           <article
             key={title}
@@ -55,18 +56,18 @@ export function ProblemSolution() {
         ))}
       </div>
 
-      <div className="reveal mt-8 flex justify-center text-slate-400">
-        <ArrowDown className="size-6 animate-bounce" aria-hidden="true" />
+      <div className="reveal mt-6 flex justify-center text-slate-400">
+        <ArrowDown className="size-5 animate-bounce" aria-hidden="true" />
       </div>
 
-      <p className="reveal mt-8 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-emerald-500 font-bold">
+      <p className="reveal mt-6 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-emerald-500 font-bold">
         <Check className="size-4" aria-hidden="true" /> The Solution
       </p>
 
-      <article className="reveal glass-card-brand mt-4 grid gap-6 p-6 md:p-8 md:grid-cols-[1fr_1.2fr] md:items-center">
+      <article className="reveal glass-card-brand mt-3 grid gap-6 p-6 md:p-8 md:grid-cols-[1fr_1.2fr] md:items-center">
         <div>
-          <Sparkles className="size-6 text-cyan-500" aria-hidden="true" />
-          <h3 className="mt-4 text-xl font-bold text-slate-900 dark:text-white">Prism Bridges the Gap</h3>
+          <PrismVectorMark className="w-8 h-8 mb-2" />
+          <h3 className="mt-2 text-xl font-bold text-slate-900 dark:text-white">Prism Bridges the Gap</h3>
           <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
             Real execution. Real heap memory. Grounded explanations — every pedagogical claim is read straight from your runtime trace diff.
           </p>

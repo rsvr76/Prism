@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { PrismLogo } from "./PrismLogo";
-import ThemeToggle from "@/components/theme/ThemeToggle";
 import { useNavDrawerStore } from "@/store/useNavDrawerStore";
+import HamburgerButton from "@/components/navigation/HamburgerButton";
 
 const LINKS = [
   { href: "/library", label: "Library" },
@@ -18,6 +18,7 @@ export function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const openDrawer = useNavDrawerStore((state) => state.openDrawer);
+  const isDrawerOpen = useNavDrawerStore((state) => state.isOpen);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -28,46 +29,46 @@ export function LandingNav() {
 
   return (
     <header
-      className={`sticky top-0 z-50 border-b transition-colors duration-300 ${
+      className={`sticky top-0 z-50 h-14 border-b transition-colors duration-300 ${
         scrolled
           ? "border-slate-200 dark:border-slate-800 bg-white/85 dark:bg-[#070a13]/85 backdrop-blur-md"
           : "border-transparent bg-transparent"
       }`}
     >
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <div className="flex items-center gap-3">
-          {/* Slide-out drawer trigger */}
-          <button
-            type="button"
+      <div className="w-full h-full px-4 flex items-center justify-between">
+        {/* Left Side: Hamburger & Brand Logo (Positioned exactly matching sidebar down to the pixel) */}
+        <div
+          className={`flex items-center gap-3 shrink-0 transition-opacity duration-200 ${
+            isDrawerOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+        >
+          <HamburgerButton
+            isOpen={isDrawerOpen}
             onClick={openDrawer}
-            aria-label="Open navigation drawer"
-            className="inline-flex size-9 items-center justify-center rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            <Menu className="size-5" />
-          </button>
+            ariaLabel="Open navigation drawer"
+            title="Open Navigation Drawer"
+          />
 
-          <Link href="/" className="flex items-center gap-2">
-            <PrismLogo className="h-8 w-auto" />
+          <Link href="/" className="flex items-center">
+            <PrismLogo variant="compact" size="sm" />
           </Link>
         </div>
 
-        {/* Desktop Nav Links */}
-        <div className="hidden items-center gap-1 md:flex">
+        {/* Desktop Nav Links (Clean text links, centered) */}
+        <nav aria-label="Quick Links" className="hidden md:flex items-center gap-7">
           {LINKS.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className="rounded-full px-3.5 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+              className="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors tracking-tight relative py-1"
             >
               {l.label}
             </Link>
           ))}
-        </div>
+        </nav>
 
-        {/* Right CTA & Controls */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <ThemeToggle />
-
+        {/* Right CTA: Open Editor (ThemeToggle removed completely from header) */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <Link
             href="/workbench"
             className="btn-base btn-primary hidden sm:inline-flex text-xs md:text-sm font-bold shadow-md shadow-purple-500/20"
@@ -85,7 +86,7 @@ export function LandingNav() {
             {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
         </div>
-      </nav>
+      </div>
 
       {/* Mobile dropdown menu */}
       {mobileMenuOpen && (
@@ -104,7 +105,7 @@ export function LandingNav() {
             <Link
               href="/workbench"
               onClick={() => setMobileMenuOpen(false)}
-              className="btn-base btn-primary mt-3 w-full justify-center"
+              className="mt-2 flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 py-2.5 text-sm font-bold text-white shadow-md shadow-cyan-500/20"
             >
               Open Editor <ArrowRight className="size-4" />
             </Link>

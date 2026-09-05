@@ -317,7 +317,7 @@ export default function LinkedListVisualizer({
           variant={BackgroundVariant.Dots}
           gap={22}
           size={1.2}
-          color={isDark ? "#334155" : "#cbd5e1"}
+          color={isDark ? "#334155" : "#94a3b8"}
         />
       </ReactFlow>
     </div>

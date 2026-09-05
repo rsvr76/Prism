@@ -8,8 +8,8 @@ export function Footer() {
   return (
     <footer className="mx-auto max-w-6xl px-5 py-12">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2.5">
-          <PrismLogo className="h-7 w-auto" />
+        <Link href="/" className="flex items-center">
+          <PrismLogo variant="compact" size="md" />
         </Link>
         <nav className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-600 dark:text-slate-400 font-medium">
           <Link href="/library" className="hover:text-purple-600 dark:hover:text-cyan-400 transition-colors">
