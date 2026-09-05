@@ -1,85 +1,63 @@
 "use client";
 
-import React, { Suspense, useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
-import ExecutionHeader from "@/components/controls/ExecutionHeader";
-import CodeEditor from "@/components/editor/CodeEditor";
-import AutoRevealRightPanel from "@/components/debug/AutoRevealRightPanel";
-import ExecutionOutputTab from "@/components/debug/ExecutionOutputTab";
-import TimelineScrubber from "@/components/debug/TimelineScrubber";
-import VisualizerCanvas from "@/components/visualization/VisualizerCanvas";
-import { useExecutionStore } from "@/store/useExecutionStore";
-import { getAlgorithmBySlug } from "@/lib/content/algorithms";
-import { getLessonBySlug } from "@/lib/content/learningPaths";
+import React, { Suspense, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useReveal } from "@/hooks/useReveal";
+import LandingNav from "@/components/landing/LandingNav";
+import HeroSection from "@/components/landing/HeroSection";
+import TrustBar from "@/components/landing/TrustBar";
+import ProblemSolution from "@/components/landing/ProblemSolution";
+import FeatureRows from "@/components/landing/FeatureRows";
+import InteractiveTeaser from "@/components/landing/InteractiveTeaser";
+import PathsPreview from "@/components/landing/PathsPreview";
+import FinalCTA from "@/components/landing/FinalCTA";
+import Footer from "@/components/landing/Footer";
 
-function AlgorithmLoader() {
+function QueryRedirectHandler() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const loadAlgorithmCode = useExecutionStore((state) => state.loadAlgorithmCode);
-  const lastLoadedKey = useRef<string | null>(null);
 
   useEffect(() => {
-    const algoSlug = searchParams.get("algo") || searchParams.get("example");
-    const lessonSlug = searchParams.get("lesson");
-    const pathSlug = searchParams.get("path") || "dsa-foundations";
-    const cacheKey = `${algoSlug || ""}:${lessonSlug || ""}`;
-
-    if (algoSlug && cacheKey !== lastLoadedKey.current) {
-      const algo = getAlgorithmBySlug(algoSlug);
-      if (algo) {
-        lastLoadedKey.current = cacheKey;
-        let lessonContext: { pathSlug: string; lessonSlug: string; lessonTitle: string } | null = null;
-        if (lessonSlug) {
-          const lookup = getLessonBySlug(pathSlug, lessonSlug);
-          if (lookup) {
-            lessonContext = {
-              pathSlug: lookup.path.slug,
-              lessonSlug: lookup.lesson.slug,
-              lessonTitle: lookup.lesson.title,
-            };
-          }
-        }
-        loadAlgorithmCode(algo.name, algo.pythonCode, lessonContext);
-      }
+    const algo = searchParams.get("algo") || searchParams.get("example");
+    const lesson = searchParams.get("lesson");
+    if (algo || lesson) {
+      const qs = searchParams.toString();
+      router.replace(`/workbench${qs ? `?${qs}` : ""}`);
     }
-  }, [searchParams, loadAlgorithmCode]);
+  }, [router, searchParams]);
 
   return null;
 }
 
-export default function PrismWorkbench() {
+export default function LandingPage() {
+  useReveal();
+
   return (
-    <main className="flex flex-col min-h-screen lg:h-screen w-screen overflow-y-auto lg:overflow-hidden bg-slate-50 dark:bg-[#070a13] text-slate-900 dark:text-slate-100">
-      {/* Parameter-based Algorithm loader */}
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070a13] text-slate-900 dark:text-slate-100 transition-colors duration-150">
       <Suspense fallback={null}>
-        <AlgorithmLoader />
+        <QueryRedirectHandler />
       </Suspense>
 
-      {/* Top Navigation & Controls */}
-      <ExecutionHeader />
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-purple-600 focus:px-4 focus:py-2 focus:text-white"
+      >
+        Skip to content
+      </a>
 
-      {/* Main 2-Screen Workbench: Left = Code, Right = Visualizer */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 p-2.5 md:p-3 lg:overflow-hidden min-h-0 relative">
-        {/* Left Screen: Monaco Code Editor with Execute & Output Action Bar */}
-        <div className="h-[460px] lg:h-full lg:overflow-hidden min-h-0 flex flex-col">
-          <CodeEditor />
-        </div>
+      <LandingNav />
 
-        {/* Right Screen: Linked List / Structure Visualizer (HERO) */}
-        <div className="h-[460px] lg:h-full lg:overflow-hidden min-h-0 flex flex-col">
-          <VisualizerCanvas />
-        </div>
+      <main id="main">
+        <HeroSection />
+        <TrustBar />
+        <ProblemSolution />
+        <FeatureRows />
+        <InteractiveTeaser />
+        <PathsPreview />
+        <FinalCTA />
+      </main>
 
-        {/* Small/Dynamic Output Tab between Code and Visualizer (Does not affect code or visualizer size) */}
-        <ExecutionOutputTab />
-
-        {/* Auto-Revealing Right Tab Drawer: AI Explainer, Tutor & Diagnostics */}
-        <AutoRevealRightPanel />
-      </div>
-
-      {/* Bottom Dock: Timeline Playback & Scrubber */}
-      <div className="sticky bottom-0 z-30">
-        <TimelineScrubber />
-      </div>
-    </main>
+      <Footer />
+    </div>
   );
 }

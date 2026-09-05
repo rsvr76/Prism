@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Phase 8B: Guided Learning Paths & Progression E2E Validation', () => {
 
   test('1. Navigation from Workbench to Learning Paths Catalog & Path Overview', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/workbench');
     await page.waitForLoadState('domcontentloaded');
 
     // Learning Paths link in nav drawer
@@ -119,7 +119,7 @@ test.describe('Phase 8B: Guided Learning Paths & Progression E2E Validation', ()
     await tryBtn.click();
 
     // Navigates to workbench with algo and lesson query parameters
-    await expect(page).toHaveURL(/\/\?algo=array&lesson=arrays-memory-access/);
+    await expect(page).toHaveURL(/\/(workbench\?algo=array&lesson=arrays-memory-access|\?algo=array&lesson=arrays-memory-access)/);
 
     // Header displays guided lesson context badge
     await expect(page.getByTitle('Return to Guided Lesson')).toBeVisible();

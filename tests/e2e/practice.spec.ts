@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Phase 8C: Practice & Challenges E2E Validation', () => {
 
   test('1. Navigation from Workbench to Practice Catalog', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/workbench');
     await page.waitForLoadState('domcontentloaded');
 
     // Practice tab in navigation drawer

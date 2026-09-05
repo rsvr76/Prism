@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Phase 8D: Unified Student Progress & Dashboard E2E Validation', () => {
 
   test('1. Navigation from Workbench to Student Dashboard', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/workbench');
     await page.waitForLoadState('domcontentloaded');
 
     // Dashboard link in nav drawer

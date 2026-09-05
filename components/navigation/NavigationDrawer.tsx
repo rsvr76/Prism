@@ -12,6 +12,7 @@ import {
   Compass,
   Target,
   LayoutDashboard,
+  Home,
 } from "lucide-react";
 import { useNavDrawerStore } from "@/store/useNavDrawerStore";
 import ThemeToggle from "@/components/theme/ThemeToggle";
@@ -25,8 +26,14 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   {
-    label: "Workbench",
+    label: "Home",
     href: "/",
+    icon: Home,
+    description: "Overview, interactive demos & learning paths",
+  },
+  {
+    label: "Workbench",
+    href: "/workbench",
     icon: Code2,
     description: "Interactive Python execution & memory visualizers",
   },

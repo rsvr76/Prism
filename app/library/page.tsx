@@ -42,7 +42,7 @@ export default function AlgorithmLibraryPage() {
 
   const handleTryInPrism = (algo: AlgorithmDefinition) => {
     loadAlgorithmCode(algo.name, algo.pythonCode);
-    router.push(`/?algo=${algo.slug}`);
+    router.push(`/workbench?algo=${algo.slug}`);
   };
 
   const getVisualizationLabel = (target: string) => {

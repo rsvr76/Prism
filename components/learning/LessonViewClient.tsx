@@ -331,7 +331,7 @@ export default function LessonViewClient({
                   </button>
 
                   <Link
-                    href={`/?algo=${algorithm.slug}&lesson=${lesson.slug}&path=${path.slug}`}
+                    href={`/workbench?algo=${algorithm.slug}&lesson=${lesson.slug}&path=${path.slug}`}
                     className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold shadow-md shadow-cyan-500/20 transition-all cursor-pointer"
                   >
                     <Play className="w-3.5 h-3.5 fill-slate-950" />

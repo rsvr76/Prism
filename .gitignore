@@ -14,9 +14,12 @@ out/
 New Research/
 research/
 references/
-LOGS.md
-MEMORY.md
 
 # Test artifacts
 test-results/
 playwright-report/
+
+# Others
+Frontend/
+LOGS.md
+MEMORY.md

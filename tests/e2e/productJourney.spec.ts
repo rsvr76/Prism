@@ -4,7 +4,7 @@ test.describe('Phase 8E: Complete Student Product Flows & Release Readiness', ()
 
   test('Flow 1: Home → Learning Paths → Lesson → Try in Prism → Execute Trace', async ({ page }) => {
     // 1. Home / Workbench
-    await page.goto('/');
+    await page.goto('/workbench');
     await page.waitForLoadState('domcontentloaded');
     await expect(page.locator('h1')).toHaveText('PRISM');
 
@@ -27,7 +27,7 @@ test.describe('Phase 8E: Complete Student Product Flows & Release Readiness', ()
     // 5. Try in Prism
     const tryBtn = page.getByRole('link', { name: 'Try in Prism' }).first();
     await tryBtn.click();
-    await expect(page).toHaveURL(/\/\?algo=array&lesson=arrays-memory-access/);
+    await expect(page).toHaveURL(/\/(workbench\?algo=array&lesson=arrays-memory-access|\?algo=array&lesson=arrays-memory-access)/);
 
     // 6. Execute in Workbench
     const runBtn = page.getByRole('button', { name: /Execute|Visualize/i }).first();
@@ -89,7 +89,7 @@ test.describe('Phase 8E: Complete Student Product Flows & Release Readiness', ()
     await page.setViewportSize({ width: 768, height: 1024 });
 
     // 1. Workbench
-    await page.goto('/');
+    await page.goto('/workbench');
     await page.waitForLoadState('domcontentloaded');
     const mainNav = page.getByRole('navigation', { name: 'Main Navigation' });
 
@@ -120,7 +120,7 @@ test.describe('Phase 8E: Complete Student Product Flows & Release Readiness', ()
     // 6. Return to Workbench
     await page.getByRole('button', { name: 'Navigation menu' }).click();
     await page.getByRole('navigation', { name: 'Main Navigation' }).getByRole('link', { name: 'Workbench' }).click();
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL(/\/workbench/);
     await expect(page.locator('h1')).toHaveText('PRISM');
   });
 });

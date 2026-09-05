@@ -46,7 +46,7 @@ export default function AlgorithmDetailClient({ algorithm }: AlgorithmDetailClie
 
   const handleTryInPrism = () => {
     loadAlgorithmCode(algorithm.name, algorithm.pythonCode);
-    router.push(`/?algo=${algorithm.slug}`);
+    router.push(`/workbench?algo=${algorithm.slug}`);
   };
 
   const isDataStructure = algorithm.category === "data-structures";

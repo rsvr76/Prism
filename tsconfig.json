@@ -37,6 +37,7 @@
   "exclude": [
     "node_modules",
     "references",
-    "New Research"
+    "New Research",
+    "Frontend"
   ]
 }

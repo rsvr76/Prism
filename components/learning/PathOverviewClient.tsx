@@ -278,7 +278,7 @@ export default function PathOverviewClient({ path }: PathOverviewClientProps) {
                           {/* Action Links */}
                           <div className="flex items-center gap-2 shrink-0 ml-4">
                             <Link
-                              href={`/?algo=${lesson.algorithmSlug}&lesson=${lesson.slug}&path=${path.slug}`}
+                              href={`/workbench?algo=${lesson.algorithmSlug}&lesson=${lesson.slug}&path=${path.slug}`}
                               className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-mono text-slate-400 hover:text-cyan-300 hover:bg-slate-800 border border-slate-800 transition-colors"
                               title="Try code immediately in Workbench"
                             >

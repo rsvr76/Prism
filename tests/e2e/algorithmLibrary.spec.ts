@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Phase 8A: Algorithm Library & Learning Content E2E Validation', () => {
 
   test('1. Navigation from Workbench to Algorithm Library', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/workbench');
     await page.waitForLoadState('domcontentloaded');
 
     // Brand and navigation links exist
@@ -89,7 +89,7 @@ test.describe('Phase 8A: Algorithm Library & Learning Content E2E Validation', (
     await tryBtn.click();
 
     // Navigates to workbench
-    await expect(page).toHaveURL(/\/\?algo=bubble-sort/);
+    await expect(page).toHaveURL(/\/(workbench\?algo=bubble-sort|\?algo=bubble-sort)/);
 
     // Workbench displays loaded algorithm title badge
     await expect(page.getByText(/Bubble Sort/i).first()).toBeVisible();
@@ -119,7 +119,7 @@ test.describe('Phase 8A: Algorithm Library & Learning Content E2E Validation', (
     await cardTryBtn.click();
 
     // Navigates to workbench with linked-list param
-    await expect(page).toHaveURL(/\/\?algo=linked-list/);
+    await expect(page).toHaveURL(/\/(workbench\?algo=linked-list|\?algo=linked-list)/);
     await expect(page.getByText(/Singly Linked List/i).first()).toBeVisible();
   });
 

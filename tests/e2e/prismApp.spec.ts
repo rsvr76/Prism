@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Prism Real Browser E2E & Production UX Validation', () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/workbench');
     await page.waitForLoadState('domcontentloaded');
   });
 
@@ -112,7 +112,7 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
   });
 
   test('5. Data Structure Visualization (Linked List Preset)', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/workbench');
     await page.waitForLoadState('domcontentloaded');
 
     const presetSelect = page.locator('select');
@@ -188,7 +188,7 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
   });
 
   test('8. Modal Keyboard Accessibility (Escape key closes What-If)', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/workbench');
     await page.waitForLoadState('domcontentloaded');
 
     const runBtn = page.getByRole('button', { name: 'Visualize' });
@@ -209,7 +209,7 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
 
   test('9. Viewport Responsiveness (Tablet 768x1024)', async ({ page }) => {
     await page.setViewportSize({ width: 768, height: 1024 });
-    await page.goto('/');
+    await page.goto('/workbench');
 
     await expect(page.locator('h1')).toHaveText('PRISM');
     await expect(page.getByRole('button', { name: 'Execute' })).toBeVisible();
