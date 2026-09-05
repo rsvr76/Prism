@@ -456,6 +456,8 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
 /* ==========================================================================
    Hamburger Menu Morphing Animation (McButton)
    - Closed: 3 horizontal bars
