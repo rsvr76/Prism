@@ -22,8 +22,8 @@ test.describe('Landing & Opening Page E2E Validation', () => {
 
     // TrustBar items
     await expect(page.getByText('Built with:')).toBeVisible();
-    await expect(page.getByText('Python 3.12')).toBeVisible();
-    await expect(page.getByText('WebAssembly')).toBeVisible();
+    await expect(page.getByText('Python 3.12', { exact: true })).toBeVisible();
+    await expect(page.getByText('WebAssembly', { exact: true })).toBeVisible();
   });
 
   test('2. Sorting Bars Animation & Live Trace Step Card', async ({ page }) => {
@@ -142,4 +142,32 @@ test.describe('Landing & Opening Page E2E Validation', () => {
     await themeBtn.click();
     await expect(html).toHaveClass(/dark/);
   });
+
+  test('9. Interactive Teaser: Automatic Scroll-Triggered Stepping and User Override', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const teaser = page.locator('#teaser');
+    await page.evaluate(() => {
+      document.getElementById('teaser')?.scrollIntoView();
+    });
+    await expect(teaser).toBeVisible();
+
+    // Verify auto-play preview badge appears
+    const autoBadge = teaser.getByText(/Auto-Playing Preview/i);
+    await expect(autoBadge).toBeVisible({ timeout: 5000 });
+
+    // Wait for auto-stepping to advance past step 1
+    await expect(teaser.getByText(/step [2-5] of 5/i)).toBeVisible({ timeout: 4000 });
+
+    // Click Run Demo to override auto-play
+    const runBtn = teaser.getByRole('button', { name: /Run Demo/i });
+    await runBtn.click();
+
+    // Auto-playing preview badge should disappear and Interactive Mode should appear
+    const interactiveBadge = teaser.getByText(/Interactive Mode/i);
+    await expect(interactiveBadge).toBeVisible();
+    await expect(autoBadge).not.toBeVisible();
+  });
 });
+

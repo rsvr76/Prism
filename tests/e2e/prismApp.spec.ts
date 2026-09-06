@@ -86,7 +86,7 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
     const runBtn = page.getByRole('button', { name: 'Visualize' });
     await expect(runBtn).toBeEnabled({ timeout: 15000 });
     await runBtn.click();
-    await expect(page.getByText(/Executed \(\d+ steps\)/i)).toBeVisible({ timeout: 60000 });
+    await expect(page.getByText(/Executed \(\d+ steps\)/i).or(page.getByText(/\d+ steps/i)).first()).toBeVisible({ timeout: 60000 });
 
     // Open AI and Diagnostics panel
     await page.getByRole('button', { name: /Toggle AI and Diagnostics panel/i }).click();

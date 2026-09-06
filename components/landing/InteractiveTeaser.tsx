@@ -67,40 +67,120 @@ const ALGOS: { id: Algo; label: string; code: string[]; steps: string[][] }[] = 
 ];
 
 export function InteractiveTeaser() {
-  const [algo, setAlgo] = useState<Algo>("bubble");
+  const [algoIndex, setAlgoIndex] = useState(0);
   const [step, setStep] = useState(0);
   const [running, setRunning] = useState(false);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+  const [hasUserOverridden, setHasUserOverridden] = useState(false);
+  const [inView, setInView] = useState(false);
 
-  const current = ALGOS.find((a) => a.id === algo)!;
-  const done = step >= current.steps.length - 1 && !running;
+  const sectionRef = useRef<HTMLElement>(null);
+  const stepTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const current = ALGOS[algoIndex]!;
+  const done = step >= current.steps.length - 1;
+
+  // 1. Detect when teaser section scrolls into view
   useEffect(() => {
-    return () => {
-      if (timer.current) clearInterval(timer.current);
-    };
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry && entry.isIntersecting) {
+          setInView(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
-  const run = () => {
-    if (timer.current) clearInterval(timer.current);
+  // 2. Automatic stepping & algorithm cycling when scrolled into view (unless user took over)
+  useEffect(() => {
+    if (!inView || hasUserOverridden) return;
+
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+
+    setIsAutoPlaying(true);
+    setRunning(true);
+
+    const currentAlgo = ALGOS[algoIndex]!;
+    if (step < currentAlgo.steps.length - 1) {
+      stepTimer.current = setTimeout(() => {
+        setStep((s) => s + 1);
+      }, 750);
+    } else {
+      // Hold on the completed step (1500ms) before cycling to the next algorithm
+      transitionTimer.current = setTimeout(() => {
+        setAlgoIndex((prev) => (prev + 1) % ALGOS.length);
+        setStep(0);
+      }, 1500);
+    }
+
+    return () => {
+      if (stepTimer.current) clearTimeout(stepTimer.current);
+      if (transitionTimer.current) clearTimeout(transitionTimer.current);
+    };
+  }, [inView, hasUserOverridden, algoIndex, step]);
+
+  // 3. User-enabled stepping when user manually triggers "Run Demo"
+  useEffect(() => {
+    if (!hasUserOverridden || !running) return;
+
+    const currentAlgo = ALGOS[algoIndex]!;
+    if (step < currentAlgo.steps.length - 1) {
+      stepTimer.current = setTimeout(() => {
+        setStep((s) => s + 1);
+      }, 700);
+    } else {
+      setRunning(false);
+    }
+
+    return () => {
+      if (stepTimer.current) clearTimeout(stepTimer.current);
+    };
+  }, [hasUserOverridden, running, algoIndex, step]);
+
+  // Handle User Click on "Run Demo": immediately stop auto-play and run user demo
+  const handleUserRun = () => {
+    if (stepTimer.current) clearTimeout(stepTimer.current);
+    if (transitionTimer.current) clearTimeout(transitionTimer.current);
+    setHasUserOverridden(true);
+    setIsAutoPlaying(false);
     setStep(0);
     setRunning(true);
-    timer.current = setInterval(() => {
-      setStep((s) => {
-        if (s >= current.steps.length - 1) {
-          if (timer.current) clearInterval(timer.current);
-          setRunning(false);
-          return s;
-        }
-        return s + 1;
-      });
-    }, 700);
+  };
+
+  // Handle User Selection in dropdown: immediately stop auto-play and switch topic
+  const handleSelectAlgo = (id: Algo) => {
+    if (stepTimer.current) clearTimeout(stepTimer.current);
+    if (transitionTimer.current) clearTimeout(transitionTimer.current);
+    setHasUserOverridden(true);
+    setIsAutoPlaying(false);
+    setRunning(false);
+    const idx = ALGOS.findIndex((a) => a.id === id);
+    if (idx !== -1) {
+      setAlgoIndex(idx);
+    }
+    setStep(0);
   };
 
   const codeLine = Math.min(step + 1, current.code.length - 1);
 
   return (
-    <section id="teaser" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-12 md:py-16">
+    <section
+      id="teaser"
+      ref={sectionRef}
+      className="mx-auto max-w-6xl scroll-mt-20 px-5 py-12 md:py-16"
+    >
       <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white reveal">
         Interactive Algorithm Teaser
       </h2>
@@ -110,31 +190,42 @@ export function InteractiveTeaser() {
 
       <div className="reveal glass-card mt-6 overflow-hidden p-0">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-300 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 px-4 py-3">
-          <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-            Select an algorithm:
-            <select
-              value={algo}
-              onChange={(e) => {
-                setAlgo(e.target.value as Algo);
-                setStep(0);
-                setRunning(false);
-                if (timer.current) clearInterval(timer.current);
-              }}
-              className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-sm text-slate-800 dark:text-slate-100 shadow-2xs outline-none focus:ring-2 focus:ring-purple-500/50"
-            >
-              {ALGOS.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+              Select an algorithm:
+              <select
+                value={current.id}
+                onChange={(e) => handleSelectAlgo(e.target.value as Algo)}
+                className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-sm text-slate-800 dark:text-slate-100 shadow-2xs outline-none focus:ring-2 focus:ring-purple-500/50"
+              >
+                {ALGOS.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            {/* Mode Indicator Badge */}
+            {isAutoPlaying && !hasUserOverridden ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-[11px] font-mono text-cyan-700 dark:text-cyan-300 font-semibold">
+                <span className="size-1.5 rounded-full bg-cyan-500 animate-pulse" />
+                Auto-Playing Preview
+              </span>
+            ) : hasUserOverridden ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-[11px] font-mono text-purple-700 dark:text-purple-300 font-semibold">
+                <span className="size-1.5 rounded-full bg-purple-500" />
+                Interactive Mode
+              </span>
+            ) : null}
+          </div>
+
           <button
             type="button"
-            onClick={run}
+            onClick={handleUserRun}
             className="btn-base btn-primary text-xs md:text-sm shadow-md shadow-purple-500/20"
           >
-            <Play className="size-4" /> {running ? "Running…" : "Run Demo"}
+            <Play className="size-4" /> {running && hasUserOverridden ? "Running…" : "Run Demo"}
           </button>
         </div>
 
@@ -161,7 +252,7 @@ export function InteractiveTeaser() {
             <div className="flex flex-wrap items-center justify-center gap-1.5">
               {(current.steps[step] ?? []).filter(Boolean).map((cell, i) => (
                 <span
-                  key={`${step}-${i}`}
+                  key={`${algoIndex}-${step}-${i}`}
                   className={`min-w-9 rounded-md border px-3 py-2 text-center font-mono text-xs transition-all duration-300 ${
                     done
                       ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold"
