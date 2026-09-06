@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Menu, X, ArrowRight } from "lucide-react";
-import { PrismLogo } from "./PrismLogo";
+import { PrismLogoCompact } from "./PrismLogo";
 import { useNavDrawerStore } from "@/store/useNavDrawerStore";
 import HamburgerButton from "@/components/navigation/HamburgerButton";
 
@@ -49,8 +49,8 @@ export function LandingNav() {
             title="Open Navigation Drawer"
           />
 
-          <Link href="/" className="flex items-center">
-            <PrismLogo variant="compact" size="sm" />
+          <Link href="/" className="flex items-center group" aria-label="Prism Home">
+            <PrismLogoCompact size="sm" asHeading />
           </Link>
         </div>
 
@@ -60,7 +60,7 @@ export function LandingNav() {
             <Link
               key={l.href}
               href={l.href}
-              className="nav-link text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors tracking-tight py-1"
+              className="nav-link text-base font-semibold text-slate-800 dark:text-slate-200 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors tracking-normal py-1"
             >
               {l.label}
             </Link>

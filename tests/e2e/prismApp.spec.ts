@@ -112,11 +112,8 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
   });
 
   test('5. Data Structure Visualization (Linked List Preset)', async ({ page }) => {
-    await page.goto('/workbench');
+    await page.goto('/workbench?algo=linked-list');
     await page.waitForLoadState('domcontentloaded');
-
-    const presetSelect = page.locator('select');
-    await presetSelect.selectOption('Linked List Traversal');
 
     const runBtn = page.getByRole('button', { name: 'Visualize' });
     await expect(runBtn).toBeEnabled({ timeout: 15000 });
@@ -134,8 +131,8 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
   });
 
   test('6. Data Structure Visualization (Bubble Sort Array Preset)', async ({ page }) => {
-    const presetSelect = page.locator('select');
-    await presetSelect.selectOption('Bubble Sort');
+    await page.goto('/workbench?algo=bubble-sort');
+    await page.waitForLoadState('domcontentloaded');
 
     const runBtn = page.getByRole('button', { name: 'Visualize' });
     await expect(runBtn).toBeEnabled({ timeout: 15000 });

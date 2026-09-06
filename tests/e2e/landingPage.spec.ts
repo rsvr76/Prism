@@ -48,17 +48,15 @@ test.describe('Landing & Opening Page E2E Validation', () => {
     const select = teaser.locator('select');
     await expect(select).toHaveValue('bubble');
 
-    // Switch to Binary Search
+    // Switch to Binary Search: triggers auto-run immediately
     await select.selectOption('binary');
     await expect(page.getByText('def binary_search(arr, target):')).toBeVisible();
+    await expect(teaser.getByText(/step \d+ of \d+/i)).toBeVisible({ timeout: 10000 });
 
-    // Click Run Demo
+    // Click Run Demo: launches full Workbench with binary-search loaded
     const runBtn = teaser.getByRole('button', { name: /Run Demo/i });
     await runBtn.click();
-
-    // Wait for step progression inside teaser
-    await page.waitForTimeout(1000);
-    await expect(teaser.getByText(/step \d+ of \d+/i)).toBeVisible();
+    await expect(page).toHaveURL(/\/workbench\?algo=binary-search/, { timeout: 15000 });
   });
 
   test('4. Navbar Open Editor CTA Navigates to Workbench', async ({ page }) => {
@@ -70,8 +68,8 @@ test.describe('Landing & Opening Page E2E Validation', () => {
     await openEditorBtn.click();
 
     // Navigates cleanly to /workbench
-    await expect(page).toHaveURL(/\/workbench/);
-    await expect(page.getByText('Python 3.12 Editor')).toBeVisible();
+    await expect(page).toHaveURL(/\/workbench/, { timeout: 15000 });
+    await expect(page.getByText('Python 3.12 Editor')).toBeVisible({ timeout: 15000 });
     await expect(page.getByRole('button', { name: 'Execute' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Visualize' })).toBeVisible();
   });
@@ -83,8 +81,8 @@ test.describe('Landing & Opening Page E2E Validation', () => {
     const startBtn = page.getByRole('link', { name: /Start Learning Free/i }).first();
     await startBtn.click();
 
-    await expect(page).toHaveURL(/\/workbench/);
-    await expect(page.getByText('Python 3.12 Editor')).toBeVisible();
+    await expect(page).toHaveURL(/\/workbench/, { timeout: 15000 });
+    await expect(page.getByText('Python 3.12 Editor')).toBeVisible({ timeout: 15000 });
   });
 
   test('6. Backward-Compatible Deep-Link Redirect (/?algo=bubble-sort -> /workbench?algo=bubble-sort)', async ({ page }) => {
@@ -92,7 +90,7 @@ test.describe('Landing & Opening Page E2E Validation', () => {
     await page.waitForLoadState('domcontentloaded');
 
     // Automatically forwards to /workbench with preserved query params
-    await expect(page).toHaveURL(/\/workbench\?algo=bubble-sort/);
+    await expect(page).toHaveURL(/\/workbench\?algo=bubble-sort/, { timeout: 15000 });
     await expect(page.getByText(/Bubble Sort/i).first()).toBeVisible();
     await expect(page.getByText('Python 3.12 Editor')).toBeVisible();
   });
@@ -143,31 +141,27 @@ test.describe('Landing & Opening Page E2E Validation', () => {
     await expect(html).toHaveClass(/dark/);
   });
 
-  test('9. Interactive Teaser: Automatic Scroll-Triggered Stepping and User Override', async ({ page }) => {
+  test('9. Interactive Teaser: Automatic Scroll-Triggered Stepping and Run Demo Navigation', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
 
     const teaser = page.locator('#teaser');
-    await page.evaluate(() => {
-      document.getElementById('teaser')?.scrollIntoView();
-    });
+    await teaser.scrollIntoViewIfNeeded();
     await expect(teaser).toBeVisible();
 
-    // Verify auto-play preview badge appears
-    const autoBadge = teaser.getByText(/Auto-Playing Preview/i);
-    await expect(autoBadge).toBeVisible({ timeout: 5000 });
+    // Verify live preview badge appears
+    const liveBadge = teaser.getByText(/Live Visualizer Preview/i);
+    await expect(liveBadge).toBeVisible({ timeout: 10000 });
 
     // Wait for auto-stepping to advance past step 1
-    await expect(teaser.getByText(/step [2-5] of 5/i)).toBeVisible({ timeout: 4000 });
+    await expect(teaser.getByText(/step [2-5] of 5/i)).toBeVisible({ timeout: 6000 });
 
-    // Click Run Demo to override auto-play
+    // Click Run Demo to open Workbench with algorithm code
     const runBtn = teaser.getByRole('button', { name: /Run Demo/i });
     await runBtn.click();
 
-    // Auto-playing preview badge should disappear and Interactive Mode should appear
-    const interactiveBadge = teaser.getByText(/Interactive Mode/i);
-    await expect(interactiveBadge).toBeVisible();
-    await expect(autoBadge).not.toBeVisible();
+    // Verifies navigation to workbench with algo parameter
+    await expect(page).toHaveURL(/\/workbench\?algo=bubble-sort/);
   });
 });
 

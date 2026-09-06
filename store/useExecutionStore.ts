@@ -250,13 +250,69 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   },
 
   executeCode: async () => {
-    return get().runCode(false);
+    traceRunner.cancelExecution();
+
+    const epoch = ++activeExecutionEpoch;
+    const { code } = get();
+
+    const executionId = `exec_pure_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+
+    set({
+      isRunning: true,
+      isPlaying: false,
+      isVisualizing: false,
+      errorMessage: null,
+      explanationError: null,
+      tutorError: null,
+      complexityError: null,
+    });
+
+    try {
+      const trace = await traceRunner.runPureExecution(code, DEFAULT_EXECUTION_LIMITS);
+      if (epoch !== activeExecutionEpoch) return;
+
+      const record: ExecutionRecord = {
+        executionId,
+        type: "original",
+        label: "Original",
+        code,
+        trace,
+        createdAt: Date.now(),
+      };
+
+      set((state) => ({
+        executions: {
+          ...state.executions,
+          [executionId]: record,
+        },
+        executionIds: state.executionIds.includes(executionId)
+          ? state.executionIds
+          : [...state.executionIds, executionId],
+        activeExecutionId: executionId,
+        code,
+        trace,
+        currentStep: 0,
+        isRunning: false,
+        isVisualizing: false,
+        status: trace.status,
+        errorMessage: trace.errorMessage || null,
+      }));
+    } catch (err: any) {
+      if (epoch !== activeExecutionEpoch) return;
+
+      set({
+        isRunning: false,
+        isVisualizing: false,
+        status: "RUNTIME_ERROR",
+        errorMessage: err?.message || "Execution failed",
+      });
+    }
   },
 
   visualizeCode: async () => {
     const { trace, code } = get();
-    // If a completed trace matching the exact current code already exists in memory, activate visualization immediately
-    if (trace && trace.code === code && trace.frames && trace.frames.length > 0) {
+    // If a completed full trace matching the exact current code already exists in memory, activate visualization immediately
+    if (trace && trace.code === code && trace.frames && trace.frames.length > 1) {
       set({ isVisualizing: true, currentStep: 0, isRunning: false });
       return;
     }

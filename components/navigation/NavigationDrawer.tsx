@@ -12,10 +12,12 @@ import {
   Target,
   LayoutDashboard,
   Home,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useNavDrawerStore } from "@/store/useNavDrawerStore";
 import { PrismLogoCompact } from "@/components/branding/PrismLogo";
-import ThemeToggle from "@/components/theme/ThemeToggle";
+import { useTheme } from "@/components/theme/ThemeProvider";
 import HamburgerButton from "@/components/navigation/HamburgerButton";
 
 interface NavItem {
@@ -69,6 +71,7 @@ export default function NavigationDrawer() {
   const closeDrawer = useNavDrawerStore((state) => state.closeDrawer);
   const openDrawer = useNavDrawerStore((state) => state.openDrawer);
   const pathname = usePathname();
+  const { isDark, toggleTheme } = useTheme();
 
   const [touchStartX, setTouchStartX] = React.useState<number | null>(null);
 
@@ -271,12 +274,42 @@ export default function NavigationDrawer() {
               </p>
             </Link>
           </div>
+
+          {/* Appearance / Theme Toggle (Under DSA Foundations, styled like Home & Workbench) */}
+          <div className="px-3 pt-3">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500 font-semibold block mb-2">
+              Appearance
+            </span>
+            <button
+              onClick={toggleTheme}
+              type="button"
+              aria-label="Toggle theme"
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 border border-slate-300 dark:border-slate-800 shadow-2xs group"
+            >
+              <div className="p-1 rounded-md transition-colors text-amber-500 dark:text-amber-400">
+                {isDark ? (
+                  <Sun className="w-4 h-4 transition-transform group-hover:rotate-45 duration-200" />
+                ) : (
+                  <Moon className="w-4 h-4 transition-transform group-hover:-rotate-12 duration-200" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <span className="block truncate font-semibold">
+                  {isDark ? "Light Mode" : "Dark Mode"}
+                </span>
+              </div>
+              <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 font-normal">
+                {isDark ? "Switch to Light" : "Switch to Dark"}
+              </span>
+            </button>
+          </div>
         </nav>
 
-        {/* Drawer Footer (Theme Toggle & Brand Tagline) */}
-        <div className="p-3.5 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between shrink-0 text-xs">
-          <ThemeToggle showLabel />
-          <span className="text-[10px] text-slate-400 font-mono">v1.0.0</span>
+        {/* Drawer Footer (Clean Minimal Version) */}
+        <div className="p-3.5 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between shrink-0 text-xs text-slate-500 dark:text-slate-400 font-mono">
+          <span>Prism DSA</span>
+          <span className="text-[10px] text-slate-400">v1.0.0</span>
         </div>
       </aside>
     </div>

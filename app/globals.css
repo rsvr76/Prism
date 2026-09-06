@@ -383,6 +383,21 @@ body {
   }
 }
 
+/* Global Light-Mode Button Outlines (WCAG High Clarity across entire project) */
+:root button:not([class*="border-"]):not([class*="border"]):not(.monaco-editor *):not(.react-flow *) {
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+:root button:not([class*="border-0"]):not([class*="border"]):not(.monaco-editor *):not(.react-flow *):hover {
+  border-color: var(--surface-border);
+}
+
+.dark button:not([class*="border-"]):not([class*="border"]):not(.monaco-editor *):not(.react-flow *) {
+  border: none;
+  box-shadow: none;
+}
+
 /* Motion & Animation Utilities */
 @keyframes float {
   0%, 100% {

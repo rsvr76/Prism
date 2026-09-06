@@ -1,11 +1,11 @@
-﻿import { ExecutionLimits, ExecutionStatus, PrismTrace } from './trace';
+import { ExecutionLimits, ExecutionStatus, PrismTrace } from './trace';
 
-export type WorkerCommand = 'INIT' | 'RUN_CODE' | 'PING';
+export type WorkerCommand = 'INIT' | 'RUN_CODE' | 'EXECUTE_CODE' | 'PING';
 
 export interface RunCodePayload {
   code: string;
   limits: ExecutionLimits;
-  tracerCode: string;
+  tracerCode?: string;
 }
 
 export interface WorkerInMessage {
@@ -25,6 +25,8 @@ export interface WorkerOutMessage {
   id: string;
   type: WorkerResponseType;
   trace?: PrismTrace;
+  stdout?: string[];
+  durationMs?: number;
   status?: ExecutionStatus;
   error?: string;
 }

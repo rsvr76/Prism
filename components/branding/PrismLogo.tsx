@@ -205,7 +205,7 @@ export function PrismLogo({
   className = "",
   variant = "compact",
   size = "md",
-  href = "/",
+  href,
   onClick,
 }: PrismLogoProps) {
   let content: React.ReactNode;

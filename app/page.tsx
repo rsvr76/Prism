@@ -18,10 +18,14 @@ function QueryRedirectHandler() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const algo = searchParams.get("algo") || searchParams.get("example");
-    const lesson = searchParams.get("lesson");
+    let qs = searchParams.toString();
+    if (!qs && typeof window !== "undefined") {
+      qs = window.location.search.replace(/^\?/, "");
+    }
+    const params = new URLSearchParams(qs);
+    const algo = params.get("algo") || params.get("example");
+    const lesson = params.get("lesson");
     if (algo || lesson) {
-      const qs = searchParams.toString();
       router.replace(`/workbench${qs ? `?${qs}` : ""}`);
     }
   }, [router, searchParams]);
