@@ -52,7 +52,7 @@ function BSTNodeComponent({ data }: NodeProps<Node<BSTNodeData>>) {
   const { displayValue, className, pointerLabels, isActive } = data;
 
   return (
-    <div className="relative flex flex-col items-center">
+    <div className="relative flex flex-col items-center node-appear">
       {/* Top Target Handle */}
       <Handle
         type="target"
@@ -67,7 +67,7 @@ function BSTNodeComponent({ data }: NodeProps<Node<BSTNodeData>>) {
           {pointerLabels.map((lbl) => (
             <span
               key={lbl}
-              className="px-2 py-0.5 text-[10px] font-mono font-bold rounded-md bg-cyan-100 dark:bg-cyan-950/90 border border-cyan-400/60 text-cyan-800 dark:text-cyan-300 shadow-xs"
+              className="pointer-transition px-2 py-0.5 text-[10px] font-mono font-bold rounded-md bg-cyan-100 dark:bg-cyan-950/90 border border-cyan-400/60 text-cyan-800 dark:text-cyan-300 shadow-xs"
             >
               {lbl}
             </span>
@@ -79,7 +79,7 @@ function BSTNodeComponent({ data }: NodeProps<Node<BSTNodeData>>) {
       <div
         className={`w-16 h-16 rounded-full flex flex-col items-center justify-center border-2 transition-all duration-200 shadow-xs ${
           isActive
-            ? "border-cyan-500 bg-cyan-50/90 shadow-md ring-2 ring-cyan-400/50 scale-105 dark:border-cyan-400 dark:bg-[#0a1628] dark:shadow-cyan-500/30"
+            ? "border-cyan-500 bg-cyan-50/90 shadow-md ring-2 ring-cyan-400/50 scale-105 dark:border-cyan-400 dark:bg-[#0a1628] dark:shadow-cyan-500/30 active-node-glow"
             : "border-slate-300 bg-white hover:border-slate-400 shadow-xs dark:border-slate-600/90 dark:bg-slate-900/90 dark:hover:border-slate-500"
         }`}
       >

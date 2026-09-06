@@ -219,20 +219,20 @@ export default function ResizableWorkbenchSplit() {
         onPointerDown={handlePointerDown}
         onKeyDown={handleKeyDown}
         onDoubleClick={handleDoubleClick}
-        className={`hidden lg:flex items-center justify-center shrink-0 w-3 z-30 cursor-col-resize group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-sm transition-colors ${
-          isDragging ? "bg-cyan-500/20" : "hover:bg-cyan-500/10"
+        className={`hidden lg:flex items-center justify-center shrink-0 w-3 z-30 cursor-col-resize group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-sm transition-colors border-x border-slate-300/80 dark:border-slate-800/80 bg-slate-100/60 dark:bg-slate-900/40 ${
+          isDragging ? "bg-cyan-500/20 border-cyan-400" : "hover:bg-cyan-500/10 hover:border-cyan-400"
         }`}
         title="Drag to resize panels (Double-click to reset, Arrow keys to adjust)"
       >
         {/* Visible divider track & grip bar */}
         <div
-          className={`w-1 h-8 rounded-full transition-all flex items-center justify-center ${
+          className={`w-1.5 h-8 rounded-full transition-all flex items-center justify-center shadow-2xs ${
             isDragging
               ? "bg-cyan-600 dark:bg-cyan-400 scale-y-125"
-              : "bg-slate-300 dark:bg-slate-700/80 group-hover:bg-cyan-500/80 dark:group-hover:bg-cyan-400/80"
+              : "bg-slate-400 dark:bg-slate-600 group-hover:bg-cyan-500 dark:group-hover:bg-cyan-400"
           }`}
         >
-          <GripVertical className="w-3 h-3 text-slate-500 dark:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <GripVertical className="w-3 h-3 text-slate-600 dark:text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
       </div>
 

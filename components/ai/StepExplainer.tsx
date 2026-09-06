@@ -131,7 +131,9 @@ export default function StepExplainer() {
           <div className="rounded-lg bg-emerald-50/70 border border-emerald-300 dark:bg-emerald-950/20 dark:border-emerald-500/30 overflow-hidden shadow-2xs">
             <div className="px-3 py-1.5 bg-emerald-100/70 dark:bg-emerald-950/40 border-b border-emerald-300 dark:border-emerald-500/30 flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300 text-xs font-mono font-bold uppercase tracking-wide">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span className="observed-dot text-emerald-500">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                </span>
                 <span>OBSERVED IN EXECUTION</span>
               </div>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 font-mono font-semibold dark:bg-emerald-950 dark:border-emerald-500/40 dark:text-emerald-300">

@@ -247,8 +247,8 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
                       onClick={() => setStudentAnswer(opt)}
                       className={`px-3 py-1.5 rounded-lg border text-sm font-mono transition-all ${
                         studentAnswer === opt
-                          ? "bg-violet-600 border-violet-500 text-white"
-                          : "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-300 hover:border-violet-400 dark:hover:border-violet-500/50"
+                          ? "bg-violet-600 border-violet-500 text-white font-bold shadow-xs"
+                          : "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-300 hover:border-violet-500 dark:hover:border-violet-500/50 shadow-2xs font-semibold"
                       }`}
                     >
                       {opt}
@@ -280,8 +280,8 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
                     onClick={() => setStudentAnswer(cls)}
                     className={`px-3 py-1.5 rounded-lg border text-sm font-mono transition-all ${
                       studentAnswer === cls
-                        ? "bg-amber-600 border-amber-500 text-white"
-                        : "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-300 hover:border-amber-400 dark:hover:border-amber-500/50"
+                        ? "bg-amber-600 border-amber-500 text-white font-bold shadow-xs"
+                        : "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-300 hover:border-amber-500 dark:hover:border-amber-500/50 shadow-2xs font-semibold"
                     }`}
                   >
                     {cls}
@@ -380,7 +380,7 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
             <button
               onClick={handleSubmit}
               disabled={isRunning || (needsAnswerFirst && !studentAnswer.trim())}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-sm transition-all shadow-md shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white dark:bg-cyan-500 dark:hover:bg-cyan-400 dark:text-slate-950 font-semibold text-sm transition-all border border-cyan-700/60 dark:border-cyan-400/50 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isRunning ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -412,7 +412,7 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
                 ) : (
                   <>
                     <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                    <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">Not Quite — Try Again</span>
+                    <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">Not Quite - Try Again</span>
                   </>
                 )}
               </div>

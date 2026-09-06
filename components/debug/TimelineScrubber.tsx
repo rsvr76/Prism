@@ -37,7 +37,7 @@ export default function TimelineScrubber() {
 
   if (!isVisualizing || !trace || totalFrames === 0) {
     return (
-      <div className="h-14 flex items-center justify-between px-6 bg-white/95 dark:bg-[#0a0f1d]/90 backdrop-blur border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 font-mono select-none">
+      <div className="h-14 flex items-center justify-between px-6 bg-white/95 dark:bg-[#0a0f1d]/90 backdrop-blur border-t border-slate-300 dark:border-slate-800 text-xs text-slate-500 font-mono select-none">
         <span>Timeline ready. Click &quot;Visualize&quot; below the editor to step through execution.</span>
         <span className="text-slate-400 dark:text-slate-600">0 / 0 steps</span>
       </div>
@@ -45,13 +45,13 @@ export default function TimelineScrubber() {
   }
 
   return (
-    <div className="h-14 flex flex-wrap items-center justify-between gap-3 px-4 md:px-6 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md border-t border-slate-300 dark:border-slate-800 shadow-xs dark:shadow-md select-none z-20">
+    <div className="h-14 flex flex-wrap items-center justify-between gap-3 px-4 md:px-6 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md border-t border-slate-300 dark:border-slate-800 shadow-sm dark:shadow-md select-none z-20">
       {/* Playback Controls & Speed */}
       <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={prevStep}
           disabled={currentStep <= 0}
-          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-600 dark:text-slate-300 disabled:opacity-25 transition-all cursor-pointer"
+          className="p-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white hover:bg-slate-100 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 disabled:opacity-25 shadow-2xs transition-all cursor-pointer"
           title="Step Backward"
         >
           <SkipBack className="w-4 h-4" />
@@ -59,7 +59,7 @@ export default function TimelineScrubber() {
 
         <button
           onClick={togglePlay}
-          className="flex items-center justify-center w-8 h-8 rounded-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-md shadow-cyan-500/25 transition-transform active:scale-95 cursor-pointer"
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 border border-cyan-600/60 shadow-md shadow-cyan-500/25 transition-transform active:scale-95 cursor-pointer"
           title={isPlaying ? "Pause" : "Auto Play"}
         >
           {isPlaying ? (
@@ -72,7 +72,7 @@ export default function TimelineScrubber() {
         <button
           onClick={nextStep}
           disabled={currentStep >= totalFrames - 1}
-          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-600 dark:text-slate-300 disabled:opacity-25 transition-all cursor-pointer"
+          className="p-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white hover:bg-slate-100 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 disabled:opacity-25 shadow-2xs transition-all cursor-pointer"
           title="Step Forward"
         >
           <SkipForward className="w-4 h-4" />

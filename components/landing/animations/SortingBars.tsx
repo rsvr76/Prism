@@ -77,22 +77,25 @@ export function SortingBars() {
             <div
               key={idx}
               data-state={sorted ? "sorted" : comparing ? "comparing" : "idle"}
-              className={`flex-1 rounded-t-sm transition-all duration-300 ${
+              className={`flex-1 rounded-t-sm bar-rise transition-all duration-300 ${
                 sorted
                   ? "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]"
                   : comparing
                     ? "bg-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.6)]"
-                    : "bg-purple-500/60 dark:bg-purple-600/60"
+                    : "bg-purple-600/75 dark:bg-purple-600/60"
               }`}
-              style={{ height: `${(v / MAX) * 100}%` }}
+              style={{
+                height: `${(v / MAX) * 100}%`,
+                animationDelay: `${idx * 35}ms`,
+              }}
             />
           );
         })}
       </div>
 
       {/* Step card sits below the chart so it never covers the bars */}
-      <div className="rounded-xl border border-purple-500/25 dark:border-purple-500/20 bg-white/90 dark:bg-slate-900/90 p-3.5 font-mono text-[11px] leading-relaxed shadow-lg shadow-purple-500/5 dark:shadow-black/40 backdrop-blur-md">
-        <div className="mb-2 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2 text-slate-500 dark:text-slate-400">
+      <div className="rounded-xl border border-purple-300 dark:border-purple-500/20 bg-white/95 dark:bg-slate-900/90 p-3.5 font-mono text-[11px] leading-relaxed shadow-md shadow-purple-500/10 dark:shadow-black/40 backdrop-blur-md">
+        <div className="mb-2 flex items-center justify-between border-b border-slate-300 dark:border-slate-800 pb-2 text-slate-600 dark:text-slate-400">
           <span>
             Step {index + 1} of {FRAMES.length}
           </span>

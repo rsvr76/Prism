@@ -9,7 +9,7 @@
  *
  * CONTRACT:
  * - Input: a single PrismFrame (from trace.frames[currentStep])
- * - Output: DetectedStructure[] — what structures are present at this step
+ * - Output: DetectedStructure[]: what structures are present at this step
  * - NEVER executes Python, invokes AI, or mutates trace data
  * - Deterministic: same frame always produces same output
  */

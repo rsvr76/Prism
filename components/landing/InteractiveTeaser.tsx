@@ -109,7 +109,7 @@ export function InteractiveTeaser() {
       </p>
 
       <div className="reveal glass-card mt-6 overflow-hidden p-0">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-300 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 px-4 py-3">
           <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
             Select an algorithm:
             <select
@@ -120,7 +120,7 @@ export function InteractiveTeaser() {
                 setRunning(false);
                 if (timer.current) clearInterval(timer.current);
               }}
-              className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-purple-500/50"
+              className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-sm text-slate-800 dark:text-slate-100 shadow-2xs outline-none focus:ring-2 focus:ring-purple-500/50"
             >
               {ALGOS.map((a) => (
                 <option key={a.id} value={a.id}>
@@ -139,7 +139,7 @@ export function InteractiveTeaser() {
         </div>
 
         <div className="grid md:grid-cols-2">
-          <pre className="border-b border-slate-200 dark:border-slate-800 p-4 font-mono text-[11px] leading-6 md:border-b-0 md:border-r bg-slate-50/40 dark:bg-slate-950/40">
+          <pre className="border-b border-slate-300 dark:border-slate-800 p-4 font-mono text-[11px] leading-6 md:border-b-0 md:border-r border-slate-300 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-950/40">
             {current.code.map((l, i) => (
               <div
                 key={i}
@@ -164,8 +164,8 @@ export function InteractiveTeaser() {
                   key={`${step}-${i}`}
                   className={`min-w-9 rounded-md border px-3 py-2 text-center font-mono text-xs transition-all duration-300 ${
                     done
-                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold"
-                      : "border-purple-500/25 bg-white dark:bg-slate-800 text-purple-700 dark:text-cyan-300 font-semibold shadow-sm"
+                      ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold"
+                      : "border-purple-300 dark:border-purple-500/30 bg-white dark:bg-slate-800 text-purple-800 dark:text-cyan-300 font-semibold shadow-xs"
                   }`}
                 >
                   {cell}
@@ -179,7 +179,7 @@ export function InteractiveTeaser() {
         </div>
 
         {done && step > 0 && (
-          <div className="new-node border-t border-slate-200 dark:border-slate-800 bg-purple-500/10 dark:bg-purple-950/20 px-4 py-4 text-center">
+          <div className="new-node border-t border-slate-300 dark:border-slate-800 bg-purple-500/10 dark:bg-purple-950/20 px-4 py-4 text-center">
             <Link
               href="/workbench"
               className="btn-base btn-primary shadow-lg shadow-purple-500/20"

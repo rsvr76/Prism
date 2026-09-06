@@ -249,7 +249,7 @@ export default function LessonViewClient({
           </section>
 
           {/* Why Am I Learning This? */}
-          <section className="rounded-xl border border-purple-200 dark:border-purple-500/20 bg-purple-50/70 dark:bg-purple-950/20 p-5 sm:p-6 space-y-2 shadow-xs">
+          <section className="rounded-xl border border-purple-300 dark:border-purple-500/20 bg-purple-50/70 dark:bg-purple-950/20 p-5 sm:p-6 space-y-2 shadow-xs border-l-4 border-l-purple-600">
             <div className="flex items-center gap-2 text-purple-800 dark:text-purple-300 font-semibold text-sm">
               <HelpCircle className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               <span>Why Am I Learning This?</span>
@@ -303,7 +303,7 @@ export default function LessonViewClient({
             <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
               {lesson.conceptExplanation}
             </p>
-            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-300 italic border-l-4 border-l-cyan-500">
+            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-300 italic border-l-4 border-l-cyan-500 shadow-2xs">
               <strong className="text-cyan-700 dark:text-cyan-400 not-italic block mb-1 font-semibold">Intuitive Mental Model:</strong>
               &ldquo;{lesson.mentalModel}&rdquo;
             </div>

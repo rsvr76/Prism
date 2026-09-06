@@ -181,7 +181,7 @@ export default function NavigationDrawer() {
           transition: "transform 380ms cubic-bezier(0.22, 1, 0.36, 1)",
         }}
       >
-        {/* Drawer Header (Hamburger + PRISM Logo — EXACT same positioning as homepage & all headers) */}
+        {/* Drawer Header (Hamburger + PRISM Logo: EXACT same positioning as homepage & all headers) */}
         <div className="h-14 flex items-center justify-between px-4 border-b border-slate-200/80 dark:border-slate-800/80 shrink-0">
           <div className="flex items-center gap-3">
             <HamburgerButton

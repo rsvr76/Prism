@@ -79,10 +79,11 @@ export default function ExecutionEventBanner({ event, className = "" }: Executio
 
   return (
     <div
-      className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg border backdrop-blur-md shadow-xs transition-all select-none text-xs ${
+      key={event.stepIndex}
+      className={`event-enter flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg border backdrop-blur-md shadow-sm transition-all select-none text-xs ${
         event.isStructural
-          ? "bg-white/95 dark:bg-[#0c1322]/95 border-cyan-300/80 dark:border-cyan-500/40"
-          : "bg-white/95 dark:bg-[#0c1322]/95 border-slate-200 dark:border-slate-800"
+          ? "bg-white/95 dark:bg-[#0c1322]/95 border-cyan-400 dark:border-cyan-500/40 shadow-cyan-500/10"
+          : "bg-white/95 dark:bg-[#0c1322]/95 border-slate-300 dark:border-slate-800"
       } ${className}`}
       role="status"
       aria-label={`Execution Event: ${event.badgeLabel} at Step ${event.stepIndex + 1}`}
@@ -112,7 +113,7 @@ export default function ExecutionEventBanner({ event, className = "" }: Executio
             <span>Visual Mutation</span>
           </span>
         )}
-        <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-semibold">
+        <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-400 font-semibold">
           Line {event.line}
         </span>
       </div>

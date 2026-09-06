@@ -8,7 +8,7 @@
  * - Heap allocation scaling & auxiliary memory growth
  * - Educational asymptotic heuristics with explicit empirical grounding
  *
- * PURE FUNCTION — Does NOT execute code or fabricate state.
+ * PURE FUNCTION: Does NOT execute code or fabricate state.
  */
 
 import { PrismTrace } from "@/types/trace";

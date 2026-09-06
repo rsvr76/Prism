@@ -13,7 +13,7 @@ export const DSA_FOUNDATIONS_PATH: LearningPath = {
   description:
     'A carefully sequenced, beginner-friendly curriculum designed to build your algorithmic intuition. Learn contiguous memory, pointer-based structures, search mechanics, comparison sorting, and hierarchical binary trees with real step-by-step execution visualization.',
   difficulty: 'Beginner',
-  estimatedTime: '3–4 hours',
+  estimatedTime: '3 to 4 hours',
   prerequisites: ['Basic Python syntax (variables, if-else, while/for loops)', 'Basic function definitions'],
   stages: [
     {
@@ -208,7 +208,7 @@ export const DSA_FOUNDATIONS_PATH: LearningPath = {
           title: 'Binary Trees & Hierarchical Branching',
           subtitle: 'Model parent-child relationships where each node links to left and right children.',
           whyItMatters:
-            'Hierarchical data—such as file directories, HTML DOM trees, and decision models—cannot be naturally represented in a 1D sequence without losing parent-child relationships.',
+            'Hierarchical data (such as file directories, HTML DOM trees, and decision models) cannot be naturally represented in a 1D sequence without losing parent-child relationships.',
           learningObjectives: [
             'Master tree terminology: root, parent, child, leaf, depth, and height',
             'Visualize planar tree coordinates with left and right labeled edges',

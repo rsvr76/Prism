@@ -111,24 +111,24 @@ export function PrismLogoMark({
 }) {
   if (useImage) {
     return (
-      <div className={`relative inline-flex items-center justify-center shrink-0 ${className}`}>
+      <div className={`relative inline-flex items-center justify-center shrink-0 prism-logo ${className}`}>
         {/* Dark Mode Mark */}
         <img
           src="/brand/prism-mark-dark.png"
           alt="Prism Brand Mark"
-          className="hidden dark:block w-full h-full object-contain drop-shadow-[0_0_8px_rgba(6,182,212,0.35)]"
+          className="hidden dark:block w-full h-full object-contain"
         />
         {/* Light Mode Mark */}
         <img
           src="/brand/prism-mark-light.png"
           alt="Prism Brand Mark"
-          className="block dark:hidden w-full h-full object-contain drop-shadow-[0_0_6px_rgba(8,145,178,0.25)]"
+          className="block dark:hidden w-full h-full object-contain"
         />
       </div>
     );
   }
 
-  return <PrismVectorMark className={className} />;
+  return <PrismVectorMark className={`prism-logo ${className}`} />;
 }
 
 /**

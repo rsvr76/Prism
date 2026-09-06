@@ -15,7 +15,7 @@
  * CONTRACT:
  * - Pure consumer: no execution, no AI
  * - Derives all visual state from trace.frames[currentStep]
- * - Trace frames are immutable — never mutated here
+ * - Trace frames are immutable: never mutated here
  */
 
 import React, { useMemo } from "react";
@@ -181,7 +181,7 @@ export default function VisualizerCanvas() {
 
   if (!isVisualizing || !frame || !effectiveState) {
     return (
-      <div className="w-full h-full bg-white dark:bg-[#0a0f1d] rounded-xl border border-slate-200 dark:border-slate-800/80 overflow-hidden shadow-xs dark:shadow-lg relative">
+      <div className="w-full h-full bg-white dark:bg-[#0a0f1d] rounded-xl border border-slate-300 dark:border-slate-800/80 overflow-hidden shadow-sm dark:shadow-lg relative">
         {semanticEvent && (
           <div className="absolute top-2.5 left-2.5 right-2.5 z-20">
             <ExecutionEventBanner event={semanticEvent} />
@@ -202,7 +202,7 @@ export default function VisualizerCanvas() {
   const renderFrame = effectiveFrame || frame;
 
   return (
-    <div className="w-full h-full bg-white dark:bg-[#0a0f1d] rounded-xl border border-slate-200 dark:border-slate-800/80 overflow-hidden shadow-xs dark:shadow-lg relative">
+    <div className="w-full h-full bg-white dark:bg-[#0a0f1d] rounded-xl border border-slate-300 dark:border-slate-800/80 overflow-hidden shadow-sm dark:shadow-lg relative">
       {/* Top Banner: Compact Semantic Execution Event */}
       {semanticEvent && (
         <div className="absolute top-2.5 left-2.5 right-2.5 z-20">

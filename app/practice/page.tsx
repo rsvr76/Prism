@@ -83,7 +83,7 @@ function ChallengeCard({ challenge, progress }: { challenge: Challenge; progress
     <Link
       href={`/practice/${challenge.slug}`}
       className="group block bg-white hover:bg-slate-50/80 dark:bg-slate-900/60 dark:hover:bg-slate-900/80 border border-slate-200 hover:border-cyan-400 dark:border-slate-800 dark:hover:border-cyan-500/40 rounded-xl p-5 shadow-xs hover:shadow-md transition-all"
-      aria-label={`${challenge.title} — ${challenge.difficulty} ${challenge.type} challenge`}
+      aria-label={`${challenge.title} (${challenge.difficulty} ${challenge.type} challenge)`}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2">

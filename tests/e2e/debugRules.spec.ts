@@ -6,6 +6,7 @@ test('Check matched CSS rules on mc-button', async ({ page }) => {
 
   const ruleInfo = await page.evaluate(() => {
     const btn = document.querySelector('header .mc-button');
+    if (!btn) return null;
     btn.classList.add('active');
     const activeTransform = window.getComputedStyle(btn).transform;
     
@@ -14,13 +15,14 @@ test('Check matched CSS rules on mc-button', async ({ page }) => {
 
     // Check all CSS rules in document.styleSheets for .mc-button
     const matchedRules = [];
-    for (const sheet of document.styleSheets) {
+    for (const sheet of Array.from(document.styleSheets)) {
       try {
-        for (const rule of sheet.cssRules) {
-          if (rule.selectorText && rule.selectorText.includes('mc-button')) {
+        for (const rule of Array.from(sheet.cssRules)) {
+          const styleRule = rule as CSSStyleRule;
+          if (styleRule.selectorText && styleRule.selectorText.includes('mc-button')) {
             matchedRules.push({
-              selector: rule.selectorText,
-              cssText: rule.cssText
+              selector: styleRule.selectorText,
+              cssText: styleRule.cssText
             });
           }
         }

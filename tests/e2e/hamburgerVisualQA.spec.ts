@@ -28,6 +28,10 @@ test.describe('Hamburger Button Visual QA & Animation Verification', () => {
     await expect(closeBtnLight).toBeVisible();
     await closeBtnLight.click();
     await page.waitForTimeout(600);
-    await page.screenshot({ path: 'C:/Users/ADMIN/.gemini/antigravity/brain/85261ed8-df70-4385-9bb3-f171c67a0ece/qa-hamburger-light-closed.png' });
+    // 5. Capture Redesigned Symbol-Driven Why Prism Section
+    const whyPrismSection = page.locator('section').filter({ hasText: /Why Prism/i }).first();
+    await whyPrismSection.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400);
+    await whyPrismSection.screenshot({ path: 'C:/Users/ADMIN/.gemini/antigravity/brain/85261ed8-df70-4385-9bb3-f171c67a0ece/why-prism-redesign.png' });
   });
 });

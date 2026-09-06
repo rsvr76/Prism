@@ -104,8 +104,8 @@ export default function CodeEditor() {
     (status !== "SUCCESS" && status !== "RUNNING" && status !== "IDLE" && errorMessage);
 
   return (
-    <div className="w-full h-full flex flex-col bg-white dark:bg-[#0a0f1d] border border-slate-200 dark:border-slate-800/80 rounded-xl overflow-hidden shadow-xs dark:shadow-lg">
-      <div className="flex items-center justify-between px-3.5 py-2 bg-slate-100/90 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-800/80 text-xs text-slate-600 dark:text-slate-400 font-mono">
+    <div className="w-full h-full flex flex-col bg-white dark:bg-[#0a0f1d] border border-slate-300 dark:border-slate-800/80 rounded-xl overflow-hidden shadow-sm dark:shadow-lg">
+      <div className="flex items-center justify-between px-3.5 py-2 bg-slate-100/90 dark:bg-slate-900/70 border-b border-slate-300 dark:border-slate-800/80 text-xs text-slate-600 dark:text-slate-400 font-mono">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
           <span className="font-semibold text-slate-800 dark:text-slate-200">Python 3.12 Editor</span>
@@ -146,14 +146,14 @@ export default function CodeEditor() {
       </div>
 
       {/* Code Editor Bottom Action Bar: 1. Execute | 2. Visualize */}
-      <div className="flex flex-wrap items-center justify-between px-3 py-2 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-[#0a0f1d] shrink-0 gap-2">
+      <div className="flex flex-wrap items-center justify-between px-3 py-2 border-t border-slate-300 dark:border-slate-800/80 bg-slate-50 dark:bg-[#0a0f1d] shrink-0 gap-2">
         {/* Action Buttons: 1st Execute, 2nd Visualize */}
         <div className="flex items-center gap-2">
           {/* Button 1: Execute (runs code and displays output in center tab) */}
           <button
             onClick={handleExecute}
             disabled={isRunning}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-sm hover:shadow-emerald-500/25 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs border border-emerald-700/50 shadow-xs hover:shadow-emerald-500/25 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
             title="Execute Python code to display output"
           >
             {activeAction === "execute" ? (
@@ -168,7 +168,7 @@ export default function CodeEditor() {
           <button
             onClick={handleVisualize}
             disabled={isRunning}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-xs shadow-sm hover:shadow-cyan-500/25 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-xs border border-cyan-700/50 shadow-xs hover:shadow-cyan-500/25 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
             title="Visualize data structures and execution trace"
           >
             {activeAction === "visualize" ? (
@@ -186,7 +186,7 @@ export default function CodeEditor() {
               closeOutput();
             }}
             disabled={isRunning}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-colors cursor-pointer disabled:opacity-40"
+            className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 bg-white hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-2xs transition-colors cursor-pointer disabled:opacity-40"
             title="Reset Code & Execution"
           >
             <RotateCcw className="w-4 h-4" />
@@ -198,8 +198,8 @@ export default function CodeEditor() {
               onClick={toggleOutput}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono transition-colors cursor-pointer ${
                 isOutputOpen
-                  ? "bg-emerald-50 text-emerald-800 border border-emerald-300 font-semibold dark:bg-slate-800 dark:text-emerald-300 dark:border-slate-700"
-                  : "text-slate-700 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/60"
+                  ? "bg-emerald-50 text-emerald-800 border border-emerald-400 font-semibold dark:bg-slate-800 dark:text-emerald-300 dark:border-slate-700 shadow-2xs"
+                  : "bg-white dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-2xs"
               }`}
               title="Toggle execution output tab"
             >

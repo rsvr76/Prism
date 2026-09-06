@@ -122,8 +122,11 @@ function TutorMock() {
         <span className="font-mono text-purple-700 dark:text-purple-300">curr.next = Node(7)</span>. The heap allocated a new
         node at <span className="font-mono text-cyan-600 dark:text-cyan-400">@0x7f2a</span> and updated the pointer from node(3).
         <div className="mt-2.5 flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-0.5 font-mono text-[10px] text-cyan-700 dark:text-cyan-300 font-semibold">
-            <Check className="size-3 text-cyan-500" /> OBSERVED GROUND TRUTH
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-0.5 font-mono text-[10px] text-cyan-700 dark:text-cyan-300 font-semibold">
+            <span className="observed-dot text-cyan-500">
+              <Check className="size-3 text-cyan-500" />
+            </span>
+            OBSERVED GROUND TRUTH
           </span>
         </div>
       </div>
@@ -135,12 +138,12 @@ const ROWS = [
   {
     visual: <WorkbenchMock />,
     title: "Write. Run. Inspect.",
-    body: "The workbench shows your code, its execution trace, and heap memory state — all strictly synchronized to the same step.",
+    body: "The workbench shows your code, its execution trace, and heap memory state: all strictly synchronized to the same step.",
   },
   {
     visual: <LinkedListAnim />,
     title: "See Every Pointer Move.",
-    body: "Arrays, linked lists, and binary search trees render directly from your actual heap — not idealized or pre-drawn pictures.",
+    body: "Arrays, linked lists, and binary search trees render directly from your actual heap instead of pre-drawn pictures.",
   },
   {
     visual: <TutorMock />,

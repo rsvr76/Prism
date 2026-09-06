@@ -7,10 +7,10 @@
   --foreground: #0f172a;
   --surface: #ffffff;
   --surface-hover: #f1f5f9;
-  --surface-card: #f8fafc;
-  --surface-border: #cbd5e1;
-  --border-subtle: #e2e8f0;
-  --border-active: #94a3b8;
+  --surface-card: #ffffff;
+  --surface-border: #94a3b8;
+  --border-subtle: #cbd5e1;
+  --border-active: #475569;
   --text-muted: #475569;
   --prism-cyan: #0891b2;
   --prism-cyan-glow: rgba(8, 145, 178, 0.12);
@@ -32,8 +32,8 @@
   --color-rose: #e11d48;
   --color-code: #4338ca;
   --gradient-brand: linear-gradient(135deg, #7c3aed, #9333ea);
-  --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.25);
-  --shadow-glow-strong: 0 0 32px rgba(124, 58, 237, 0.4);
+  --shadow-glow: 0 2px 4px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(124, 58, 237, 0.28);
+  --shadow-glow-strong: 0 4px 14px rgba(124, 58, 237, 0.4), 0 2px 4px rgba(15, 23, 42, 0.15);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -101,7 +101,7 @@ body {
   background: var(--scrollbar-thumb-hover);
 }
 
-/* Monaco Active Line Decoration — High-clarity educational highlight */
+/* Monaco Active Line Decoration: High-clarity educational highlight */
 .prism-active-line-highlight {
   background: rgba(6, 182, 212, 0.15) !important;
   border-left: 3px solid #0891b2 !important;
@@ -221,12 +221,18 @@ body {
   background: #ffffff;
   border: 1px solid #cbd5e1;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.08),
+    0 4px 16px rgba(15, 23, 42, 0.06),
+    0 0 0 1px rgba(148, 163, 184, 0.15);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   &:hover {
-    border-color: rgba(124, 58, 237, 0.35);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border-color: #94a3b8;
+    box-shadow:
+      0 8px 24px -4px rgba(15, 23, 42, 0.12),
+      0 3px 8px -1px rgba(15, 23, 42, 0.08),
+      0 0 0 1px rgba(124, 58, 237, 0.25);
     transform: translateY(-2px);
   }
 }
@@ -254,15 +260,20 @@ body {
 }
 
 @utility glass-card-brand {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(6, 182, 212, 0.05)), #ffffff;
-  border: 1px solid rgba(124, 58, 237, 0.3);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.06), rgba(6, 182, 212, 0.04)), #ffffff;
+  border: 1.5px solid rgba(124, 58, 237, 0.4);
   border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(124, 58, 237, 0.08);
+  box-shadow:
+    0 2px 6px rgba(124, 58, 237, 0.08),
+    0 6px 20px rgba(15, 23, 42, 0.06);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   &:hover {
+    border-color: rgba(124, 58, 237, 0.65);
     transform: translateY(-2px);
-    box-shadow: 0 12px 36px rgba(124, 58, 237, 0.15);
+    box-shadow:
+      0 4px 14px rgba(124, 58, 237, 0.16),
+      0 12px 32px rgba(15, 23, 42, 0.1);
   }
 }
 
@@ -286,8 +297,8 @@ body {
 
 @utility grid-backdrop {
   background-image:
-    linear-gradient(to right, rgba(124, 58, 237, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(124, 58, 237, 0.05) 1px, transparent 1px);
+    linear-gradient(to right, rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
   background-size: 56px 56px;
 }
 
@@ -317,35 +328,58 @@ body {
   background: var(--gradient-brand);
   color: var(--primary-foreground);
   font-weight: 600;
-  box-shadow: var(--shadow-glow);
+  border: 1px solid rgba(109, 40, 217, 0.6);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.12),
+    0 4px 12px rgba(124, 58, 237, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 
   &:hover {
-    box-shadow: var(--shadow-glow-strong);
+    box-shadow:
+      0 4px 14px rgba(124, 58, 237, 0.4),
+      0 2px 4px rgba(15, 23, 42, 0.15);
+    border-color: rgba(109, 40, 217, 0.85);
     transform: translateY(-1px) scale(1.02);
   }
 }
 
-@utility btn-ghost {
-  background: transparent;
-  border: 1px solid rgba(124, 58, 237, 0.35);
-  color: #6d28d9;
-  font-weight: 500;
+.dark .btn-primary {
+  border: 1px solid oklch(0.585 0.203 277 / 0.5);
+  box-shadow: var(--shadow-glow);
 
   &:hover {
-    background: rgba(124, 58, 237, 0.08);
-    border-color: rgba(124, 58, 237, 0.6);
+    box-shadow: var(--shadow-glow-strong);
+  }
+}
+
+@utility btn-ghost {
+  background: #f5f3ff;
+  border: 1.5px solid #a78bfa;
+  color: #5b21b6;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+
+  &:hover {
+    background: #ede9fe;
+    border-color: #7c3aed;
     color: #4c1d95;
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.15);
+    transform: translateY(-1px);
   }
 }
 
 .dark .btn-ghost {
+  background: transparent;
   border: 1px solid oklch(0.585 0.203 277 / 0.3);
   color: oklch(0.79 0.09 277);
+  box-shadow: none;
 
   &:hover {
     background: oklch(0.585 0.203 277 / 0.08);
     border-color: oklch(0.585 0.203 277 / 0.6);
     color: oklch(0.93 0.03 275);
+    box-shadow: none;
+    transform: none;
   }
 }
 
@@ -417,6 +451,7 @@ body {
 }
 
 @utility graph-node {
+  display: none;
   position: absolute;
   width: 8px;
   height: 8px;
@@ -427,6 +462,7 @@ body {
 }
 
 .dark .graph-node {
+  display: block;
   border: 1px solid oklch(0.585 0.203 277 / 0.35);
   background: oklch(0.585 0.203 277 / 0.15);
 }
@@ -531,6 +567,247 @@ body {
   margin-top: -1px;
   transform: rotate(90deg);
   transition: top 130ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms;
+}
+
+/* ==========================================================================
+   PRISM 3-TIER ANIMATION SYSTEM
+   ========================================================================== */
+
+/* ── LAYER 1: BRAND MOTION (Subtle, Slow, Organic) ── */
+
+/* 1. Hero Prism Breathing Glow */
+@keyframes prismGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.18))
+            drop-shadow(0 0 10px rgba(168, 85, 247, 0.10));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.35))
+            drop-shadow(0 0 18px rgba(168, 85, 247, 0.22));
+  }
+}
+
+.prism-logo {
+  animation: prismGlow 4s ease-in-out infinite;
+}
+
+/* 2. Hero Background Grid Subtle Movement */
+@keyframes gridDrift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 56px 56px;
+  }
+}
+
+.grid-backdrop-animated {
+  animation: gridDrift 28s linear infinite;
+}
+
+/* 3. Hero Visualization Bars Staggered Entrance */
+@keyframes barRise {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.bar-rise {
+  transform-origin: bottom;
+  animation: barRise 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 4. Network Lines Pulse in Final CTA & Visuals */
+@keyframes networkPulse {
+  0%, 100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.network-line {
+  animation: networkPulse 4s ease-in-out infinite;
+}
+
+/* 5. Floating Node Gentle Drift */
+@keyframes floatNode {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.float-node {
+  animation: floatNode 3.5s ease-in-out infinite;
+}
+
+
+/* ── LAYER 2: INTERFACE MOTION (Fast, Understated, Responsive) ── */
+
+/* 1. Navigation Sliding Underline */
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  background: var(--gradient-brand);
+  border-radius: 9999px;
+  transition: width 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* 2. CTA Hover Micro-Lift */
+.cta-hover,
+.btn-primary {
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.cta-hover:hover,
+.btn-primary:hover {
+  transform: translateY(-2px);
+}
+
+/* 3. Execution Event Banner Slide-In */
+@keyframes eventEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.event-enter {
+  animation: eventEnter 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 4. Observed Indicator Beacon / Concentric Ping */
+@keyframes observedPing {
+  0% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  70% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+.observed-dot {
+  position: relative;
+  display: inline-flex;
+}
+
+.observed-dot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background-color: currentColor;
+  animation: observedPing 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* 5. Learning Path Progression Checkmark */
+@keyframes checkIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.check-in {
+  animation: checkIn 350ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* 6. Execution Trace Step Highlight Pulse */
+@keyframes tracePulse {
+  0% {
+    background-color: transparent;
+  }
+  30% {
+    background-color: rgba(6, 182, 212, 0.22);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.trace-pulse {
+  animation: tracePulse 600ms ease-out;
+}
+
+
+/* ── LAYER 3: DSA CONCEPT MOTION (Pedagogically Grounded) ── */
+
+/* 1. Array Item Swap & Compare Transition */
+.array-item-transition {
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, border-color 200ms ease;
+}
+
+/* 2. Active Node Breathing Glow */
+@keyframes activeNode {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(6, 182, 212, 0);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(6, 182, 212, 0.25);
+  }
+}
+
+.active-node-glow {
+  animation: activeNode 3s ease-in-out infinite;
+}
+
+/* 3. Node Creation Scale-In */
+@keyframes nodeAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.node-appear {
+  animation: nodeAppear 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 4. Pointer Label Movement Transition */
+.pointer-transition {
+  transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1), opacity 250ms ease;
 }
 
 @media (prefers-reduced-motion: reduce) {

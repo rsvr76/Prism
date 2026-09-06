@@ -234,14 +234,14 @@ export default function PathOverviewClient({ path }: PathOverviewClientProps) {
                               ? "bg-slate-50 border-slate-300 hover:border-emerald-500 dark:bg-slate-900/40 dark:border-slate-800/80 dark:hover:border-emerald-500/30"
                               : isNextUp
                               ? "bg-cyan-50 border-cyan-300 hover:border-cyan-400 dark:bg-cyan-950/20 dark:border-cyan-500/40 dark:hover:border-cyan-400"
-                              : "bg-white border-slate-200 hover:border-slate-300 dark:bg-slate-900/20 dark:border-slate-800/40 dark:hover:border-slate-700"
+                              : "bg-white border-slate-300 hover:border-slate-400 dark:bg-slate-900/20 dark:border-slate-800/40 dark:hover:border-slate-700 shadow-2xs"
                           }`}
                         >
                           <div className="flex items-center gap-3.5 min-w-0">
                             {/* Status Icon */}
                             <div className="shrink-0">
                               {isComplete ? (
-                                <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 check-in" />
                               ) : isNextUp ? (
                                 <div className="w-5 h-5 rounded-full border-2 border-cyan-600 dark:border-cyan-400 flex items-center justify-center animate-pulse">
                                   <div className="w-1.5 h-1.5 rounded-full bg-cyan-600 dark:bg-cyan-400" />

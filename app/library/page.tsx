@@ -62,7 +62,7 @@ export default function AlgorithmLibraryPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans">
       {/* Top Header */}
-      <header className="h-14 flex items-center justify-between gap-3 px-4 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 sticky top-0 z-20 shadow-xs select-none">
+      <header className="h-14 flex items-center justify-between gap-3 px-4 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md border-b border-slate-300 dark:border-slate-800/80 sticky top-0 z-20 shadow-xs select-none">
         <div
           className={`flex items-center gap-3 shrink-0 transition-opacity duration-200 ${
             isDrawerOpen ? "opacity-0 pointer-events-none" : "opacity-100"
@@ -128,7 +128,7 @@ export default function AlgorithmLibraryPage() {
         </section>
 
         {/* Hero Section */}
-        <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-slate-50 to-cyan-50/40 dark:from-slate-900 dark:via-slate-900/90 dark:to-cyan-950/40 border border-slate-200 dark:border-slate-800 p-6 md:p-10 shadow-xs dark:shadow-2xl">
+        <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-slate-50 to-cyan-50/40 dark:from-slate-900 dark:via-slate-900/90 dark:to-cyan-950/40 border border-slate-300 dark:border-slate-800 p-6 md:p-10 shadow-xs dark:shadow-2xl">
           <div className="relative z-10 max-w-3xl space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 dark:bg-cyan-950/80 border border-cyan-300 dark:border-cyan-500/30 text-cyan-800 dark:text-cyan-300 text-xs font-mono">
               <BookOpen className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
@@ -147,7 +147,7 @@ export default function AlgorithmLibraryPage() {
         </section>
 
         {/* Filter & Search Controls */}
-        <section aria-label="Search and Filter Controls" className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <section aria-label="Search and Filter Controls" className="bg-white dark:bg-slate-900/80 border border-slate-300 dark:border-slate-800 rounded-xl p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
           {/* Search Input */}
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -163,7 +163,7 @@ export default function AlgorithmLibraryPage() {
           {/* Category & Difficulty Filters */}
           <div className="flex flex-wrap items-center gap-2">
             {/* Category Tabs */}
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-1 rounded-lg text-xs font-medium">
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 p-1 rounded-lg text-xs font-medium">
               <button
                 onClick={() => setSelectedCategory("all")}
                 className={`px-3 py-1.5 rounded-md transition-all ${
@@ -199,7 +199,7 @@ export default function AlgorithmLibraryPage() {
             </div>
 
             {/* Difficulty Selector */}
-            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400">
+            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400">
               <Filter className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>Difficulty:</span>
               <select
@@ -250,7 +250,7 @@ export default function AlgorithmLibraryPage() {
                 return (
                   <article
                     key={algo.id}
-                    className="flex flex-col justify-between bg-white hover:bg-slate-50/80 dark:bg-slate-900/70 dark:hover:bg-slate-900 border border-slate-200 hover:border-cyan-400 dark:border-slate-800 dark:hover:border-cyan-500/50 rounded-xl p-5 transition-all shadow-xs hover:shadow-md group"
+                    className="flex flex-col justify-between bg-white hover:bg-slate-50/80 dark:bg-slate-900/70 dark:hover:bg-slate-900 border border-slate-300 hover:border-cyan-500 dark:border-slate-800 dark:hover:border-cyan-500/50 rounded-xl p-5 transition-all shadow-sm hover:shadow-md group"
                   >
                     <div className="space-y-3">
                       {/* Category & Difficulty Badges */}
@@ -286,7 +286,7 @@ export default function AlgorithmLibraryPage() {
                       </div>
 
                       {/* Visualizer Target & Complexity Metrics */}
-                      <div className="space-y-1.5 pt-2 border-t border-slate-200 dark:border-slate-800/80 font-mono text-[11px]">
+                      <div className="space-y-1.5 pt-2 border-t border-slate-300 dark:border-slate-800/80 font-mono text-[11px]">
                         <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
                           <Eye className="w-3 h-3 text-cyan-600 dark:text-cyan-400 shrink-0" />
                           <span className="truncate">{getVisualizationLabel(algo.visualizationType)}</span>
@@ -299,10 +299,10 @@ export default function AlgorithmLibraryPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-2 mt-5 pt-3 border-t border-slate-200 dark:border-slate-800/80">
+                    <div className="grid grid-cols-2 gap-2 mt-5 pt-3 border-t border-slate-300 dark:border-slate-800/80">
                       <Link
                         href={`/library/${algo.slug}`}
-                        className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-medium transition-colors cursor-pointer"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
                       >
                         <span>Learn</span>
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -310,7 +310,7 @@ export default function AlgorithmLibraryPage() {
 
                       <button
                         onClick={() => handleTryInPrism(algo)}
-                        className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white dark:bg-cyan-500 dark:hover:bg-cyan-400 dark:text-slate-950 text-xs font-bold transition-all shadow-sm cursor-pointer"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white dark:bg-cyan-500 dark:hover:bg-cyan-400 dark:text-slate-950 text-xs font-bold transition-all border border-cyan-700/60 dark:border-cyan-400/50 shadow-xs cursor-pointer"
                         title="Load into Workbench"
                       >
                         <Play className="w-3.5 h-3.5 fill-current" />

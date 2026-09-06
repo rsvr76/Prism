@@ -43,7 +43,7 @@ export function HeroSection() {
 
   return (
     <section className="relative overflow-hidden">
-      <div className="grid-backdrop pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_50%_0%,black,transparent_75%)]" />
+      <div className="grid-backdrop grid-backdrop-animated pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_50%_0%,black,transparent_75%)]" />
       <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 py-12 md:py-20 lg:grid-cols-[1.1fr_0.9fr]">
         <div>
           <span className="inline-flex items-center gap-2 rounded-full border border-purple-500/25 bg-purple-500/10 px-3.5 py-1.5 text-xs font-medium tracking-wide">
@@ -66,7 +66,7 @@ export function HeroSection() {
 
           <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg">
             Prism runs your code in a real Python 3 sandbox, records every memory mutation step by
-            step, and explains exactly why it happened — no simulations, no guesswork.
+            step, and explains exactly why it happened: zero simulations, zero guesswork.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">

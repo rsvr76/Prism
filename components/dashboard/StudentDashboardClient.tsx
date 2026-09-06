@@ -105,7 +105,7 @@ export default function StudentDashboardClient() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-cyan-500/30 font-sans">
       {/* Top Navigation Header */}
-      <header className="h-14 border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md sticky top-0 px-4 flex items-center justify-between z-20 shadow-xs select-none">
+      <header className="h-14 border-b border-slate-300 dark:border-slate-800/80 bg-white/95 dark:bg-[#0a0f1d]/95 backdrop-blur-md sticky top-0 px-4 flex items-center justify-between z-20 shadow-xs select-none">
         <div
           className={`flex items-center gap-3 shrink-0 transition-opacity duration-200 ${
             isDrawerOpen ? "opacity-0 pointer-events-none" : "opacity-100"
@@ -150,7 +150,7 @@ export default function StudentDashboardClient() {
         )}
 
         {/* 1. Welcome & Primary Continue Learning Action */}
-        <section className="bg-gradient-to-br from-white via-slate-50 to-cyan-50/40 dark:from-slate-900 dark:via-slate-900/90 dark:to-cyan-950/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xs dark:shadow-xl">
+        <section className="bg-gradient-to-br from-white via-slate-50 to-cyan-50/40 dark:from-slate-900 dark:via-slate-900/90 dark:to-cyan-950/40 border border-slate-300 dark:border-slate-800 rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-sm dark:shadow-xl">
           <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
             <div className="space-y-2">
@@ -196,7 +196,7 @@ export default function StudentDashboardClient() {
 
               <Link
                 href="/paths/dsa-foundations"
-                className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-sm font-medium transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 dark:bg-slate-800/80 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-sm font-medium transition-colors cursor-pointer shadow-2xs"
               >
                 <span>Curriculum Outline</span>
               </Link>
@@ -207,7 +207,7 @@ export default function StudentDashboardClient() {
         {/* 2. Unified Metrics Overview: Learning vs Practice */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Card A: Learning Progress */}
-          <section className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-6 shadow-xs">
+          <section className="bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-6 shadow-sm">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -239,7 +239,7 @@ export default function StudentDashboardClient() {
               </div>
 
               {/* Stage Progression Pills */}
-              <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800/80">
+              <div className="space-y-2 pt-2 border-t border-slate-300 dark:border-slate-800/80">
                 <span className="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                   Stage Milestones
                 </span>
@@ -252,7 +252,7 @@ export default function StudentDashboardClient() {
                           ? "bg-emerald-50 border-emerald-300 text-emerald-800 dark:bg-emerald-950/20 dark:border-emerald-500/40 dark:text-emerald-300"
                           : completed > 0
                           ? "bg-cyan-50 border-cyan-300 text-cyan-800 dark:bg-cyan-950/20 dark:border-cyan-500/40 dark:text-cyan-300"
-                          : "bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-950/40 dark:border-slate-800/80 dark:text-slate-400"
+                          : "bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-950/40 dark:border-slate-800/80 dark:text-slate-400"
                       }`}
                     >
                       <div className="flex items-center justify-between gap-1 mb-1">
@@ -282,7 +282,7 @@ export default function StudentDashboardClient() {
           </section>
 
           {/* Card B: Practice Progress */}
-          <section className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-6 shadow-xs">
+          <section className="bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-6 shadow-sm">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -314,7 +314,7 @@ export default function StudentDashboardClient() {
               </div>
 
               {/* Topic Breakdown Pills */}
-              <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800/80">
+              <div className="space-y-2 pt-2 border-t border-slate-300 dark:border-slate-800/80">
                 <span className="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                   Topic Mastery
                 </span>
@@ -327,7 +327,7 @@ export default function StudentDashboardClient() {
                           ? "bg-emerald-50 border-emerald-300 text-emerald-800 dark:bg-emerald-950/20 dark:border-emerald-500/40 dark:text-emerald-300"
                           : passed > 0
                           ? "bg-purple-50 border-purple-300 text-purple-800 dark:bg-purple-950/20 dark:border-purple-500/40 dark:text-purple-300"
-                          : "bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-950/40 dark:border-slate-800/80 dark:text-slate-400"
+                          : "bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-950/40 dark:border-slate-800/80 dark:text-slate-400"
                       }`}
                     >
                       <div className="flex items-center justify-between gap-1 mb-1">
@@ -360,7 +360,7 @@ export default function StudentDashboardClient() {
         {/* 3. Next Action Recommendations */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Action A: Continue Learning */}
-          <section className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-4 shadow-xs">
+          <section className="bg-white dark:bg-slate-900/40 border border-slate-300 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-4 shadow-sm">
             <div>
               <div className="flex items-center gap-2 mb-2 text-cyan-600 dark:text-cyan-400 text-xs font-mono font-semibold uppercase tracking-wider">
                 <BookOpen className="w-4 h-4" />
@@ -396,7 +396,7 @@ export default function StudentDashboardClient() {
             ) : (
               <Link
                 href="/paths/dsa-foundations"
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-semibold transition-all self-start cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-semibold transition-all self-start cursor-pointer border border-slate-300 dark:border-slate-700"
               >
                 <span>Review Curriculum</span>
               </Link>
@@ -404,7 +404,7 @@ export default function StudentDashboardClient() {
           </section>
 
           {/* Action B: Recommended Practice Challenge */}
-          <section className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-4 shadow-xs">
+          <section className="bg-white dark:bg-slate-900/40 border border-slate-300 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-4 shadow-sm">
             <div>
               <div className="flex items-center gap-2 mb-2 text-purple-600 dark:text-purple-400 text-xs font-mono font-semibold uppercase tracking-wider">
                 <Target className="w-4 h-4" />
@@ -445,7 +445,7 @@ export default function StudentDashboardClient() {
             ) : (
               <Link
                 href="/practice"
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-semibold transition-all self-start cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-semibold transition-all self-start cursor-pointer border border-slate-300 dark:border-slate-700"
               >
                 <span>View Practice Catalog</span>
               </Link>
@@ -454,7 +454,7 @@ export default function StudentDashboardClient() {
         </div>
 
         {/* 4. Recent Activity Stream */}
-        <section className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-xs">
+        <section className="bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Activity className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
@@ -466,7 +466,7 @@ export default function StudentDashboardClient() {
           </div>
 
           {recentActivity.length === 0 ? (
-            <div className="p-8 text-center rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800/80 space-y-2">
+            <div className="p-8 text-center rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-300 dark:border-slate-800/80 space-y-2">
               <p className="text-sm text-slate-600 dark:text-slate-400">No recent learning activity yet.</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Start your first lesson in{" "}
@@ -526,7 +526,7 @@ export default function StudentDashboardClient() {
 
         {/* 5. Recent Executions / Workbench History */}
         {recentExecutions.length > 0 && (
-          <section className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-xs">
+          <section className="bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Code2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
@@ -541,7 +541,7 @@ export default function StudentDashboardClient() {
               {recentExecutions.map((exec) => (
                 <div
                   key={exec.id}
-                  className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs"
+                  className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 flex items-center justify-between text-xs shadow-2xs"
                 >
                   <div className="space-y-1 truncate pr-3">
                     <div className="flex items-center gap-2">
@@ -556,7 +556,7 @@ export default function StudentDashboardClient() {
                   </div>
                   <Link
                     href="/"
-                    className="shrink-0 px-2.5 py-1 rounded bg-slate-200 hover:bg-slate-300 text-cyan-800 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-cyan-400 font-medium transition-colors cursor-pointer"
+                    className="shrink-0 px-2.5 py-1 rounded bg-slate-200 hover:bg-slate-300 text-cyan-800 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-cyan-400 font-medium transition-colors cursor-pointer border border-slate-300/80 dark:border-transparent"
                   >
                     Open
                   </Link>
@@ -567,10 +567,10 @@ export default function StudentDashboardClient() {
         )}
 
         {/* 6. Settings & Reset Progress Action */}
-        <section className="pt-6 border-t border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-end gap-4 text-xs text-slate-600 dark:text-slate-400">
+        <section className="pt-6 border-t border-slate-300 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-end gap-4 text-xs text-slate-600 dark:text-slate-400">
           <button
             onClick={() => setShowResetModal(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950/30 dark:hover:bg-rose-950/60 dark:text-rose-400 dark:border-rose-500/30 transition-colors self-start sm:self-auto cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-950/30 dark:hover:bg-rose-950/60 dark:text-rose-400 dark:border-rose-500/30 shadow-2xs transition-colors self-start sm:self-auto cursor-pointer font-medium"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset All Progress</span>
@@ -585,7 +585,7 @@ export default function StudentDashboardClient() {
             aria-modal="true"
             aria-labelledby="reset-modal-title"
           >
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
               <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
                 <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-500/30 flex items-center justify-center">
                   <AlertTriangle className="w-5 h-5" />
@@ -608,13 +608,13 @@ export default function StudentDashboardClient() {
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
                   onClick={() => setShowResetModal(false)}
-                  className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmReset}
-                  className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition-colors shadow-sm cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition-colors border border-rose-700/60 shadow-xs cursor-pointer"
                 >
                   Confirm Reset
                 </button>

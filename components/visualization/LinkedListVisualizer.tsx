@@ -7,9 +7,9 @@
  * Consumes: trace.frames[currentStep]
  *
  * CONTRACT:
- * - Derives visual state purely from PrismFrame — no execution, no AI
+ * - Derives visual state purely from PrismFrame: no execution, no AI
  * - Uses stable execution-local heap IDs (obj_<id>) as React Flow node IDs
- * - Renders current frame state ONLY — does NOT track history itself
+ * - Renders current frame state ONLY: does NOT track history itself
  * - Does NOT mutate trace frames
  */
 
@@ -59,7 +59,7 @@ function LinkedListNodeComponent({ data }: NodeProps<Node<LinkedListNodeData>>) 
   const isHead = pointerLabels.some((l) => l.toLowerCase() === "head");
 
   return (
-    <div className="relative">
+    <div className="relative node-appear">
       {/* Pointer labels & Head Indicator above the node */}
       {pointerLabels.length > 0 && (
         <div className="absolute -top-8 left-0 right-0 flex justify-center gap-1.5 flex-wrap z-10">
@@ -70,7 +70,7 @@ function LinkedListNodeComponent({ data }: NodeProps<Node<LinkedListNodeData>>) 
             return (
               <span
                 key={label}
-                className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded-md shadow-xs flex items-center gap-1 ${
+                className={`pointer-transition px-2 py-0.5 text-[10px] font-mono font-bold rounded-md shadow-xs flex items-center gap-1 ${
                   isThisHead
                     ? "bg-emerald-100 border border-emerald-400 text-emerald-800 ring-1 ring-emerald-500/30 dark:bg-emerald-950/90 dark:border-emerald-500/60 dark:text-emerald-300"
                     : isCurr
@@ -90,7 +90,7 @@ function LinkedListNodeComponent({ data }: NodeProps<Node<LinkedListNodeData>>) 
       <div
         className={`flex items-stretch rounded-lg border-2 overflow-hidden transition-all duration-200 shadow-sm ${
           isActive
-            ? "border-cyan-500 bg-cyan-50/90 shadow-md ring-2 ring-cyan-400/40 dark:border-cyan-400 dark:shadow-cyan-500/25 dark:bg-[#0a1628]"
+            ? "border-cyan-500 bg-cyan-50/90 shadow-md ring-2 ring-cyan-400/40 dark:border-cyan-400 dark:shadow-cyan-500/25 dark:bg-[#0a1628] active-node-glow"
             : isHead
             ? "border-emerald-400 bg-white hover:border-emerald-500 dark:border-slate-600 dark:bg-slate-900/95 dark:hover:border-slate-500"
             : "border-slate-300 bg-white hover:border-slate-400 dark:border-slate-700/80 dark:bg-slate-900/90 dark:hover:border-slate-600"
@@ -218,9 +218,9 @@ function buildGraphFromFrame(
         markerEnd: { type: "arrowclosed" as const, color: isActive ? "#22d3ee" : "#64748b" },
       });
     } else if (nextHeapId && isCircular) {
-      // Circular back edge — skip for simplicity in Phase 3A layout
+      // Circular back edge: skip for simplicity in Phase 3A layout
     } else {
-      // Next is null — edge to NULL terminator node
+      // Next is null: edge to NULL terminator node
       const nullNodeId = `${NULL_NODE_ID}_${heapId}`;
       const nullX = x + NODE_SPACING_X;
 

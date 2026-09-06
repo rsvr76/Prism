@@ -47,8 +47,9 @@ export function FloatingGraph() {
               x2={`${m.left}%`}
               y2={`${m.top}%`}
               stroke="currentColor"
-              className="text-purple-500/20 dark:text-cyan-400/20"
+              className="text-purple-500/25 dark:text-cyan-400/25 network-line"
               strokeWidth="1"
+              style={{ animationDelay: `${(i * 0.4).toFixed(1)}s` }}
             />
           );
         })}
@@ -56,7 +57,7 @@ export function FloatingGraph() {
       {nodes.map((n, i) => (
         <span
           key={i}
-          className="graph-node"
+          className="graph-node float-node"
           style={
             {
               left: `${n.left}%`,
@@ -66,6 +67,7 @@ export function FloatingGraph() {
               "--tx-end": n.txEnd,
               "--ty-end": n.tyEnd,
               "--duration": n.duration,
+              animationDelay: `${(i * 0.3).toFixed(1)}s`,
             } as React.CSSProperties
           }
         />

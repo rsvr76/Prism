@@ -164,7 +164,7 @@ export default function ArrayVisualizer({
             return (
               <div
                 key={el.index}
-                className={`flex flex-col items-center gap-1.5 transition-all duration-200 ${
+                className={`flex flex-col items-center gap-1.5 array-item-transition ${
                   inBoundary ? "opacity-100" : boundaries.length > 0 ? "opacity-40" : "opacity-100"
                 }`}
                 style={{ width: Math.max(40, Math.min(68, Math.floor(520 / elements.length))) }}
@@ -174,7 +174,7 @@ export default function ArrayVisualizer({
                   {el.pointerLabels.map((lbl) => (
                     <span
                       key={lbl}
-                      className="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded-md bg-cyan-100 dark:bg-cyan-950/90 border border-cyan-400/60 text-cyan-800 dark:text-cyan-300 shadow-xs leading-none"
+                      className="pointer-transition px-1.5 py-0.5 text-[10px] font-mono font-bold rounded-md bg-cyan-100 dark:bg-cyan-950/90 border border-cyan-400/60 text-cyan-800 dark:text-cyan-300 shadow-xs leading-none"
                     >
                       {lbl}
                     </span>
@@ -185,7 +185,7 @@ export default function ArrayVisualizer({
                 {hasNumericValues && (
                   <div className="w-full h-28 flex items-end justify-center bg-slate-200/60 dark:bg-slate-900/40 rounded-t-lg border-b border-slate-300 dark:border-slate-800 p-0.5">
                     <div
-                      className={`w-full rounded-t-md transition-all duration-200 ${style.bar}`}
+                      className={`w-full rounded-t-md array-item-transition ${style.bar}`}
                       style={{ height: `${el.heightPercent}%`, minHeight: "6px" }}
                     />
                   </div>
@@ -193,7 +193,9 @@ export default function ArrayVisualizer({
 
                 {/* Value Box Card */}
                 <div
-                  className={`w-full h-12 flex items-center justify-center rounded-lg border-2 transition-all duration-200 font-mono font-bold text-sm ${style.border} ${style.glow}`}
+                  className={`w-full h-12 flex items-center justify-center rounded-lg border-2 array-item-transition font-mono font-bold text-sm ${style.border} ${style.glow} ${
+                    el.state === "comparing" || el.state === "swapping" ? "active-node-glow" : ""
+                  }`}
                 >
                   <span className="truncate px-1">
                     {el.value === null ? "None" : String(el.value)}
