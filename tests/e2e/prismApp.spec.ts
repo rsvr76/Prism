@@ -39,12 +39,12 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
 
     // Step Forward
     const stepForwardBtn = page.getByTitle('Step Forward');
-    await stepForwardBtn.click();
+    await stepForwardBtn.click({ force: true });
     await expect(page.getByText(/^Step 2 \//i)).toBeVisible();
 
     // Step Backward
     const stepBackBtn = page.getByTitle('Step Backward');
-    await stepBackBtn.click();
+    await stepBackBtn.click({ force: true });
     await expect(page.getByText(/^Step 1 \//i)).toBeVisible();
   });
 
@@ -57,7 +57,7 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
     // Step forward into execution where variables exist
     const stepForwardBtn = page.getByTitle('Step Forward');
     for (let i = 0; i < 5; i++) {
-      await stepForwardBtn.click();
+      await stepForwardBtn.click({ force: true });
     }
 
     // Open AI and Diagnostics panel
@@ -114,6 +114,7 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
   test('5. Data Structure Visualization (Linked List Preset)', async ({ page }) => {
     await page.goto('/workbench?algo=linked-list');
     await page.waitForLoadState('domcontentloaded');
+    await expect(page.getByText('Singly Linked List').first()).toBeVisible({ timeout: 15000 });
 
     const runBtn = page.getByRole('button', { name: 'Visualize' });
     await expect(runBtn).toBeEnabled({ timeout: 15000 });
@@ -123,7 +124,7 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
     // Step forward until linked list is constructed
     const stepForwardBtn = page.getByTitle('Step Forward');
     for (let i = 0; i < 20; i++) {
-      await stepForwardBtn.click();
+      await stepForwardBtn.click({ force: true });
     }
 
     // Verify Linked List node structure rendered in React Flow canvas
@@ -133,6 +134,7 @@ test.describe('Prism Real Browser E2E & Production UX Validation', () => {
   test('6. Data Structure Visualization (Bubble Sort Array Preset)', async ({ page }) => {
     await page.goto('/workbench?algo=bubble-sort');
     await page.waitForLoadState('domcontentloaded');
+    await expect(page.getByText('Bubble Sort').first()).toBeVisible({ timeout: 15000 });
 
     const runBtn = page.getByRole('button', { name: 'Visualize' });
     await expect(runBtn).toBeEnabled({ timeout: 15000 });

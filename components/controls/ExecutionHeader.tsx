@@ -159,7 +159,7 @@ export default function ExecutionHeader() {
           {loadedLessonContext ? (
             <Link
               href={`/paths/${loadedLessonContext.pathSlug}/${loadedLessonContext.lessonSlug}`}
-              className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-500/40 text-purple-700 dark:text-purple-300 hover:text-purple-900 hover:border-purple-300 dark:hover:text-purple-200 dark:hover:border-purple-400 text-xs font-mono transition-colors shrink-0"
+              className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-500/40 text-purple-700 dark:text-purple-300 hover:text-purple-900 hover:border-purple-300 dark:hover:text-purple-200 dark:hover:border-purple-400 text-xs font-mono transition-colors shrink-0"
               title="Return to Guided Lesson"
             >
               <Compass className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
@@ -168,7 +168,7 @@ export default function ExecutionHeader() {
               <span className="text-[10px] text-purple-600 dark:text-purple-400 underline ml-1">Return →</span>
             </Link>
           ) : loadedAlgorithmTitle ? (
-            <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 text-cyan-800 dark:text-cyan-300 text-xs font-mono shrink-0">
+            <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 text-cyan-800 dark:text-cyan-300 text-xs font-mono shrink-0">
               <span className="text-slate-500 dark:text-slate-400">Loaded:</span>
               <span className="font-semibold text-cyan-700 dark:text-cyan-200 truncate max-w-[140px]">{loadedAlgorithmTitle}</span>
             </div>
