@@ -47,6 +47,12 @@ interface ExecutionStore {
   isPlaying: boolean;
   playbackSpeed: number; // 0.5x, 1x, 2x, 5x
   isRunning: boolean;
+  isExecuting: boolean; // Pure execution running
+  isVisualizingRun: boolean; // Visualization trace running
+  executionOutput: string[] | null; // Pure execution stdout
+  executionStatus: ExecutionStatus | null; // Pure execution status
+  executionError: string | null; // Pure execution error
+  isComplexityOpen: boolean; // Floating Big-O widget visibility
   status: ExecutionStatus;
   errorMessage: string | null;
 
@@ -110,6 +116,9 @@ interface ExecutionStore {
 
   // Phase 6B Complexity Actions
   analyzeComplexity: () => Promise<void>;
+  openComplexity: () => void;
+  closeComplexity: () => void;
+  toggleComplexity: () => void;
 }
 
 // Module-scoped execution epoch counter to prevent async race conditions
@@ -122,8 +131,14 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   isVisualizing: false,
   currentStep: 0,
   isPlaying: false,
-  playbackSpeed: 1,
+  playbackSpeed: 0.5,
   isRunning: false,
+  isExecuting: false,
+  isVisualizingRun: false,
+  executionOutput: null,
+  executionStatus: null,
+  executionError: null,
+  isComplexityOpen: false,
   status: "IDLE",
   errorMessage: null,
 
@@ -190,15 +205,15 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   },
 
   runCode: async (visualize: boolean = true) => {
-    // If already running, cancel previous execution and restart cleanly
-    traceRunner.cancelExecution();
+    // Only cancel in-flight visualization trace, keeping pure execution independent
+    traceRunner.cancelTrace();
 
     const epoch = ++activeExecutionEpoch;
     const { code } = get();
-
-    const executionId = `exec_orig_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const executionId = "exec_orig_main";
 
     set({
+      isVisualizingRun: true,
       isRunning: true,
       isPlaying: false,
       errorMessage: null,
@@ -227,21 +242,29 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
         },
         executionIds: state.executionIds.includes(executionId)
           ? state.executionIds
-          : [...state.executionIds, executionId],
+          : [executionId, ...state.executionIds.filter((id) => id !== "exec_orig_main")],
         activeExecutionId: executionId,
         code,
         trace,
         currentStep: 0,
         isRunning: false,
+        isVisualizingRun: false,
         isVisualizing: visualize,
         status: trace.status,
         errorMessage: trace.errorMessage || null,
+        ...(visualize && trace.status === "SUCCESS" ? { isComplexityOpen: true } : {}),
       }));
+
+      // Automatically compute Big-O complexity analysis upon visualization finish
+      if (visualize && trace.status === "SUCCESS") {
+        get().analyzeComplexity();
+      }
     } catch (err: any) {
       if (epoch !== activeExecutionEpoch) return;
 
       set({
         isRunning: false,
+        isVisualizingRun: false,
         isVisualizing: false,
         status: "RUNTIME_ERROR",
         errorMessage: err?.message || "Execution failed",
@@ -250,61 +273,51 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
   },
 
   executeCode: async () => {
-    traceRunner.cancelExecution();
+    // Only cancel in-flight pure execution, keeping visualization trace independent
+    traceRunner.cancelPureExecution();
 
-    const epoch = ++activeExecutionEpoch;
     const { code } = get();
-
-    const executionId = `exec_pure_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const executionId = "exec_orig_main";
 
     set({
-      isRunning: true,
-      isPlaying: false,
-      isVisualizing: false,
-      errorMessage: null,
-      explanationError: null,
-      tutorError: null,
-      complexityError: null,
+      isExecuting: true,
+      executionError: null,
     });
 
     try {
       const trace = await traceRunner.runPureExecution(code, DEFAULT_EXECUTION_LIMITS);
-      if (epoch !== activeExecutionEpoch) return;
+      const stdout = trace.frames?.[0]?.stdout || [];
 
-      const record: ExecutionRecord = {
-        executionId,
-        type: "original",
-        label: "Original",
-        code,
-        trace,
-        createdAt: Date.now(),
-      };
+      set((state) => {
+        const record: ExecutionRecord = {
+          executionId,
+          type: "original",
+          label: "Original",
+          code,
+          trace: state.trace || trace,
+          createdAt: Date.now(),
+        };
 
-      set((state) => ({
-        executions: {
-          ...state.executions,
-          [executionId]: record,
-        },
-        executionIds: state.executionIds.includes(executionId)
-          ? state.executionIds
-          : [...state.executionIds, executionId],
-        activeExecutionId: executionId,
-        code,
-        trace,
-        currentStep: 0,
-        isRunning: false,
-        isVisualizing: false,
-        status: trace.status,
-        errorMessage: trace.errorMessage || null,
-      }));
+        return {
+          executions: {
+            ...state.executions,
+            [executionId]: record,
+          },
+          executionIds: state.executionIds.includes(executionId)
+            ? state.executionIds
+            : [executionId, ...state.executionIds.filter((id) => id !== "exec_orig_main")],
+          activeExecutionId: executionId,
+          isExecuting: false,
+          executionOutput: stdout,
+          executionStatus: trace.status,
+          executionError: trace.errorMessage || null,
+        };
+      });
     } catch (err: any) {
-      if (epoch !== activeExecutionEpoch) return;
-
       set({
-        isRunning: false,
-        isVisualizing: false,
-        status: "RUNTIME_ERROR",
-        errorMessage: err?.message || "Execution failed",
+        isExecuting: false,
+        executionStatus: "RUNTIME_ERROR",
+        executionError: err?.message || "Execution failed",
       });
     }
   },
@@ -313,7 +326,8 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
     const { trace, code } = get();
     // If a completed full trace matching the exact current code already exists in memory, activate visualization immediately
     if (trace && trace.code === code && trace.frames && trace.frames.length > 1) {
-      set({ isVisualizing: true, currentStep: 0, isRunning: false });
+      set({ isVisualizing: true, currentStep: 0, isRunning: false, isComplexityOpen: true });
+      get().analyzeComplexity();
       return;
     }
     // Otherwise, run execution with visualization enabled
@@ -358,7 +372,14 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
       isVisualizing: false,
       currentStep: 0,
       isPlaying: false,
+      playbackSpeed: 0.5,
       isRunning: false,
+      isExecuting: false,
+      isVisualizingRun: false,
+      executionOutput: null,
+      executionStatus: null,
+      executionError: null,
+      isComplexityOpen: false,
       status: "IDLE",
       errorMessage: null,
       executions: {},
@@ -733,4 +754,8 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
       });
     }
   },
+
+  openComplexity: () => set({ isComplexityOpen: true }),
+  closeComplexity: () => set({ isComplexityOpen: false }),
+  toggleComplexity: () => set((state) => ({ isComplexityOpen: !state.isComplexityOpen })),
 }));

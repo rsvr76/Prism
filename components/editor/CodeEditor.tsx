@@ -26,6 +26,8 @@ export default function CodeEditor() {
   const visualizeCode = useExecutionStore((state) => state.visualizeCode);
   const reset = useExecutionStore((state) => state.reset);
   const isRunning = useExecutionStore((state) => state.isRunning);
+  const isExecuting = useExecutionStore((state) => state.isExecuting);
+  const isVisualizingRun = useExecutionStore((state) => state.isVisualizingRun);
   const status = useExecutionStore((state) => state.status);
   const errorMessage = useExecutionStore((state) => state.errorMessage);
   const { isDark } = useTheme();
@@ -77,25 +79,21 @@ export default function CodeEditor() {
 
   const currentFrame = trace?.frames?.[currentStep];
 
-  const [activeAction, setActiveAction] = useState<"execute" | "visualize" | null>(null);
-
   const handleExecute = async () => {
-    setActiveAction("execute");
     openOutput();
     try {
       await executeCode();
-    } finally {
-      setActiveAction(null);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   const handleVisualize = async () => {
-    setActiveAction("visualize");
     closeOutput();
     try {
       await visualizeCode();
-    } finally {
-      setActiveAction(null);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -152,31 +150,31 @@ export default function CodeEditor() {
           {/* Button 1: Execute (runs code and displays output in center tab) */}
           <button
             onClick={handleExecute}
-            disabled={isRunning}
+            disabled={isExecuting}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs border border-emerald-700/50 shadow-xs hover:shadow-emerald-500/25 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
             title="Execute Python code to display output"
           >
-            {activeAction === "execute" ? (
+            {isExecuting ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : (
               <Play className="w-3.5 h-3.5 fill-white" />
             )}
-            <span>{activeAction === "execute" ? "Executing..." : "Execute"}</span>
+            <span>{isExecuting ? "Executing..." : "Execute"}</span>
           </button>
 
           {/* Button 2: Visualize (runs code and renders DSA structures) */}
           <button
             onClick={handleVisualize}
-            disabled={isRunning}
+            disabled={isVisualizingRun}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-xs border border-cyan-700/50 shadow-xs hover:shadow-cyan-500/25 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
             title="Visualize data structures and execution trace"
           >
-            {activeAction === "visualize" ? (
+            {isVisualizingRun ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : (
               <Eye className="w-3.5 h-3.5" />
             )}
-            <span>{activeAction === "visualize" ? "Visualizing..." : "Visualize"}</span>
+            <span>{isVisualizingRun ? "Visualizing..." : "Visualize"}</span>
           </button>
 
           {/* Reset Button */}
@@ -185,7 +183,7 @@ export default function CodeEditor() {
               reset();
               closeOutput();
             }}
-            disabled={isRunning}
+            disabled={isExecuting && isVisualizingRun}
             className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 bg-white hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-2xs transition-colors cursor-pointer disabled:opacity-40"
             title="Reset Code & Execution"
           >

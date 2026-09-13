@@ -10,19 +10,26 @@ export default function ExecutionOutputTab() {
   const isOpen = useOutputTabStore((state) => state.isOpen);
   const closeOutput = useOutputTabStore((state) => state.closeOutput);
 
+  const isExecuting = useExecutionStore((state) => state.isExecuting);
   const isRunning = useExecutionStore((state) => state.isRunning);
   const status = useExecutionStore((state) => state.status);
   const errorMessage = useExecutionStore((state) => state.errorMessage);
   const trace = useExecutionStore((state) => state.trace);
+  const executionOutput = useExecutionStore((state) => state.executionOutput);
+  const executionStatus = useExecutionStore((state) => state.executionStatus);
+  const executionError = useExecutionStore((state) => state.executionError);
 
   if (!isOpen) return null;
 
-  // Get full stdout lines from the completed trace, or current step
-  const stdout = trace?.frames?.[trace.frames.length - 1]?.stdout || [];
+  // Prefer pure execution stdout if available, otherwise trace stdout
+  const stdout = executionOutput !== null ? executionOutput : (trace?.frames?.[trace.frames.length - 1]?.stdout || []);
   const lineCount = stdout.length;
+  const activeRunning = isExecuting;
+  const activeStatus = executionStatus || status;
+  const activeError = executionError || errorMessage;
 
   // Adapt container sizing based on output magnitude
-  const isCompact = lineCount <= 2 && !errorMessage;
+  const isCompact = lineCount <= 2 && !activeError;
 
   return (
     <div
@@ -38,17 +45,17 @@ export default function ExecutionOutputTab() {
         <div className="flex items-center gap-2">
           <Terminal className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
           <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">Execution Output</span>
-          {isRunning ? (
+          {activeRunning ? (
             <span className="flex items-center gap-1 text-[10px] text-cyan-600 dark:text-cyan-400 font-mono">
               <Loader2 className="w-3 h-3 animate-spin" />
               <span>{traceRunner.isWorkerReady() ? "Running..." : "Initializing Python..."}</span>
             </span>
-          ) : status === "SUCCESS" ? (
+          ) : activeStatus === "SUCCESS" ? (
             <span className="flex items-center gap-1 text-[10px] text-emerald-700 dark:text-emerald-400 font-mono font-medium">
               <CheckCircle2 className="w-3 h-3" />
               <span>{lineCount} line{lineCount === 1 ? "" : "s"}</span>
             </span>
-          ) : status !== "IDLE" ? (
+          ) : activeStatus !== "IDLE" ? (
             <span className="flex items-center gap-1 text-[10px] text-rose-600 dark:text-rose-400 font-mono font-medium">
               <AlertCircle className="w-3 h-3" />
               <span>Failed</span>
@@ -68,7 +75,7 @@ export default function ExecutionOutputTab() {
 
       {/* Output Body */}
       <div className="p-3 overflow-y-auto font-mono text-xs text-slate-800 dark:text-slate-200 space-y-1 custom-scrollbar max-h-72 bg-slate-50/50 dark:bg-transparent">
-        {isRunning ? (
+        {activeRunning ? (
           <div className="flex items-center gap-2 text-slate-500 italic py-2">
             <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-600 dark:text-cyan-400" />
             <span>
@@ -77,12 +84,12 @@ export default function ExecutionOutputTab() {
                 : "Initializing Python environment..."}
             </span>
           </div>
-        ) : status !== "SUCCESS" && status !== "IDLE" && errorMessage ? (
+        ) : activeStatus !== "SUCCESS" && activeStatus !== "IDLE" && activeError ? (
           <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-800/60 text-rose-800 dark:text-rose-300 space-y-1">
             <div className="font-bold text-[11px] uppercase tracking-wide text-rose-600 dark:text-rose-400">
-              {status}
+              {activeStatus}
             </div>
-            <div className="break-words text-[11px] leading-relaxed">{errorMessage}</div>
+            <div className="break-words text-[11px] leading-relaxed">{activeError}</div>
           </div>
         ) : stdout.length > 0 ? (
           stdout.map((line, idx) => (

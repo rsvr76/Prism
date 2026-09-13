@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Test Suite: Phase 6B & 6C Big-O / Complexity Analysis & Grounded Learning Insights
  *
  * Covers:
@@ -333,6 +333,31 @@ res = factorial(4)
 
       const recEv = metrics.evidenceItems.find((e) => e.kind === "recursion");
       expect(recEv?.observedValue).toBe(4);
+    });
+
+    it("G. Real Execution: Bubble Sort -> O(n²) time and O(1) space complexity", () => {
+      const code = `
+def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        for j in range(0, n - i - 1):
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+    return arr
+
+numbers = [5, 2, 8, 1, 4]
+sorted_arr = bubble_sort(numbers)
+`;
+      const realTrace = runRealPythonTrace(code);
+      expect(realTrace.status).toBe("SUCCESS");
+
+      const metrics = extractComplexityMetrics(realTrace);
+      expect(metrics.maxLoopNesting).toBe(2);
+      expect(metrics.observedTimeHeuristic).toBe("O(n²)");
+      expect(metrics.observedSpaceHeuristic).toBe("O(1)");
+
+      const nestingEv = metrics.evidenceItems.find((e) => e.kind === "loop_nesting");
+      expect(nestingEv?.observedValue).toBe(2);
     });
   });
 

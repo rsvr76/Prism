@@ -12,6 +12,7 @@ import {
   AlertCircle,
   Menu,
   Compass,
+  Activity,
 } from "lucide-react";
 import WhatIfModal from "@/components/controls/WhatIfModal";
 import { PrismLogoCompact } from "@/components/branding/PrismLogo";
@@ -96,6 +97,12 @@ export default function ExecutionHeader() {
   const toggleDrawer = useNavDrawerStore((state) => state.toggleDrawer);
   const isDrawerOpen = useNavDrawerStore((state) => state.isOpen);
 
+  const isComplexityOpen = useExecutionStore((state) => state.isComplexityOpen);
+  const toggleComplexity = useExecutionStore((state) => state.toggleComplexity);
+  const complexityAnalyses = useExecutionStore((state) => state.complexityAnalyses);
+  const hasComplexity = !!(activeExecutionId && complexityAnalyses[activeExecutionId]);
+  const hasBranches = executionIds.some((id) => executions[id]?.type === "branch");
+
   const getStatusBadge = () => {
     switch (status) {
       case "SUCCESS":
@@ -174,8 +181,8 @@ export default function ExecutionHeader() {
             </div>
           ) : null}
 
-          {/* Phase 6A: Branch Switcher Tabs */}
-          {executionIds.length > 0 && (
+          {/* Phase 6A: Branch Switcher Tabs (Only displayed when actual What-If branches exist) */}
+          {hasBranches && (
             <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 p-1 rounded-lg font-mono text-xs overflow-x-auto max-w-xs shrink-0">
               {executionIds.map((id) => {
                 const exec = executions[id];
@@ -205,8 +212,25 @@ export default function ExecutionHeader() {
           )}
         </div>
 
-        {/* Right Side: Status Badge (ThemeToggle removed completely from header) */}
+        {/* Right Side: Big-O Trigger & Status Badge */}
         <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            onClick={toggleComplexity}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold transition-all cursor-pointer shadow-2xs ${
+              isComplexityOpen
+                ? "bg-amber-500 text-slate-950 border border-amber-600 font-bold shadow-xs"
+                : "bg-amber-50 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-500/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/60"
+            }`}
+            title="Toggle Big-O Complexity floating card"
+            aria-label="Toggle Big-O Complexity"
+          >
+            <Activity className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            <span>Big-O</span>
+            {hasComplexity && (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+            )}
+          </button>
+
           {getStatusBadge()}
         </div>
       </header>

@@ -104,60 +104,106 @@ export function extractComplexityMetrics(trace: PrismTrace): DeterministicComple
   const countsArray = Object.values(lineCounts);
   const maxLineExecutionCount = countsArray.length > 0 ? Math.max(...countsArray) : 0;
 
-  // 4. True Sequence-Based Loop Nesting Detection
-  // Rather than guessing from global counts, check if inner lines execute repeatedly
-  // between consecutive visits of an outer candidate line.
+  // 4. Syntactic & Sequence-Based Loop Nesting Detection
+  // Distinguish function definitions (def), conditionals (if/elif), and statements from actual
+  // iteration statements (for/while).
   let maxLoopNesting = 0;
+
+  const codeLines = trace.code ? trace.code.split("\n") : [];
+  let totalLoopStatementsInCode = 0;
+  const defLineNumbers = new Set<number>();
+
+  for (let idx = 0; idx < codeLines.length; idx++) {
+    const rawLine = codeLines[idx];
+    const lineNum = idx + 1;
+    if (/^\s*(for\b|while\b)/.test(rawLine)) {
+      totalLoopStatementsInCode++;
+    } else if (/^\s*def\b/.test(rawLine)) {
+      defLineNumbers.add(lineNum);
+    }
+  }
+
+  // Filter candidate loop lines: lines that repeat in the trace, excluding def lines
   const candidateLoopLines = Object.keys(lineCounts)
     .map(Number)
-    .filter((line) => lineCounts[line] > 1);
+    .filter((line) => lineCounts[line] > 1 && !defLineNumbers.has(line));
 
   if (candidateLoopLines.length > 0) {
     maxLoopNesting = 1; // At least one loop exists
 
-    // Check for nested loop relationships (A contains B)
-    for (const outerLine of candidateLoopLines) {
-      // Find all step indices where outerLine occurs
-      const outerIndices: number[] = [];
-      for (let idx = 0; idx < executedLineSequence.length; idx++) {
-        if (executedLineSequence[idx] === outerLine) {
-          outerIndices.push(idx);
-        }
-      }
-
-      if (outerIndices.length >= 2) {
-        // Check lines that appear between outerIndices[0] and outerIndices[1]
-        for (const innerLine of candidateLoopLines) {
-          if (innerLine === outerLine) continue;
-
-          let nestedRepetitions = 0;
-          for (let k = 0; k < outerIndices.length - 1; k++) {
-            const start = outerIndices[k];
-            const end = outerIndices[k + 1];
-            let innerCount = 0;
-            for (let s = start + 1; s < end; s++) {
-              if (executedLineSequence[s] === innerLine) {
-                innerCount++;
-              }
-            }
-            if (innerCount >= 2) {
-              nestedRepetitions++;
-            }
-          }
-
-          if (nestedRepetitions >= 2) {
-            maxLoopNesting = Math.max(maxLoopNesting, 2);
-
-            // Check if there is a 3rd nested loop inside innerLine
-            for (const innermostLine of candidateLoopLines) {
-              if (innermostLine === outerLine || innermostLine === innerLine) continue;
-              if (lineCounts[innermostLine] >= lineCounts[innerLine] * 1.5) {
-                maxLoopNesting = Math.max(maxLoopNesting, 3);
-              }
-            }
+    if (candidateLoopLines.length >= 2) {
+      // Check for nested loop relationships (A contains B)
+      for (const outerLine of candidateLoopLines) {
+        // Find all step indices where outerLine occurs
+        const outerIndices: number[] = [];
+        for (let idx = 0; idx < executedLineSequence.length; idx++) {
+          if (executedLineSequence[idx] === outerLine) {
+            outerIndices.push(idx);
           }
         }
+
+        if (outerIndices.length >= 2) {
+          // Check lines that appear between outerIndices[0] and outerIndices[1]
+          for (const innerLine of candidateLoopLines) {
+            if (innerLine === outerLine) continue;
+
+            let nestedRepetitions = 0;
+            for (let k = 0; k < outerIndices.length - 1; k++) {
+              const start = outerIndices[k];
+              const end = outerIndices[k + 1];
+              let innerCount = 0;
+              for (let s = start + 1; s < end; s++) {
+                if (executedLineSequence[s] === innerLine) {
+                  innerCount++;
+                }
+              }
+              if (innerCount >= 2) {
+                nestedRepetitions++;
+              }
+            }
+
+            if (nestedRepetitions >= 2) {
+              maxLoopNesting = Math.max(maxLoopNesting, 2);
+
+              // Check if there is a 3rd nested loop inside innerLine
+              for (const innermostLine of candidateLoopLines) {
+                if (innermostLine === outerLine || innermostLine === innerLine) continue;
+
+                // Verify innermostLine executes repeatedly within iterations of innerLine
+                const innerIndices: number[] = [];
+                for (let idx = 0; idx < executedLineSequence.length; idx++) {
+                  if (executedLineSequence[idx] === innerLine) {
+                    innerIndices.push(idx);
+                  }
+                }
+
+                if (innerIndices.length >= 2) {
+                  let innermostNestedRepetitions = 0;
+                  for (let m = 0; m < innerIndices.length - 1; m++) {
+                    const iStart = innerIndices[m];
+                    const iEnd = innerIndices[m + 1];
+                    let count = 0;
+                    for (let t = iStart + 1; t < iEnd; t++) {
+                      if (executedLineSequence[t] === innermostLine) {
+                        count++;
+                      }
+                    }
+                    if (count >= 2) innermostNestedRepetitions++;
+                  }
+                  if (innermostNestedRepetitions >= 2) {
+                    maxLoopNesting = Math.max(maxLoopNesting, 3);
+                  }
+                }
+              }
+            }
+          }
+        }
       }
+    }
+
+    // Safety constraint: Loop nesting can NEVER exceed the number of loop statements in source code
+    if (codeLines.length > 0 && totalLoopStatementsInCode > 0) {
+      maxLoopNesting = Math.min(maxLoopNesting, totalLoopStatementsInCode);
     }
   }
 

@@ -3,10 +3,9 @@
 import React, { useState } from "react";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { ObjectReference, SerializedValue } from "@/types/trace";
-import { Layers, Variable, Database, Terminal, AlertCircle, Sparkles, MessageSquareQuote, Activity } from "lucide-react";
+import { Layers, Variable, Database, Terminal, AlertCircle, Sparkles, MessageSquareQuote } from "lucide-react";
 import StepExplainer from "@/components/ai/StepExplainer";
 import TutorDrawer from "@/components/ai/TutorDrawer";
-import ComplexityPanel from "@/components/ai/ComplexityPanel";
 
 function isObjectRef(val: SerializedValue): val is ObjectReference {
   return typeof val === "object" && val !== null && "__type__" in val && (val as ObjectReference).__type__ === "object_ref";
@@ -20,16 +19,14 @@ export default function ExecutionStatePanel() {
   const errorMessage = useExecutionStore((state) => state.errorMessage);
   const stepExplanations = useExecutionStore((state) => state.stepExplanations);
   const tutorMessages = useExecutionStore((state) => state.tutorMessages);
-  const complexityAnalyses = useExecutionStore((state) => state.complexityAnalyses);
 
-  const [activeTab, setActiveTab] = useState<"scope" | "ai" | "tutor" | "complexity" | "stack" | "heap" | "stdout">("ai");
+  const [activeTab, setActiveTab] = useState<"scope" | "ai" | "tutor" | "stack" | "heap" | "stdout">("ai");
 
   const currentFrame = trace?.frames?.[currentStep] || null;
   const cacheKey = activeExecutionId ? `${activeExecutionId}_step_${currentStep}` : `step_${currentStep}`;
   const hasExplanation = !!stepExplanations[cacheKey];
   const activeTutorMsgs = (activeExecutionId && tutorMessages[activeExecutionId]) || [];
   const hasTutorMessages = activeTutorMsgs.length > 0;
-  const hasComplexity = !!(activeExecutionId && complexityAnalyses[activeExecutionId]);
 
   return (
     <div className="w-full h-full flex flex-col bg-white dark:bg-[#0a0f1d] border border-slate-200 dark:border-slate-800/80 rounded-xl overflow-hidden shadow-xs dark:shadow-lg">
@@ -66,21 +63,6 @@ export default function ExecutionStatePanel() {
               <span className="text-[10px] px-1 bg-purple-200 text-purple-800 dark:bg-purple-900 dark:text-purple-200 rounded font-bold">
                 {activeTutorMsgs.length}
               </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => setActiveTab("complexity")}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all cursor-pointer ${
-              activeTab === "complexity"
-                ? "bg-amber-100 text-amber-800 font-bold border border-amber-300 shadow-xs dark:bg-amber-950/90 dark:text-amber-300 dark:border-amber-500/50"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60"
-            }`}
-          >
-            <Activity className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-            <span>Big-O</span>
-            {hasComplexity && (
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
             )}
           </button>
         </div>
@@ -165,8 +147,6 @@ export default function ExecutionStatePanel() {
           <StepExplainer />
         ) : activeTab === "tutor" ? (
           <TutorDrawer />
-        ) : activeTab === "complexity" ? (
-          <ComplexityPanel />
         ) : !currentFrame ? (
           <div className="h-full flex items-center justify-center text-slate-500 dark:text-slate-600 text-xs font-mono">
             No active frame data. Click &quot;Run Trace&quot; to execute.

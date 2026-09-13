@@ -4,53 +4,74 @@ import { DEFAULT_EXECUTION_LIMITS } from '@/lib/config/executionLimits';
 import { validateCodePreflight } from './astValidator';
 import { PYTHON_TRACER_CODE } from './pythonTracerScript';
 
-class TraceRunnerService {
-  private worker: Worker | null = null;
-  private workerReady = false;
-  private pendingResolvers = new Map<string, {
-    resolve: (trace: PrismTrace) => void;
-    reject: (error: Error) => void;
-    timer: NodeJS.Timeout;
-    code: string;
-    limits: ExecutionLimits;
-  }>();
+interface PendingJob {
+  resolve: (trace: PrismTrace) => void;
+  reject: (error: Error) => void;
+  timer: NodeJS.Timeout;
+  code: string;
+  limits: ExecutionLimits;
+}
 
-  private getWorker(): Worker {
-    if (!this.worker && typeof window !== 'undefined') {
-      this.worker = new Worker('/pyodideWorker.js');
-      this.worker.onmessage = this.handleWorkerMessage.bind(this);
-      this.worker.onerror = (err) => {
-        console.error('Pyodide Web Worker error:', err);
+class TraceRunnerService {
+  // Dedicated Web Worker for full sys.settrace AST visualization
+  private traceWorker: Worker | null = null;
+  private traceWorkerReady = false;
+  private pendingTraceResolvers = new Map<string, PendingJob>();
+
+  // Dedicated Web Worker for lightweight pure Python execution (stdout/stderr)
+  private pureWorker: Worker | null = null;
+  private pureWorkerReady = false;
+  private pendingPureResolvers = new Map<string, PendingJob>();
+
+  private getTraceWorker(): Worker {
+    if (!this.traceWorker && typeof window !== 'undefined') {
+      this.traceWorker = new Worker('/pyodideWorker.js');
+      this.traceWorker.onmessage = this.handleTraceWorkerMessage.bind(this);
+      this.traceWorker.onerror = (err) => {
+        console.error('Pyodide Trace Worker error:', err);
       };
-      // Send Init
-      this.worker.postMessage({
-        id: 'init_' + Date.now(),
+      this.traceWorker.postMessage({
+        id: 'init_trace_' + Date.now(),
         command: 'INIT',
       });
     }
-    return this.worker!;
+    return this.traceWorker!;
   }
 
-  private handleWorkerMessage(event: MessageEvent<WorkerOutMessage>) {
+  private getPureWorker(): Worker {
+    if (!this.pureWorker && typeof window !== 'undefined') {
+      this.pureWorker = new Worker('/pyodideWorker.js');
+      this.pureWorker.onmessage = this.handlePureWorkerMessage.bind(this);
+      this.pureWorker.onerror = (err) => {
+        console.error('Pyodide Pure Worker error:', err);
+      };
+      this.pureWorker.postMessage({
+        id: 'init_pure_' + Date.now(),
+        command: 'INIT',
+      });
+    }
+    return this.pureWorker!;
+  }
+
+  private handleTraceWorkerMessage(event: MessageEvent<WorkerOutMessage>) {
     const { id, type, trace, status, error } = event.data;
 
     if (type === 'READY') {
-      this.workerReady = true;
+      this.traceWorkerReady = true;
       return;
     }
 
-    const pending = this.pendingResolvers.get(id);
+    const pending = this.pendingTraceResolvers.get(id);
     if (!pending) return;
 
     if (type === 'EXECUTION_STARTED') {
-      // Worker finished initializing Pyodide WASM; now arm strict runtime limit timer
       clearTimeout(pending.timer);
       pending.timer = setTimeout(() => {
-        this.pendingResolvers.delete(id);
-        if (this.worker) {
-          this.worker.terminate();
-          this.worker = null;
-          this.workerReady = false;
+        this.pendingTraceResolvers.delete(id);
+        if (this.traceWorker) {
+          this.traceWorker.terminate();
+          this.traceWorker = null;
+          this.traceWorkerReady = false;
         }
         pending.resolve({
           version: '1.0',
@@ -73,45 +94,31 @@ class TraceRunnerService {
     }
 
     clearTimeout(pending.timer);
-    this.pendingResolvers.delete(id);
+    this.pendingTraceResolvers.delete(id);
 
     if (type === 'EXECUTION_COMPLETE') {
       if (trace) {
         pending.resolve(trace);
       } else {
-        const pureTrace: PrismTrace = {
+        pending.resolve({
           version: '1.0',
           code: pending.code,
           language: 'python',
           status: status || 'SUCCESS',
           errorMessage: error || undefined,
-          totalSteps: 1,
-          frames: [
-            {
-              stepIndex: 0,
-              line: 1,
-              eventType: 'line',
-              description: 'Execution output',
-              callStack: [],
-              scope: {},
-              heap: {},
-              activePointers: [],
-              stdout: event.data.stdout || [],
-            },
-          ],
+          totalSteps: 0,
+          frames: [],
           detectedStructures: [],
           metrics: {
-            totalOperations: 1,
-            maxStackDepth: 1,
+            totalOperations: 0,
+            maxStackDepth: 0,
             peakHeapObjects: 0,
-            executionDurationMs: event.data.durationMs || 1,
+            executionDurationMs: 0,
           },
-        };
-        pending.resolve(pureTrace);
+        });
       }
     } else if (type === 'EXECUTION_ERROR') {
-      // Build fallback error trace
-      const errorTrace: PrismTrace = {
+      pending.resolve({
         version: '1.0',
         code: pending.code,
         language: 'python',
@@ -126,8 +133,71 @@ class TraceRunnerService {
           peakHeapObjects: 0,
           executionDurationMs: 0,
         },
+      });
+    }
+  }
+
+  private handlePureWorkerMessage(event: MessageEvent<WorkerOutMessage>) {
+    const { id, type, status, error } = event.data;
+
+    if (type === 'READY') {
+      this.pureWorkerReady = true;
+      return;
+    }
+
+    const pending = this.pendingPureResolvers.get(id);
+    if (!pending) return;
+
+    clearTimeout(pending.timer);
+    this.pendingPureResolvers.delete(id);
+
+    if (type === 'EXECUTION_COMPLETE') {
+      const pureTrace: PrismTrace = {
+        version: '1.0',
+        code: pending.code,
+        language: 'python',
+        status: status || 'SUCCESS',
+        errorMessage: error || undefined,
+        totalSteps: 1,
+        frames: [
+          {
+            stepIndex: 0,
+            line: 1,
+            eventType: 'line',
+            description: 'Execution output',
+            callStack: [],
+            scope: {},
+            heap: {},
+            activePointers: [],
+            stdout: event.data.stdout || [],
+          },
+        ],
+        detectedStructures: [],
+        metrics: {
+          totalOperations: 1,
+          maxStackDepth: 1,
+          peakHeapObjects: 0,
+          executionDurationMs: event.data.durationMs || 1,
+        },
       };
-      pending.resolve(errorTrace);
+      pending.resolve(pureTrace);
+    } else if (type === 'EXECUTION_ERROR') {
+      pending.resolve({
+        version: '1.0',
+        code: pending.code,
+        language: 'python',
+        status: status || 'RUNTIME_ERROR',
+        errorMessage: error || 'Execution failed',
+        totalSteps: 0,
+        frames: [],
+        detectedStructures: [],
+        metrics: {
+          totalOperations: 0,
+          maxStackDepth: 0,
+          peakHeapObjects: 0,
+          executionDurationMs: 0,
+        },
+      });
     }
   }
 
@@ -192,16 +262,16 @@ class TraceRunnerService {
     }
 
     // 3. Dispatch to Web Worker with Watchdog Timer
-    const worker = this.getWorker();
+    const worker = this.getPureWorker();
     const messageId = 'exec_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
 
     return new Promise<PrismTrace>((resolve, reject) => {
       const timer = setTimeout(() => {
-        this.pendingResolvers.delete(messageId);
-        if (this.worker) {
-          this.worker.terminate();
-          this.worker = null;
-          this.workerReady = false;
+        this.pendingPureResolvers.delete(messageId);
+        if (this.pureWorker) {
+          this.pureWorker.terminate();
+          this.pureWorker = null;
+          this.pureWorkerReady = false;
         }
         resolve({
           version: '1.0',
@@ -219,9 +289,9 @@ class TraceRunnerService {
             executionDurationMs: limits.maxRuntimeMs,
           },
         });
-      }, 45000);
+      }, 75000); // 75s allowance for Pyodide WASM cold start
 
-      this.pendingResolvers.set(messageId, { resolve, reject, timer, code, limits });
+      this.pendingPureResolvers.set(messageId, { resolve, reject, timer, code, limits });
 
       const message: WorkerInMessage = {
         id: messageId,
@@ -296,17 +366,17 @@ class TraceRunnerService {
     }
 
     // 3. Dispatch to Web Worker with Watchdog Timer
-    const worker = this.getWorker();
+    const worker = this.getTraceWorker();
     const messageId = 'trace_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
 
     return new Promise<PrismTrace>((resolve, reject) => {
       // Initial startup/load timer (allows network download of Pyodide WASM)
       const timer = setTimeout(() => {
-        this.pendingResolvers.delete(messageId);
-        if (this.worker) {
-          this.worker.terminate();
-          this.worker = null;
-          this.workerReady = false;
+        this.pendingTraceResolvers.delete(messageId);
+        if (this.traceWorker) {
+          this.traceWorker.terminate();
+          this.traceWorker = null;
+          this.traceWorkerReady = false;
         }
         resolve({
           version: '1.0',
@@ -324,9 +394,9 @@ class TraceRunnerService {
             executionDurationMs: limits.maxRuntimeMs,
           },
         });
-      }, 45000); // 45s allowance for Pyodide WASM cold start
+      }, 75000); // 75s allowance for Pyodide WASM cold start
 
-      this.pendingResolvers.set(messageId, { resolve, reject, timer, code, limits });
+      this.pendingTraceResolvers.set(messageId, { resolve, reject, timer, code, limits });
 
       const message: WorkerInMessage = {
         id: messageId,
@@ -342,8 +412,37 @@ class TraceRunnerService {
     });
   }
 
-  public cancelExecution(): void {
-    for (const [, pending] of this.pendingResolvers.entries()) {
+  public cancelTrace(): void {
+    for (const [, pending] of this.pendingTraceResolvers.entries()) {
+      clearTimeout(pending.timer);
+      pending.resolve({
+        version: '1.0',
+        code: pending.code,
+        language: 'python',
+        status: 'TIMEOUT',
+        errorMessage: 'Visualization trace was cancelled.',
+        totalSteps: 0,
+        frames: [],
+        detectedStructures: [],
+        metrics: {
+          totalOperations: 0,
+          maxStackDepth: 0,
+          peakHeapObjects: 0,
+          executionDurationMs: 0,
+        },
+      });
+    }
+    this.pendingTraceResolvers.clear();
+
+    if (this.traceWorker) {
+      this.traceWorker.terminate();
+      this.traceWorker = null;
+      this.traceWorkerReady = false;
+    }
+  }
+
+  public cancelPureExecution(): void {
+    for (const [, pending] of this.pendingPureResolvers.entries()) {
       clearTimeout(pending.timer);
       pending.resolve({
         version: '1.0',
@@ -362,17 +461,22 @@ class TraceRunnerService {
         },
       });
     }
-    this.pendingResolvers.clear();
+    this.pendingPureResolvers.clear();
 
-    if (this.worker) {
-      this.worker.terminate();
-      this.worker = null;
-      this.workerReady = false;
+    if (this.pureWorker) {
+      this.pureWorker.terminate();
+      this.pureWorker = null;
+      this.pureWorkerReady = false;
     }
   }
 
+  public cancelExecution(): void {
+    this.cancelTrace();
+    this.cancelPureExecution();
+  }
+
   public isWorkerReady(): boolean {
-    return this.workerReady;
+    return this.traceWorkerReady || this.pureWorkerReady;
   }
 }
 

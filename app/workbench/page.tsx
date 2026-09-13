@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import ExecutionHeader from "@/components/controls/ExecutionHeader";
 import ResizableWorkbenchSplit from "@/components/workbench/ResizableWorkbenchSplit";
 import TimelineScrubber from "@/components/debug/TimelineScrubber";
+import FloatingComplexityCard from "@/components/ai/FloatingComplexityCard";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { getAlgorithmBySlug } from "@/lib/content/algorithms";
 import { getLessonBySlug } from "@/lib/content/learningPaths";
@@ -61,6 +62,9 @@ export default function PrismWorkbench() {
       <div className="sticky bottom-0 z-30">
         <TimelineScrubber />
       </div>
+
+      {/* Floating Draggable Big-O Complexity Widget */}
+      <FloatingComplexityCard />
     </main>
   );
 }
