@@ -16,6 +16,8 @@ coverage/
 out/
 build/
 dist/
+public/pyodide/
+
 
 # TypeScript Build Cache
 *.tsbuildinfo

@@ -15,6 +15,7 @@ import {
   AlertCircle,
   RefreshCw,
 } from "lucide-react";
+import BorderBeam from "@/components/ui/BorderBeam";
 
 export default function FloatingComplexityCard() {
   const isComplexityOpen = useExecutionStore((state) => state.isComplexityOpen);
@@ -129,6 +130,7 @@ export default function FloatingComplexityCard() {
         !position ? "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" : ""
       }`}
     >
+      <BorderBeam size={240} duration={8} colorFrom="#f59e0b" colorTo="#06b6d4" />
       {/* ── Draggable Header ── */}
       <div
         onPointerDown={handlePointerDown}

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { LinkedListAnim } from "./animations/LinkedListAnim";
+import SpotlightCard from "@/components/ui/SpotlightCard";
 
 const STEPS = [
   {
@@ -65,7 +66,7 @@ function WorkbenchMock() {
         : "text-slate-500 dark:text-slate-400";
 
   return (
-    <div className="glass-card h-[300px] overflow-hidden p-0" aria-hidden="true">
+    <SpotlightCard className="glass-card h-[300px] overflow-hidden p-0" aria-hidden="true">
       <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 px-4 py-2.5 font-mono text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-900/50">
         <span className="size-2.5 rounded-full bg-rose-500" />
         <span className="size-2.5 rounded-full bg-amber-500" />
@@ -103,13 +104,13 @@ function WorkbenchMock() {
           <p className="pt-2 text-slate-500 dark:text-slate-400">{step.note}</p>
         </div>
       </div>
-    </div>
+    </SpotlightCard>
   );
 }
 
 function TutorMock() {
   return (
-    <div className="glass-card flex h-[300px] flex-col justify-between gap-3 p-5" aria-hidden="true">
+    <SpotlightCard className="glass-card flex h-[300px] flex-col justify-between gap-3 p-5" aria-hidden="true">
       <div className="self-end max-w-[85%] rounded-2xl rounded-br-sm border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/80 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-200">
         Why did head.next change at step 12?
       </div>
@@ -130,7 +131,7 @@ function TutorMock() {
           </span>
         </div>
       </div>
-    </div>
+    </SpotlightCard>
   );
 }
 

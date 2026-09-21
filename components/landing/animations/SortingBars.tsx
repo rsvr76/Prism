@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import SpotlightCard from "@/components/ui/SpotlightCard";
+import BorderBeam from "@/components/ui/BorderBeam";
 
 type Frame = {
   values: number[];
@@ -67,9 +69,10 @@ export function SortingBars() {
   return (
     <div className="space-y-4">
       <div
-        className="glass-card flex h-[300px] items-end gap-1.5 p-5 sm:gap-2 sm:p-6"
+        className="glass-card relative overflow-hidden flex h-[300px] items-end gap-1.5 p-5 sm:gap-2 sm:p-6"
         aria-hidden="true"
       >
+        <BorderBeam size={220} duration={8} colorFrom="#06b6d4" colorTo="#a855f7" />
         {frame.values.map((v, idx) => {
           const comparing = idx === i || idx === j;
           const sorted = done || (frame.sortedFrom > 0 && idx >= frame.sortedFrom);

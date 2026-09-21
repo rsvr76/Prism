@@ -1,11 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+import Link from "next/link";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { ObjectReference, SerializedValue } from "@/types/trace";
-import { Layers, Variable, Database, Terminal, AlertCircle, Sparkles, MessageSquareQuote } from "lucide-react";
+import {
+  Layers,
+  Variable,
+  Database,
+  Terminal,
+  AlertCircle,
+  Sparkles,
+  MessageSquareQuote,
+  Compass,
+  ArrowRight,
+} from "lucide-react";
 import StepExplainer from "@/components/ai/StepExplainer";
 import TutorDrawer from "@/components/ai/TutorDrawer";
+import { DSA_FOUNDATIONS_PATH } from "@/lib/content/learningPaths";
+import { ALL_CHALLENGES } from "@/lib/content/challenges";
+import { getAlgorithmBySlug } from "@/lib/content/algorithms";
 
 function isObjectRef(val: SerializedValue): val is ObjectReference {
   return typeof val === "object" && val !== null && "__type__" in val && (val as ObjectReference).__type__ === "object_ref";
@@ -19,14 +33,82 @@ export default function ExecutionStatePanel() {
   const errorMessage = useExecutionStore((state) => state.errorMessage);
   const stepExplanations = useExecutionStore((state) => state.stepExplanations);
   const tutorMessages = useExecutionStore((state) => state.tutorMessages);
+  const code = useExecutionStore((state) => state.code);
+  const loadedAlgorithmTitle = useExecutionStore((state) => state.loadedAlgorithmTitle);
+  const loadAlgorithmCode = useExecutionStore((state) => state.loadAlgorithmCode);
 
-  const [activeTab, setActiveTab] = useState<"scope" | "ai" | "tutor" | "stack" | "heap" | "stdout">("ai");
+  const [activeTab, setActiveTab] = useState<"scope" | "ai" | "tutor" | "recommendations" | "stack" | "heap" | "stdout">("ai");
 
   const currentFrame = trace?.frames?.[currentStep] || null;
   const cacheKey = activeExecutionId ? `${activeExecutionId}_step_${currentStep}` : `step_${currentStep}`;
   const hasExplanation = !!stepExplanations[cacheKey];
   const activeTutorMsgs = (activeExecutionId && tutorMessages[activeExecutionId]) || [];
   const hasTutorMessages = activeTutorMsgs.length > 0;
+
+  // Derive Contextual Recommendations
+  const contextTopic = useMemo(() => {
+    const lower = (code + " " + (loadedAlgorithmTitle || "")).toLowerCase();
+    if (lower.includes("bubble") || lower.includes("sort")) return "sorting";
+    if (lower.includes("tree") || lower.includes("left") || lower.includes("right") || lower.includes("bst")) return "trees";
+    if (lower.includes("node") || lower.includes("head") || lower.includes("next")) return "lists";
+    return "arrays";
+  }, [code, loadedAlgorithmTitle]);
+
+  const recommendedLesson = useMemo(() => {
+    const allLessons = DSA_FOUNDATIONS_PATH.stages.flatMap((s) => s.lessons);
+    if (contextTopic === "sorting") {
+      return allLessons.find((l) => l.slug.includes("bubble") || l.slug.includes("sort")) || allLessons[2] || allLessons[0];
+    }
+    if (contextTopic === "trees") {
+      return allLessons.find((l) => l.slug.includes("tree")) || allLessons[3] || allLessons[0];
+    }
+    if (contextTopic === "lists") {
+      return allLessons.find((l) => l.slug.includes("linked-list")) || allLessons[1] || allLessons[0];
+    }
+    return allLessons[0];
+  }, [contextTopic]);
+
+  const recommendedChallenge = useMemo(() => {
+    if (contextTopic === "sorting") {
+      return ALL_CHALLENGES.find((c) => c.topic === "sorting") || ALL_CHALLENGES[0];
+    }
+    if (contextTopic === "trees") {
+      return ALL_CHALLENGES.find((c) => c.topic === "trees") || ALL_CHALLENGES[0];
+    }
+    if (contextTopic === "lists") {
+      return ALL_CHALLENGES.find((c) => c.topic === "linked-lists") || ALL_CHALLENGES[0];
+    }
+    return ALL_CHALLENGES[0];
+  }, [contextTopic]);
+
+  const comparisonAlgo = useMemo(() => {
+    if (contextTopic === "sorting") {
+      return {
+        slug: "selection-sort",
+        title: "Selection Sort",
+        description: "Compare quadratic passes: observe how selection sort minimizes swap writes compared to bubble sort.",
+      };
+    }
+    if (contextTopic === "trees") {
+      return {
+        slug: "binary-search-tree",
+        title: "Binary Search Tree",
+        description: "Compare unconstrained binary trees against ordered search trees where left is less than root and right is greater.",
+      };
+    }
+    if (contextTopic === "lists") {
+      return {
+        slug: "array",
+        title: "Dynamic Array",
+        description: "Compare node pointer traversals against contiguous memory direct index access.",
+      };
+    }
+    return {
+      slug: "linked-list",
+      title: "Singly Linked List",
+      description: "Compare contiguous index memory against dynamic pointer chains with zero shifting penalty.",
+    };
+  }, [contextTopic]);
 
   return (
     <div className="w-full h-full flex flex-col bg-white dark:bg-[#0a0f1d] border border-slate-200 dark:border-slate-800/80 rounded-xl overflow-hidden shadow-xs dark:shadow-lg">
@@ -64,6 +146,18 @@ export default function ExecutionStatePanel() {
                 {activeTutorMsgs.length}
               </span>
             )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab("recommendations")}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all cursor-pointer ${
+              activeTab === "recommendations"
+                ? "bg-amber-100 text-amber-900 font-bold border border-amber-300 shadow-xs dark:bg-amber-950/90 dark:text-amber-300 dark:border-amber-500/50"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60"
+            }`}
+          >
+            <Compass className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            <span>Recommendations</span>
           </button>
         </div>
 
@@ -147,6 +241,95 @@ export default function ExecutionStatePanel() {
           <StepExplainer />
         ) : activeTab === "tutor" ? (
           <TutorDrawer />
+        ) : activeTab === "recommendations" ? (
+          <div className="h-full overflow-y-auto space-y-3 pr-1 font-mono text-xs">
+            <div>
+              <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                <Compass className="w-3.5 h-3.5 text-amber-500" />
+                <span>Contextual Learning Feed</span>
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Recommendations tailored to your active code and execution trace.
+              </p>
+            </div>
+
+            {/* 1. Guided Lesson Card */}
+            <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 space-y-2 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                  Guided Lesson
+                </span>
+                <span className="text-[10px] text-slate-400">DSA Foundations</span>
+              </div>
+              <h5 className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                {recommendedLesson.title}
+              </h5>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                {recommendedLesson.subtitle}
+              </p>
+              <div className="pt-1">
+                <Link
+                  href={`/paths/dsa-foundations/${recommendedLesson.slug}`}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 transition-colors"
+                >
+                  <span>Open Guided Lesson</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* 2. Practice Challenge Card */}
+            <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 space-y-2 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                  Practice Challenge
+                </span>
+                <span className="text-[10px] text-slate-400">{recommendedChallenge.difficulty}</span>
+              </div>
+              <h5 className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                {recommendedChallenge.title}
+              </h5>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                {recommendedChallenge.description}
+              </p>
+              <div className="pt-1">
+                <Link
+                  href={`/practice/${recommendedChallenge.slug}`}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors"
+                >
+                  <span>Launch Challenge</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* 3. Next Experiment / Comparison */}
+            <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 space-y-2 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800">
+                  Comparison Experiment
+                </span>
+                <span className="text-[10px] text-slate-400">Step Invariant</span>
+              </div>
+              <h5 className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                {comparisonAlgo.title}
+              </h5>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                {comparisonAlgo.description}
+              </p>
+              <button
+                onClick={() => {
+                  const target = getAlgorithmBySlug(comparisonAlgo.slug);
+                  if (target) {
+                    loadAlgorithmCode(target.name, target.pythonCode);
+                  }
+                }}
+                className="mt-1 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-[11px] cursor-pointer shadow-2xs transition-colors"
+              >
+                <span>Load {comparisonAlgo.title}</span>
+              </button>
+            </div>
+          </div>
         ) : !currentFrame ? (
           <div className="h-full flex items-center justify-center text-slate-500 dark:text-slate-600 text-xs font-mono">
             No active frame data. Click &quot;Run Trace&quot; to execute.

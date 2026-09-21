@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight, Search } from "lucide-react";
 import { PrismLogoCompact } from "./PrismLogo";
 import { useNavDrawerStore } from "@/store/useNavDrawerStore";
+import { useCommandPaletteStore } from "@/store/useCommandPaletteStore";
 import HamburgerButton from "@/components/navigation/HamburgerButton";
 
 const LINKS = [
@@ -67,8 +68,21 @@ export function LandingNav() {
           ))}
         </nav>
 
-        {/* Right CTA: Open Editor (ThemeToggle removed completely from header) */}
+        {/* Right CTA: Quick Search & Open Editor */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={() => useCommandPaletteStore.getState().open()}
+            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100/80 hover:bg-slate-200/80 dark:bg-slate-900/80 dark:hover:bg-slate-800/80 border border-slate-300/80 dark:border-slate-800 shadow-2xs transition-colors cursor-pointer group"
+            title="Search algorithms, lessons, and commands (⌘K)"
+          >
+            <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-500 transition-colors" />
+            <span>Search</span>
+            <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-500">
+              ⌘K
+            </kbd>
+          </button>
+
           <Link
             href="/workbench"
             className="btn-base btn-primary hidden sm:inline-flex text-xs md:text-sm font-bold shadow-md shadow-purple-500/20"

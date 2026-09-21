@@ -1,14 +1,74 @@
 // Pyodide Web Worker for Prism Python Execution Sandbox
-importScripts('https://cdn.jsdelivr.net/pyodide/v0.27.3/full/pyodide.js');
+
+// Prioritize local Pyodide assets for sub-millisecond offline loading, fallback to CDN if unavailable
+let isLocal = false;
+try {
+  importScripts('/pyodide/pyodide.js');
+  if (typeof loadPyodide === 'function') {
+    isLocal = true;
+  }
+} catch (e) {
+  // Local pyodide assets not found, will load from CDN
+}
+
+if (!isLocal) {
+  try {
+    importScripts('https://cdn.jsdelivr.net/pyodide/v0.27.3/full/pyodide.js');
+  } catch (err) {
+    console.error('Failed to load Pyodide from CDN:', err);
+  }
+}
 
 let pyodideReadyPromise = null;
+let tracerLoaded = false;
 
 async function initPyodideWorker() {
   if (!pyodideReadyPromise) {
     pyodideReadyPromise = (async () => {
+      const indexURL = isLocal ? '/pyodide/' : 'https://cdn.jsdelivr.net/pyodide/v0.27.3/full/';
       self.pyodide = await loadPyodide({
-        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.3/full/'
+        indexURL
       });
+
+      // Pre-compile the lightweight runner function for pure Python execution
+      await self.pyodide.runPythonAsync(`
+import sys
+import io
+import json
+
+def __prism_pure_exec__(user_code):
+    stdout_buf = io.StringIO()
+    stderr_buf = io.StringIO()
+    orig_stdout = sys.stdout
+    orig_stderr = sys.stderr
+    exec_status = "SUCCESS"
+    exec_error = None
+    try:
+        sys.stdout = stdout_buf
+        sys.stderr = stderr_buf
+        exec_ns = {}
+        exec(user_code, exec_ns)
+    except Exception as e:
+        exec_status = "RUNTIME_ERROR"
+        exec_error = f"{type(e).__name__}: {str(e)}"
+    finally:
+        sys.stdout = orig_stdout
+        sys.stderr = orig_stderr
+
+    raw_stdout = stdout_buf.getvalue()
+    raw_stderr = stderr_buf.getvalue()
+    comb = raw_stdout + (("\\n" + raw_stderr) if raw_stderr and raw_stdout else raw_stderr)
+    lines = comb.split('\\n')
+    if len(lines) > 1 and lines[-1] == '':
+        lines.pop()
+
+    return json.dumps({
+        "status": exec_status,
+        "stdout": lines,
+        "error": exec_error
+    })
+`);
+
       return self.pyodide;
     })();
   }
@@ -40,58 +100,19 @@ self.onmessage = async (event) => {
       self.postMessage({ id, type: 'EXECUTION_STARTED' });
 
       const { code } = payload;
-
-      // Pure Python execution: capture stdout & stderr in memory without tracing overhead
       pyodide.globals.set('__USER_EXEC_CODE__', code);
 
-      const execRunnerCode = `
-import sys
-import io
-
-__stdout_buffer__ = io.StringIO()
-__stderr_buffer__ = io.StringIO()
-__orig_stdout__ = sys.stdout
-__orig_stderr__ = sys.stderr
-
-try:
-    sys.stdout = __stdout_buffer__
-    sys.stderr = __stderr_buffer__
-    __exec_namespace__ = {}
-    exec(__USER_EXEC_CODE__, __exec_namespace__)
-    __exec_status__ = "SUCCESS"
-    __exec_error__ = None
-except Exception as e:
-    __exec_status__ = "RUNTIME_ERROR"
-    __exec_error__ = f"{type(e).__name__}: {str(e)}"
-finally:
-    sys.stdout = __orig_stdout__
-    sys.stderr = __orig_stderr__
-
-__captured_stdout__ = __stdout_buffer__.getvalue()
-__captured_stderr__ = __stderr_buffer__.getvalue()
-`;
-
-      await pyodide.runPythonAsync(execRunnerCode);
-      const rawStdout = pyodide.globals.get('__captured_stdout__') || '';
-      const rawStderr = pyodide.globals.get('__captured_stderr__') || '';
-      const execStatus = pyodide.globals.get('__exec_status__') || 'SUCCESS';
-      const execError = pyodide.globals.get('__exec_error__');
-
-      const stdoutLines = (rawStdout + (rawStderr ? (rawStdout ? '\n' : '') + rawStderr : ''))
-        .split('\n');
-      if (stdoutLines.length > 1 && stdoutLines[stdoutLines.length - 1] === '') {
-        stdoutLines.pop();
-      }
-
+      const resJson = await pyodide.runPythonAsync('__prism_pure_exec__(__USER_EXEC_CODE__)');
+      const res = JSON.parse(resJson);
       const durationMs = Math.round(performance.now() - startTime);
 
       self.postMessage({
         id,
         type: 'EXECUTION_COMPLETE',
-        status: execStatus,
-        stdout: stdoutLines,
+        status: res.status,
+        stdout: res.stdout,
         durationMs,
-        error: execError || undefined,
+        error: res.error || undefined,
       });
     } catch (err) {
       self.postMessage({
@@ -111,6 +132,12 @@ __captured_stderr__ = __stderr_buffer__.getvalue()
       self.postMessage({ id, type: 'EXECUTION_STARTED' });
 
       const { code, limits, tracerCode } = payload;
+
+      // Load tracer definitions into Python once
+      if (!tracerLoaded && tracerCode) {
+        await pyodide.runPythonAsync(tracerCode);
+        tracerLoaded = true;
+      }
       
       // Inject tracer parameters into pyodide global namespace
       pyodide.globals.set('__USER_CODE__', code);
@@ -119,7 +146,7 @@ __captured_stderr__ = __stderr_buffer__.getvalue()
       pyodide.globals.set('__MAX_STACK__', limits.maxCallStackDepth);
       pyodide.globals.set('__MAX_STDOUT__', limits.maxStdoutLines);
 
-      const runnerCode = tracerCode + `
+      const runnerCode = `
 __PRISM_RESULT_JSON__ = __run_prism_trace__(
     __USER_CODE__,
     max_frames=__MAX_FRAMES__,

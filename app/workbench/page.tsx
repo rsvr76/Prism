@@ -9,6 +9,7 @@ import FloatingComplexityCard from "@/components/ai/FloatingComplexityCard";
 import { useExecutionStore } from "@/store/useExecutionStore";
 import { getAlgorithmBySlug } from "@/lib/content/algorithms";
 import { getLessonBySlug } from "@/lib/content/learningPaths";
+import { traceRunner } from "@/lib/execution/traceRunner";
 
 function AlgorithmLoader() {
   const searchParams = useSearchParams();
@@ -45,6 +46,10 @@ function AlgorithmLoader() {
 }
 
 export default function PrismWorkbench() {
+  useEffect(() => {
+    traceRunner.init();
+  }, []);
+
   return (
     <main className="flex flex-col min-h-screen lg:h-screen w-screen overflow-y-auto lg:overflow-hidden bg-slate-50 dark:bg-[#070a13] text-slate-900 dark:text-slate-100">
       {/* Parameter-based Algorithm loader */}

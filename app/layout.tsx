@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import NavigationDrawer from "@/components/navigation/NavigationDrawer";
+import CommandPalette from "@/components/navigation/CommandPalette";
 
 export const metadata: Metadata = {
   title: "Prism - See your code from every angle",
@@ -16,6 +17,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -38,6 +41,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-slate-50 dark:bg-[#070a13] text-slate-900 dark:text-slate-100 antialiased transition-colors duration-150">
         <ThemeProvider>
           <NavigationDrawer />
+          <CommandPalette />
           {children}
         </ThemeProvider>
       </body>

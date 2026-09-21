@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  LayoutDashboard,
   Code2,
   BookOpen,
   Compass,
@@ -12,26 +11,29 @@ import {
   Circle,
   ArrowRight,
   RotateCcw,
-  Clock,
-  Play,
   Check,
   AlertTriangle,
   Flame,
   Award,
   Sparkles,
   Activity,
-  Layers,
   ChevronRight,
-  Zap,
+  Play,
+  Search,
 } from "lucide-react";
 import {
   getUnifiedStudentProgress,
   resetAllStudentProgress,
 } from "@/lib/progress/studentProgress";
 import { useNavDrawerStore } from "@/store/useNavDrawerStore";
+import { useCommandPaletteStore } from "@/store/useCommandPaletteStore";
 import { UnifiedStudentProgress } from "@/types/progress";
 import { PrismLogoCompact } from "@/components/branding/PrismLogo";
 import HamburgerButton from "@/components/navigation/HamburgerButton";
+import StudentPersonaHero from "@/components/dashboard/StudentPersonaHero";
+import HomeWorkbenchCard from "@/components/dashboard/HomeWorkbenchCard";
+import OpportunityCardsSection from "@/components/dashboard/OpportunityCardsSection";
+import FilterableFeed from "@/components/dashboard/FilterableFeed";
 
 const FALLBACK_PROGRESS: UnifiedStudentProgress = {
   learning: {
@@ -52,7 +54,7 @@ const FALLBACK_PROGRESS: UnifiedStudentProgress = {
     accuracyPercentage: 0,
     topicBreakdown: {
       arrays: { passed: 0, total: 2 },
-      'linked-lists': { passed: 0, total: 2 },
+      "linked-lists": { passed: 0, total: 2 },
       searching: { passed: 0, total: 2 },
       sorting: { passed: 0, total: 2 },
       trees: { passed: 0, total: 2 },
@@ -99,7 +101,6 @@ function CircularProgress({
             <stop offset="100%" stopColor={gradientTo} />
           </linearGradient>
         </defs>
-        {/* Background track */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -109,7 +110,6 @@ function CircularProgress({
           strokeWidth={strokeWidth}
           className="text-slate-200/80 dark:text-slate-800/80"
         />
-        {/* Animated Progress Arc */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -169,9 +169,7 @@ export default function StudentDashboardClient() {
   };
 
   const { learning, practice, overallPercentage, recentActivity, recentExecutions, lastActiveTimestamp } = progress;
-  const isNewStudent = learning.completedCount === 0 && practice.attemptedCount === 0;
 
-  // Active status label
   const getActiveStatus = () => {
     if (!lastActiveTimestamp) return "Ready to start";
     const diffHours = (Date.now() - lastActiveTimestamp) / (1000 * 60 * 60);
@@ -200,7 +198,20 @@ export default function StudentDashboardClient() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={() => useCommandPaletteStore.getState().open()}
+            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100/80 hover:bg-slate-200/80 dark:bg-slate-900/80 dark:hover:bg-slate-800/80 border border-slate-300/80 dark:border-slate-800 shadow-2xs transition-colors cursor-pointer group"
+            title="Search algorithms, lessons, and commands (⌘K)"
+          >
+            <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-500 transition-colors" />
+            <span>Search</span>
+            <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-500">
+              ⌘K
+            </kbd>
+          </button>
+
           <Link
             href="/workbench"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/20 border border-cyan-500/20 transition-colors"
@@ -231,7 +242,6 @@ export default function StudentDashboardClient() {
 
         {/* 1. Command Bar Status Row */}
         <section aria-label="Student Command Bar" className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {/* Capsule 1: Overall Mastery */}
           <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 shadow-2xs flex items-center gap-3.5 transition-all hover:border-slate-400 dark:hover:border-slate-700">
             <div className="w-9 h-9 rounded-lg bg-cyan-100 dark:bg-cyan-950/80 border border-cyan-300 dark:border-cyan-500/30 flex items-center justify-center text-cyan-700 dark:text-cyan-400 shrink-0">
               <Award className="w-4 h-4" />
@@ -251,7 +261,6 @@ export default function StudentDashboardClient() {
             </div>
           </div>
 
-          {/* Capsule 2: Foundations Path */}
           <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 shadow-2xs flex items-center gap-3.5 transition-all hover:border-slate-400 dark:hover:border-slate-700">
             <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-950/80 border border-blue-300 dark:border-blue-500/30 flex items-center justify-center text-blue-700 dark:text-blue-400 shrink-0">
               <BookOpen className="w-4 h-4" />
@@ -271,7 +280,6 @@ export default function StudentDashboardClient() {
             </div>
           </div>
 
-          {/* Capsule 3: Practice Challenges */}
           <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 shadow-2xs flex items-center gap-3.5 transition-all hover:border-slate-400 dark:hover:border-slate-700">
             <div className="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-950/80 border border-purple-300 dark:border-purple-500/30 flex items-center justify-center text-purple-700 dark:text-purple-400 shrink-0">
               <Target className="w-4 h-4" />
@@ -291,7 +299,6 @@ export default function StudentDashboardClient() {
             </div>
           </div>
 
-          {/* Capsule 4: Student Momentum */}
           <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 shadow-2xs flex items-center gap-3.5 transition-all hover:border-slate-400 dark:hover:border-slate-700">
             <div className="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-500/30 flex items-center justify-center text-amber-700 dark:text-amber-400 shrink-0">
               <Flame className="w-4 h-4" />
@@ -309,77 +316,40 @@ export default function StudentDashboardClient() {
           </div>
         </section>
 
-        {/* 2. Hero Mission Control Card */}
-        <section className="bg-gradient-to-br from-white via-slate-50 to-cyan-50/50 dark:from-slate-900 dark:via-slate-900/90 dark:to-cyan-950/30 border border-slate-300 dark:border-slate-800 rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-sm dark:shadow-xl">
-          {/* Subtle Ambient Watermark */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 dark:bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-10 right-8 w-48 h-48 opacity-[0.03] dark:opacity-[0.05] pointer-events-none">
-            <svg viewBox="0 0 100 100" fill="currentColor" className="w-full h-full text-slate-900 dark:text-white">
-              <polygon points="50,15 90,85 10,85" />
-            </svg>
+        {/* 2. Hero Persona & Mission Control Banner */}
+        <StudentPersonaHero progress={progress} />
+
+        {/* 3. Split Studio: Interactive Quick Workbench (7 cols) + Opportunities (5 cols) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-7">
+            <HomeWorkbenchCard />
           </div>
-
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-mono text-cyan-600 dark:text-cyan-400 uppercase tracking-wider font-semibold">
-                  Student Progress & Journey
-                </span>
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
-              </div>
-
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-                {isNewStudent
-                  ? "Start Your DSA Learning Journey"
-                  : learning.isCurriculumComplete
-                  ? "DSA Foundations Completed! 🎉"
-                  : `Continue: ${learning.nextLesson?.title || "DSA Foundations"}`}
-              </h1>
-
-              <p className="text-sm text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
-                {isNewStudent
-                  ? "Welcome to Prism. Master Data Structures and Algorithms with verified Python execution, interactive memory visualizers, and guided practice challenges."
-                  : learning.isCurriculumComplete
-                  ? "You have completed all 10 foundational lessons. Solidify your skills with interactive coding challenges and trace prediction practice."
-                  : `Next up in Stage ${learning.nextLesson?.stageId.replace('stage-', '')}: ${learning.nextLesson?.subtitle}`}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 shrink-0">
-              {learning.nextLesson ? (
-                <Link
-                  href={`/paths/dsa-foundations/${learning.nextLesson.slug}`}
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white dark:bg-cyan-500 dark:hover:bg-cyan-400 dark:text-slate-950 font-semibold text-sm transition-all shadow-sm hover:shadow-cyan-500/25 cursor-pointer"
-                >
-                  <span>Continue Learning</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              ) : (
-                <Link
-                  href="/practice"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white dark:bg-purple-500 dark:hover:bg-purple-400 dark:text-slate-950 font-semibold text-sm transition-all shadow-sm cursor-pointer"
-                >
-                  <span>Explore Practice</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              )}
-
-              <Link
-                href="/paths/dsa-foundations"
-                className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 dark:bg-slate-800/80 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-sm font-medium transition-colors cursor-pointer shadow-2xs"
-              >
-                <span>Curriculum Outline</span>
-              </Link>
-            </div>
+          <div className="lg:col-span-5">
+            <OpportunityCardsSection />
           </div>
+        </div>
+
+        {/* 4. Filterable Dynamic Recommendation Feed */}
+        <section className="bg-white dark:bg-slate-900/40 border border-slate-300 dark:border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-cyan-500" />
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                Personalized Learning Stream
+              </h2>
+            </div>
+            <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+              Real-time curriculum recommendations
+            </span>
+          </div>
+          <FilterableFeed />
         </section>
 
-        {/* 3. Bento Grid: Learning, Practice & Activity Stream */}
+        {/* 5. Bento Grid: Learning, Practice & Activity Stream */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Card A: Learning Progress (4 cols) */}
           <section className="lg:col-span-4 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-6 shadow-sm hover:border-slate-400 dark:hover:border-slate-700 transition-colors">
             <div className="space-y-5">
-              {/* Header with Arc Ring */}
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -403,7 +373,6 @@ export default function StudentDashboardClient() {
                 />
               </div>
 
-              {/* Progress Summary and Bar */}
               <div className="space-y-2">
                 <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                   <div
@@ -417,7 +386,6 @@ export default function StudentDashboardClient() {
                 </div>
               </div>
 
-              {/* Stage Progression Milestones */}
               <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800/80">
                 <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                   Stage Milestones
@@ -436,7 +404,7 @@ export default function StudentDashboardClient() {
                     >
                       <div className="flex items-center justify-between gap-1 mb-1">
                         <span className="font-medium truncate text-[11px]">
-                          {stage.title.split(':')[1]?.trim() || stage.title}
+                          {stage.title.split(":")[1]?.trim() || stage.title}
                         </span>
                         {isComplete ? (
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -465,7 +433,6 @@ export default function StudentDashboardClient() {
           {/* Card B: Practice Progress (4 cols) */}
           <section className="lg:col-span-4 bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-6 shadow-sm hover:border-slate-400 dark:hover:border-slate-700 transition-colors">
             <div className="space-y-5">
-              {/* Header with Arc Ring */}
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -491,7 +458,6 @@ export default function StudentDashboardClient() {
                 />
               </div>
 
-              {/* Progress Summary and Bar */}
               <div className="space-y-2">
                 <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                   <div
@@ -505,7 +471,6 @@ export default function StudentDashboardClient() {
                 </div>
               </div>
 
-              {/* Topic Mastery Pills */}
               <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800/80">
                 <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                   Topic Mastery
@@ -524,7 +489,7 @@ export default function StudentDashboardClient() {
                     >
                       <div className="flex items-center justify-between gap-1 mb-1">
                         <span className="font-medium capitalize truncate text-[11px]">
-                          {topic.replace('-', ' ')}
+                          {topic.replace("-", " ")}
                         </span>
                         {passed === total && total > 0 ? (
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -563,7 +528,7 @@ export default function StudentDashboardClient() {
                   </h2>
                 </div>
                 <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800">
-                  {recentActivity.length} events logged
+                  {recentActivity.length} events
                 </span>
               </div>
 
@@ -620,7 +585,7 @@ export default function StudentDashboardClient() {
 
                       <div className="flex items-center gap-1 shrink-0">
                         <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">
-                          {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(item.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                         </span>
                         <ChevronRight className="w-3 h-3 text-slate-400 group-hover:text-cyan-500 transition-transform group-hover:translate-x-0.5" />
                       </div>
@@ -638,114 +603,7 @@ export default function StudentDashboardClient() {
           </section>
         </div>
 
-        {/* 4. Action Dock: Next Lesson & Recommended Practice */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Action A: Continue Learning Next Milestone */}
-          <section className="bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-4 shadow-sm relative overflow-hidden group hover:border-cyan-500/40 transition-colors">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-cyan-600 dark:text-cyan-400 text-xs font-mono font-semibold uppercase tracking-wider">
-                  <BookOpen className="w-4 h-4" />
-                  <span>Next Lesson in Journey</span>
-                </div>
-                {learning.nextLesson && (
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-50 dark:bg-cyan-950/60 border border-cyan-200 dark:border-cyan-500/30 text-cyan-700 dark:text-cyan-300 uppercase">
-                    Stage {learning.nextLesson.stageId.replace('stage-', '')}
-                  </span>
-                )}
-              </div>
-
-              {learning.nextLesson ? (
-                <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                    {learning.nextLesson.title}
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
-                    {learning.nextLesson.whyItMatters}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">All Lessons Completed!</h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">
-                    You have finished every lesson in DSA Foundations. Review any topic or dive into challenges.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {learning.nextLesson ? (
-              <Link
-                href={`/paths/dsa-foundations/${learning.nextLesson.slug}`}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white dark:bg-cyan-500 dark:hover:bg-cyan-400 dark:text-slate-950 text-xs font-semibold transition-all shadow-sm self-start cursor-pointer hover:shadow-cyan-500/20"
-              >
-                <span>Continue Lesson</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            ) : (
-              <Link
-                href="/paths/dsa-foundations"
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-semibold transition-all self-start cursor-pointer border border-slate-300 dark:border-slate-700"
-              >
-                <span>Review Curriculum</span>
-              </Link>
-            )}
-          </section>
-
-          {/* Action B: Recommended Practice Challenge */}
-          <section className="bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-4 shadow-sm relative overflow-hidden group hover:border-purple-500/40 transition-colors">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 text-xs font-mono font-semibold uppercase tracking-wider">
-                  <Target className="w-4 h-4" />
-                  <span>Practice Next</span>
-                </div>
-                {practice.nextChallenge && (
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-500/30 text-purple-800 dark:text-purple-300 font-mono capitalize">
-                    {practice.nextChallenge.difficulty}
-                  </span>
-                )}
-              </div>
-
-              {practice.nextChallenge ? (
-                <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                    {practice.nextChallenge.title}
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
-                    {practice.nextChallenge.description}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">All Challenges Completed!</h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">
-                    Outstanding achievement. You have mastered all available practice challenges.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {practice.nextChallenge ? (
-              <Link
-                href={`/practice/${practice.nextChallenge.slug}`}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white dark:bg-purple-500 dark:hover:bg-purple-400 dark:text-slate-950 text-xs font-semibold transition-all shadow-sm self-start cursor-pointer hover:shadow-purple-500/20"
-              >
-                <span>Start Challenge</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            ) : (
-              <Link
-                href="/practice"
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-semibold transition-all self-start cursor-pointer border border-slate-300 dark:border-slate-700"
-              >
-                <span>View Practice Catalog</span>
-              </Link>
-            )}
-          </section>
-        </div>
-
-        {/* 5. Recent Executions / Workbench History */}
+        {/* 6. Recent Executions / Workbench History */}
         {recentExecutions.length > 0 && (
           <section className="bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
@@ -774,7 +632,7 @@ export default function StudentDashboardClient() {
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate">
-                      {exec.totalSteps} steps - {new Date(exec.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {exec.totalSteps} steps - {new Date(exec.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </p>
                   </div>
                   <Link
@@ -789,7 +647,7 @@ export default function StudentDashboardClient() {
           </section>
         )}
 
-        {/* 6. Settings & Reset Progress Action */}
+        {/* 7. Settings & Reset Progress Action */}
         <section className="pt-6 border-t border-slate-300 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-slate-600 dark:text-slate-400">
           <div className="flex items-center gap-2 text-slate-500 dark:text-slate-500">
             <Sparkles className="w-3.5 h-3.5 text-cyan-500" />

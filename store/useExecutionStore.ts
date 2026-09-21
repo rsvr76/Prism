@@ -175,6 +175,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
     lessonContext?: { pathSlug: string; lessonSlug: string; lessonTitle: string } | null
   ) => {
     traceRunner.cancelExecution();
+    traceRunner.init();
     ++activeExecutionEpoch;
     branchCounter = 0;
     set({
@@ -326,7 +327,7 @@ export const useExecutionStore = create<ExecutionStore>((set, get) => ({
     const { trace, code } = get();
     // If a completed full trace matching the exact current code already exists in memory, activate visualization immediately
     if (trace && trace.code === code && trace.frames && trace.frames.length > 1) {
-      set({ isVisualizing: true, currentStep: 0, isRunning: false, isComplexityOpen: true });
+      set({ isVisualizing: true, currentStep: 0, isRunning: false, isVisualizingRun: false, isComplexityOpen: true });
       get().analyzeComplexity();
       return;
     }

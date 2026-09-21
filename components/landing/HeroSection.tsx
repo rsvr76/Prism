@@ -43,11 +43,13 @@ export function HeroSection() {
 
   return (
     <section className="relative overflow-hidden">
+      {/* Ambient Atmospheric Lighting & Prism Refraction */}
+      <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] sm:w-[1000px] h-[550px] bg-gradient-to-tr from-cyan-500/12 via-purple-500/12 to-transparent rounded-full blur-3xl opacity-75" />
       <div className="grid-backdrop grid-backdrop-animated pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_50%_0%,black,transparent_75%)]" />
       <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 py-12 md:py-20 lg:grid-cols-[1.1fr_0.9fr]">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-purple-500/25 bg-purple-500/10 px-3.5 py-1.5 text-xs font-medium tracking-wide">
-            <Hexagon className="size-3.5 text-cyan-500" aria-hidden="true" />
+          <span className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 dark:border-purple-500/40 bg-purple-500/10 dark:bg-purple-950/40 px-3.5 py-1.5 text-xs font-medium tracking-wide shadow-sm shadow-purple-500/10 animate-float-slow">
+            <Hexagon className="size-3.5 text-cyan-500 animate-pulse" aria-hidden="true" />
             <span className="shimmer-text font-semibold">Execution-Grounded DSA Learning</span>
           </span>
 

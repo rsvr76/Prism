@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Play } from "lucide-react";
+import SpotlightCard from "@/components/ui/SpotlightCard";
+import BorderBeam from "@/components/ui/BorderBeam";
 
 type Algo = "bubble" | "binary" | "list";
 
@@ -258,7 +260,8 @@ export function InteractiveTeaser() {
         Step through execution states in real-time. In the full Workbench, Prism runs real Python 3 code with interactive memory visualizers.
       </p>
 
-      <div className="reveal glass-card mt-6 overflow-hidden p-0 border border-slate-300 dark:border-slate-800 shadow-md">
+      <SpotlightCard className="reveal glass-card relative mt-6 overflow-hidden p-0 border border-slate-300 dark:border-slate-800 shadow-md">
+        <BorderBeam size={320} duration={12} colorFrom="#06b6d4" colorTo="#a855f7" />
         {/* Teaser Header Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-300 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 px-4 py-3">
           <div className="flex flex-wrap items-center gap-3">
@@ -554,7 +557,7 @@ export function InteractiveTeaser() {
             )}
           </div>
         </div>
-      </div>
+      </SpotlightCard>
     </section>
   );
 }

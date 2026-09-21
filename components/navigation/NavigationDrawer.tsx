@@ -19,6 +19,8 @@ import { useNavDrawerStore } from "@/store/useNavDrawerStore";
 import { PrismLogoCompact } from "@/components/branding/PrismLogo";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import HamburgerButton from "@/components/navigation/HamburgerButton";
+import { useCommandPaletteStore } from "@/store/useCommandPaletteStore";
+import { Search } from "lucide-react";
 
 interface NavItem {
   label: string;
@@ -210,6 +212,24 @@ export default function NavigationDrawer() {
 
         {/* Navigation Links (Main Navigation) */}
         <nav aria-label="Main Navigation" className="flex-1 overflow-y-auto px-3 py-4 space-y-1 custom-scrollbar">
+          {/* Quick Command Palette Trigger */}
+          <button
+            type="button"
+            onClick={() => {
+              closeDrawer();
+              useCommandPaletteStore.getState().open();
+            }}
+            className="w-full flex items-center justify-between px-3 py-2 mb-2 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-900/80 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300/80 dark:border-slate-800 shadow-2xs transition-colors cursor-pointer group"
+          >
+            <div className="flex items-center gap-2">
+              <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-500 transition-colors" />
+              <span>Command Palette...</span>
+            </div>
+            <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-500">
+              ⌘K
+            </kbd>
+          </button>
+
           {NAV_ITEMS.map((item) => {
             const isActive =
               item.href === "/"

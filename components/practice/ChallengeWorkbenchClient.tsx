@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import {
@@ -23,6 +23,8 @@ import { evaluateChallenge } from "@/lib/practice/challengeEvaluator";
 import { recordAttempt, getChallengeAttempt } from "@/lib/practice/challengeProgressManager";
 import { logActivity } from "@/lib/progress/studentProgress";
 import { useTheme } from "@/components/theme/ThemeProvider";
+import { traceRunner } from "@/lib/execution/traceRunner";
+import BorderBeam from "@/components/ui/BorderBeam";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
@@ -58,6 +60,10 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
 
   // For trace-prediction and complexity challenges we need the answer before running
   const needsAnswerFirst = challenge.type === "trace-prediction" || challenge.type === "complexity";
+
+  useEffect(() => {
+    traceRunner.init();
+  }, []);
 
   const handleSubmit = useCallback(async () => {
     if (isRunning) return;
@@ -396,7 +402,10 @@ export default function ChallengeWorkbenchClient({ challenge }: ChallengeWorkben
 
           {/* Result panel */}
           {result && (
-            <div className="border-t border-slate-300 dark:border-slate-800 bg-white/95 dark:bg-slate-950/60 p-4 max-h-72 overflow-y-auto shrink-0 shadow-inner">
+            <div className="relative overflow-hidden border-t border-slate-300 dark:border-slate-800 bg-white/95 dark:bg-slate-950/60 p-4 max-h-72 overflow-y-auto shrink-0 shadow-inner">
+              {result.passed && (
+                <BorderBeam size={220} duration={6} colorFrom="#10b981" colorTo="#06b6d4" />
+              )}
               {/* Status badge */}
               <div className="flex items-center gap-2 mb-3">
                 {result.passed ? (

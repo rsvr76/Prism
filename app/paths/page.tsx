@@ -14,10 +14,13 @@ import {
   Target,
   LayoutDashboard,
   Menu,
+  Search,
 } from "lucide-react";
 import { getAllLearningPaths } from "@/lib/content/learningPaths";
 import { calculatePathProgress } from "@/lib/learning/progressManager";
 import { useNavDrawerStore } from "@/store/useNavDrawerStore";
+import { useCommandPaletteStore } from "@/store/useCommandPaletteStore";
+import SpotlightCard from "@/components/ui/SpotlightCard";
 import { PathProgressSummary } from "@/types/learningPath";
 import { PrismLogoCompact } from "@/components/branding/PrismLogo";
 import HamburgerButton from "@/components/navigation/HamburgerButton";
@@ -56,13 +59,28 @@ export default function LearningPathsPage() {
           </Link>
         </div>
 
-        <Link
-          href="/workbench"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/20 transition-colors"
-        >
-          <Code2 className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Workbench</span>
-        </Link>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={() => useCommandPaletteStore.getState().open()}
+            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100/80 hover:bg-slate-200/80 dark:bg-slate-900/80 dark:hover:bg-slate-800/80 border border-slate-300/80 dark:border-slate-800 shadow-2xs transition-colors cursor-pointer group"
+            title="Search algorithms, lessons, and commands (⌘K)"
+          >
+            <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-500 transition-colors" />
+            <span>Search</span>
+            <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-500">
+              ⌘K
+            </kbd>
+          </button>
+
+          <Link
+            href="/workbench"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/20 transition-colors"
+          >
+            <Code2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Workbench</span>
+          </Link>
+        </div>
       </header>
 
       {/* Main Content */}
@@ -100,77 +118,79 @@ export default function LearningPathsPage() {
               const isCompleted = progress.completed === progress.total && progress.total > 0;
 
               return (
-                <article
+                <SpotlightCard
                   key={path.id}
-                  className="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:bg-slate-50/80 dark:hover:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 transition-all p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-8 relative overflow-hidden shadow-xs hover:shadow-md"
+                  className="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:bg-slate-50/80 dark:hover:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 transition-all p-6 sm:p-8 shadow-xs hover:shadow-md"
                 >
-                  <div className="space-y-4 max-w-2xl">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-cyan-100 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-400 border border-cyan-300 dark:border-cyan-500/30">
-                        {path.difficulty}
-                      </span>
-                      <span className="flex items-center gap-1 text-xs font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700/60">
-                        <Clock className="w-3 h-3 text-slate-500 dark:text-slate-400" />
-                        <span>{path.estimatedTime}</span>
-                      </span>
-                      <span className="flex items-center gap-1 text-xs font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700/60">
-                        <Layers className="w-3 h-3 text-slate-500 dark:text-slate-400" />
-                        <span>{path.stages.length} Stages</span>
-                      </span>
-                      {isCompleted && (
-                        <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/40">
-                          <Award className="w-3 h-3" />
-                          <span>Complete</span>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                    <div className="space-y-4 max-w-2xl">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-cyan-100 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-400 border border-cyan-300 dark:border-cyan-500/30">
+                          {path.difficulty}
                         </span>
-                      )}
-                    </div>
+                        <span className="flex items-center gap-1 text-xs font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700/60">
+                          <Clock className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                          <span>{path.estimatedTime}</span>
+                        </span>
+                        <span className="flex items-center gap-1 text-xs font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700/60">
+                          <Layers className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                          <span>{path.stages.length} Stages</span>
+                        </span>
+                        {isCompleted && (
+                          <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/40">
+                            <Award className="w-3 h-3" />
+                            <span>Complete</span>
+                          </span>
+                        )}
+                      </div>
 
-                    <div>
-                      <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white group-hover:text-cyan-700 dark:group-hover:text-cyan-300 transition-colors">
-                        {path.title}
-                      </h3>
-                      <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mt-1">
-                        {path.tagline}
+                      <div>
+                        <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white group-hover:text-cyan-700 dark:group-hover:text-cyan-300 transition-colors">
+                          {path.title}
+                        </h3>
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mt-1">
+                          {path.tagline}
+                        </p>
+                      </div>
+
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        {path.description}
                       </p>
+
+                      {/* Progress Bar */}
+                      <div className="space-y-1.5 pt-2">
+                        <div className="flex items-center justify-between text-xs font-mono">
+                          <span className="text-slate-500 dark:text-slate-400">Progression</span>
+                          <span className="text-cyan-700 dark:text-cyan-400 font-semibold">
+                            {progress.completed} of {progress.total} lessons ({progress.percentage}%)
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-500"
+                            style={{ width: `${progress.percentage}%` }}
+                          />
+                        </div>
+                      </div>
                     </div>
 
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                      {path.description}
-                    </p>
+                    {/* Actions & Stages Quick View */}
+                    <div className="flex flex-col sm:items-end gap-4 shrink-0">
+                      <Link
+                        href={`/paths/${path.slug}`}
+                        className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white dark:bg-cyan-500 dark:hover:bg-cyan-400 dark:text-slate-950 font-semibold text-sm shadow-sm transition-all group-hover:translate-x-0.5 cursor-pointer"
+                      >
+                        <span>{isCompleted ? "Review Path" : isStarted ? "Resume Path" : "Start Learning"}</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
 
-                    {/* Progress Bar */}
-                    <div className="space-y-1.5 pt-2">
-                      <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-slate-500 dark:text-slate-400">Progression</span>
-                        <span className="text-cyan-700 dark:text-cyan-400 font-semibold">
-                          {progress.completed} of {progress.total} lessons ({progress.percentage}%)
-                        </span>
-                      </div>
-                      <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-500"
-                          style={{ width: `${progress.percentage}%` }}
-                        />
+                      <div className="text-xs font-mono text-slate-500 text-left sm:text-right space-y-1">
+                        <div>6 Sequential Stages:</div>
+                        <div className="text-slate-600 dark:text-slate-400">Arrays → Lists → Search → Sort → Trees → BST</div>
                       </div>
                     </div>
                   </div>
-
-                  {/* Actions & Stages Quick View */}
-                  <div className="flex flex-col sm:items-end gap-4 shrink-0">
-                    <Link
-                      href={`/paths/${path.slug}`}
-                      className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white dark:bg-cyan-500 dark:hover:bg-cyan-400 dark:text-slate-950 font-semibold text-sm shadow-sm transition-all group-hover:translate-x-0.5 cursor-pointer"
-                    >
-                      <span>{isCompleted ? "Review Path" : isStarted ? "Resume Path" : "Start Learning"}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-
-                    <div className="text-xs font-mono text-slate-500 text-left sm:text-right space-y-1">
-                      <div>6 Sequential Stages:</div>
-                      <div className="text-slate-600 dark:text-slate-400">Arrays → Lists → Search → Sort → Trees → BST</div>
-                    </div>
-                  </div>
-                </article>
+                </SpotlightCard>
               );
             })}
           </div>

@@ -36,12 +36,21 @@ export function calculateInitialSplit(code: string): number {
 
 export default function ResizableWorkbenchSplit() {
   const code = useExecutionStore((state) => state.code);
+  const isVisualizingRun = useExecutionStore((state) => state.isVisualizingRun);
   const containerRef = useRef<HTMLDivElement>(null);
   const visualizerContainerRef = useRef<HTMLDivElement>(null);
 
   const [splitPercent, setSplitPercent] = useState<number>(40);
   const [isDragging, setIsDragging] = useState(false);
+  const [mobileTab, setMobileTab] = useState<"editor" | "canvas">("editor");
   const hasUserAdjusted = useRef(false);
+
+  // Auto-switch to canvas on mobile when visualization starts
+  useEffect(() => {
+    if (isVisualizingRun) {
+      setMobileTab("canvas");
+    }
+  }, [isVisualizingRun]);
 
   // Initialize from sessionStorage or heuristic on client mount
   useEffect(() => {
@@ -198,12 +207,40 @@ export default function ResizableWorkbenchSplit() {
     <div
       ref={containerRef}
       style={{ "--split-left": `${splitPercent}%` } as React.CSSProperties}
-      className={`flex-1 flex flex-col lg:flex-row gap-3 lg:gap-0 p-2.5 md:p-3 lg:overflow-hidden min-h-0 relative ${
+      className={`flex-1 flex flex-col lg:flex-row gap-2 lg:gap-0 p-2.5 md:p-3 lg:overflow-hidden min-h-0 relative ${
         isDragging ? "select-none cursor-col-resize" : ""
       }`}
     >
+      {/* Mobile/Tablet Viewport Segmented Switcher (< 1024px) */}
+      <div className="flex lg:hidden items-center justify-center p-1 bg-slate-100 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-xl mb-1 shrink-0 gap-1">
+        <button
+          onClick={() => setMobileTab("editor")}
+          className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
+            mobileTab === "editor"
+              ? "bg-white dark:bg-slate-800 text-cyan-800 dark:text-cyan-300 shadow-xs border border-slate-300 dark:border-slate-700 font-bold"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+          }`}
+        >
+          Editor
+        </button>
+        <button
+          onClick={() => setMobileTab("canvas")}
+          className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
+            mobileTab === "canvas"
+              ? "bg-white dark:bg-slate-800 text-cyan-800 dark:text-cyan-300 shadow-xs border border-slate-300 dark:border-slate-700 font-bold"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+          }`}
+        >
+          Canvas
+        </button>
+      </div>
+
       {/* Left Pane: Monaco Code Editor */}
-      <div className="h-[460px] lg:h-full lg:overflow-hidden min-h-0 flex flex-col w-full lg:w-[var(--split-left)] shrink-0">
+      <div
+        className={`h-[500px] lg:h-full lg:overflow-hidden min-h-0 flex-col w-full lg:w-[var(--split-left)] shrink-0 ${
+          mobileTab === "editor" ? "flex" : "hidden lg:flex"
+        }`}
+      >
         <CodeEditor />
       </div>
 
@@ -239,7 +276,9 @@ export default function ResizableWorkbenchSplit() {
       {/* Right Pane: Visualizer Canvas (HERO) */}
       <div
         ref={visualizerContainerRef}
-        className="h-[460px] lg:h-full lg:overflow-hidden min-h-0 flex flex-col flex-1 min-w-0 w-full"
+        className={`h-[500px] lg:h-full lg:overflow-hidden min-h-0 flex-col flex-1 min-w-0 w-full ${
+          mobileTab === "canvas" ? "flex" : "hidden lg:flex"
+        }`}
       >
         <VisualizerCanvas />
       </div>

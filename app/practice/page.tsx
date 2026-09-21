@@ -28,6 +28,8 @@ import {
 import { Challenge, ChallengeTopic, ChallengeDifficulty, ChallengeType, ChallengeProgressState } from "@/types/challenge";
 import { PrismLogoCompact } from "@/components/branding/PrismLogo";
 import HamburgerButton from "@/components/navigation/HamburgerButton";
+import { useCommandPaletteStore } from "@/store/useCommandPaletteStore";
+import SpotlightCard from "@/components/ui/SpotlightCard";
 
 const TOPIC_LABELS: Record<ChallengeTopic | "all", string> = {
   all: "All Topics",
@@ -80,48 +82,52 @@ function ChallengeCard({ challenge, progress }: { challenge: Challenge; progress
   const isAttempted = !!attempt && !isPassed;
 
   return (
-    <Link
-      href={`/practice/${challenge.slug}`}
-      className="group block bg-white hover:bg-slate-50/80 dark:bg-slate-900/60 dark:hover:bg-slate-900/80 border border-slate-200 hover:border-cyan-400 dark:border-slate-800 dark:hover:border-cyan-500/40 rounded-xl p-5 shadow-xs hover:shadow-md transition-all"
-      aria-label={`${challenge.title} (${challenge.difficulty} ${challenge.type} challenge)`}
-    >
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-2">
-          <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-xs font-medium ${TYPE_COLORS[challenge.type]}`}>
-            {TYPE_ICONS[challenge.type]}
-            {TYPE_LABELS[challenge.type]}
-          </span>
-          <span className={`text-xs font-semibold ${DIFFICULTY_COLORS[challenge.difficulty]}`}>
-            {challenge.difficulty}
-          </span>
-        </div>
-        <div className="shrink-0">
-          {isPassed ? (
-            <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-              <CheckCircle2 className="w-4 h-4" />
-              Passed
-            </span>
-          ) : isAttempted ? (
-            <span className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 font-medium">
-              <Clock className="w-4 h-4" />
-              In Progress
-            </span>
-          ) : null}
-        </div>
-      </div>
+    <SpotlightCard className="rounded-xl border border-slate-200 hover:border-cyan-400 dark:border-slate-800 dark:hover:border-cyan-500/40 bg-white hover:bg-slate-50/80 dark:bg-slate-900/60 dark:hover:bg-slate-900/80 shadow-xs hover:shadow-md transition-all">
+      <Link
+        href={`/practice/${challenge.slug}`}
+        className="group block p-5 h-full flex flex-col justify-between"
+        aria-label={`${challenge.title} (${challenge.difficulty} ${challenge.type} challenge)`}
+      >
+        <div>
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="flex items-center gap-2">
+              <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-xs font-medium ${TYPE_COLORS[challenge.type]}`}>
+                {TYPE_ICONS[challenge.type]}
+                {TYPE_LABELS[challenge.type]}
+              </span>
+              <span className={`text-xs font-semibold ${DIFFICULTY_COLORS[challenge.difficulty]}`}>
+                {challenge.difficulty}
+              </span>
+            </div>
+            <div className="shrink-0">
+              {isPassed ? (
+                <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Passed
+                </span>
+              ) : isAttempted ? (
+                <span className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 font-medium">
+                  <Clock className="w-4 h-4" />
+                  In Progress
+                </span>
+              ) : null}
+            </div>
+          </div>
 
-      <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 group-hover:text-cyan-700 dark:group-hover:text-white mb-1.5 transition-colors">
-        {challenge.title}
-      </h3>
-      <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mb-3">{challenge.description}</p>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 group-hover:text-cyan-700 dark:group-hover:text-white mb-1.5 transition-colors">
+            {challenge.title}
+          </h3>
+          <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mb-3">{challenge.description}</p>
+        </div>
 
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-slate-500 capitalize">{TOPIC_LABELS[challenge.topic]}</span>
-        {challenge.timeComplexity && (
-          <span className="text-xs font-mono text-slate-500">{challenge.timeComplexity}</span>
-        )}
-      </div>
-    </Link>
+        <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800/50">
+          <span className="text-xs text-slate-500 capitalize">{TOPIC_LABELS[challenge.topic]}</span>
+          {challenge.timeComplexity && (
+            <span className="text-xs font-mono text-slate-500">{challenge.timeComplexity}</span>
+          )}
+        </div>
+      </Link>
+    </SpotlightCard>
   );
 }
 
@@ -164,13 +170,28 @@ export default function PracticeDashboard() {
           </Link>
         </div>
 
-        <Link
-          href="/workbench"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/20 transition-colors"
-        >
-          <Code2 className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Workbench</span>
-        </Link>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={() => useCommandPaletteStore.getState().open()}
+            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100/80 hover:bg-slate-200/80 dark:bg-slate-900/80 dark:hover:bg-slate-800/80 border border-slate-300/80 dark:border-slate-800 shadow-2xs transition-colors cursor-pointer group"
+            title="Search algorithms, lessons, and commands (⌘K)"
+          >
+            <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-500 transition-colors" />
+            <span>Search</span>
+            <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-500">
+              ⌘K
+            </kbd>
+          </button>
+
+          <Link
+            href="/workbench"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/20 transition-colors"
+          >
+            <Code2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Workbench</span>
+          </Link>
+        </div>
       </header>
 
       {/* Hero */}

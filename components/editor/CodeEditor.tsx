@@ -15,10 +15,21 @@ import {
 } from "lucide-react";
 import { useOutputTabStore } from "@/store/useOutputTabStore";
 import { traceRunner } from "@/lib/execution/traceRunner";
+import { getAllAlgorithms } from "@/lib/content/algorithms";
+
+const CATEGORIES = [
+  { id: "all", label: "All" },
+  { id: "arrays", label: "Arrays" },
+  { id: "lists", label: "Linked Lists" },
+  { id: "sorting", label: "Sorting" },
+  { id: "trees", label: "Trees" },
+  { id: "recursion", label: "Recursion" },
+] as const;
 
 export default function CodeEditor() {
   const code = useExecutionStore((state) => state.code);
   const setCode = useExecutionStore((state) => state.setCode);
+  const loadAlgorithmCode = useExecutionStore((state) => state.loadAlgorithmCode);
   const currentStep = useExecutionStore((state) => state.currentStep);
   const trace = useExecutionStore((state) => state.trace);
   const isVisualizing = useExecutionStore((state) => state.isVisualizing);
@@ -32,6 +43,8 @@ export default function CodeEditor() {
   const errorMessage = useExecutionStore((state) => state.errorMessage);
   const { isDark } = useTheme();
 
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
   const isOutputOpen = useOutputTabStore((state) => state.isOpen);
   const openOutput = useOutputTabStore((state) => state.openOutput);
   const closeOutput = useOutputTabStore((state) => state.closeOutput);
@@ -39,10 +52,20 @@ export default function CodeEditor() {
 
   const editorRef = useRef<any>(null);
   const decorationsRef = useRef<string[]>([]);
+  const handleVisualizeRef = useRef<() => void>(() => {});
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;
+    // Keyboard shortcut: Ctrl+Enter or Cmd+Enter to visualize
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+      handleVisualizeRef.current();
+    });
   };
+
+  // Pre-warm Pyodide execution Web Worker in the background as soon as editor mounts
+  useEffect(() => {
+    traceRunner.init();
+  }, []);
 
   // Sync active line highlighting with currentStep ONLY during visualization
   useEffect(() => {
@@ -97,6 +120,29 @@ export default function CodeEditor() {
     }
   };
 
+  handleVisualizeRef.current = handleVisualize;
+
+  const allAlgorithms = getAllAlgorithms();
+  const filteredAlgorithms = allAlgorithms.filter((algo) => {
+    if (selectedCategory === "all") return true;
+    if (selectedCategory === "arrays") {
+      return algo.id === "ds-array" || algo.tags.includes("indexing") || algo.tags.includes("searching") || algo.visualizationType === "1d_array";
+    }
+    if (selectedCategory === "lists") {
+      return algo.id === "ds-linked-list" || algo.tags.includes("pointers") || algo.visualizationType === "singly_linked_list";
+    }
+    if (selectedCategory === "sorting") {
+      return algo.tags.includes("sorting") || algo.name.toLowerCase().includes("sort");
+    }
+    if (selectedCategory === "trees") {
+      return algo.visualizationType === "binary_tree" || algo.tags.includes("tree") || algo.id === "ds-binary-tree";
+    }
+    if (selectedCategory === "recursion") {
+      return algo.tags.includes("recursion") || algo.tags.includes("recursive");
+    }
+    return true;
+  });
+
   const hasOutputOrError =
     (trace?.frames && trace.frames.length > 0) ||
     (status !== "SUCCESS" && status !== "RUNNING" && status !== "IDLE" && errorMessage);
@@ -109,11 +155,51 @@ export default function CodeEditor() {
           <span className="font-semibold text-slate-800 dark:text-slate-200">Python 3.12 Editor</span>
         </div>
         <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+          <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] bg-slate-200/60 dark:bg-slate-800 font-mono text-slate-600 dark:text-slate-400 border border-slate-300/80 dark:border-slate-700/60">
+            Ctrl+Enter to Run
+          </span>
           {isVisualizing && currentFrame?.line ? (
             <span className="text-cyan-700 dark:text-cyan-400 font-medium">Executing Line {currentFrame.line}</span>
           ) : (
             <span>Ready</span>
           )}
+        </div>
+      </div>
+
+      {/* Preset Category Filters & Snippet Selector Bar */}
+      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50/90 dark:bg-[#070d18]/90 border-b border-slate-300 dark:border-slate-800/60 overflow-x-auto no-scrollbar text-xs shrink-0">
+        <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400 uppercase tracking-wider shrink-0 mr-0.5">
+          Presets:
+        </span>
+        <div className="flex items-center gap-1 shrink-0">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`px-2 py-0.5 rounded text-[11px] font-mono transition-colors cursor-pointer ${
+                selectedCategory === cat.id
+                  ? "bg-cyan-500/15 text-cyan-800 dark:text-cyan-300 font-semibold border border-cyan-500/40"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+        <div className="h-3 w-px bg-slate-300 dark:bg-slate-800 mx-1 shrink-0" />
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+          {filteredAlgorithms.slice(0, 6).map((algo) => (
+            <button
+              key={algo.id}
+              onClick={() => {
+                loadAlgorithmCode(algo.name, algo.pythonCode);
+              }}
+              className="px-2 py-0.5 rounded text-[11px] font-mono bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-300 transition-colors cursor-pointer shrink-0"
+              title={`Load ${algo.name} code`}
+            >
+              {algo.name}
+            </button>
+          ))}
         </div>
       </div>
       <div className="flex-1 w-full min-h-[300px]">
