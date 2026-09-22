@@ -1,6 +1,6 @@
 # Prism
 
-> **Write real Python. See exactly what happened. Understand why it happened.**
+> **See your code from every angle.**
 
 Prism is an execution-grounded learning environment for Data Structures and Algorithms (DSA). Students write and execute genuine Python 3 in an in-browser WebAssembly sandbox, inspect physical memory mutations step by step through interactive visualizers, and receive contextual pedagogical explanations strictly grounded in the execution trace.
 
